@@ -1,0 +1,1 @@
+from FanzineIssueSpecPackage import FanzineIssueSpec
