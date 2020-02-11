@@ -396,8 +396,8 @@ class FanzineIssueSpec:
                 return self._MonthText+" "+str(self._Year)+" "+tg  # There's never a monthtext+day combination
             if self._DayText is not None:
                 return self._DayText+ " "+str(self._Year)+" "+tg
-            return str(self._Day)+ " "+str(self._Month)+" "+str(self._Year)+" "+tg
-                #TODO: Conver to 3-character month
+            return MonthName(self._Month, short=True)+" "+str(self._Day)+", "+str(self._Year)+" "+tg
+                #TODO: Convert to 3-character month
 
         return tg.strip()
 
@@ -466,8 +466,10 @@ class FanzineIssueSpec:
         if self._Day is not None:
             d=("00"+str(self._Day))[-2:]
 
-        return y+"-"+m+"-"+d
-
+        rslt=y+"-"+m+"-"+d
+        if self._MonthText is not None: # We add the month text on so that the sort separates dates with the same month number coming from different forms (e.g., Sept vis Sept-Oct)
+            rslt+="-"+self._MonthText
+        return rslt
 
     #=============================================================================
     # Format the Vol/Num/Whole information
@@ -596,7 +598,7 @@ class FanzineIssueSpec:
         return self
 
     #--------------------------------
-    # Parse a string to find a date.  This tries to interpret the *whole* string.
+    # Parse a free-format string to find a date.  This tries to interpret the *whole* string as a date -- it doesn't find a date embeded in other text.
     def Parse(self, s: str):
 
         # Whitespace is not a date...
@@ -637,27 +639,28 @@ class FanzineIssueSpec:
 
         ytext=None
         mtext=None
-        m=re.compile("^(.+)\s+(\d\d)$").match(dateText)  # 2-digit years
-        if m is not None and len(m.groups()) == 2 and len(m.groups()[0]) > 0:
-            mtext=m.groups()[0]
-            ytext=m.groups()[1]
-            if ytext is not None and mtext is not None:
-                self.Year=ytext
-                self.Month=mtext
-                self.Raw=dateText
-                return self
+        # m=re.compile("^(.+)\s+(\d\d)$").match(dateText)  # Month + 2- or 4-digit year
+        # if m is not None and len(m.groups()) == 2 and len(m.groups()[0]) > 0:
+        #     mtext=m.groups()[0]
+        #     ytext=m.groups()[1]
+        #     if ytext is not None and mtext is not None:
+        #         self.Year=ytext
+        #         self.Month=mtext
+        #         self.Raw=dateText
+        #         return self
 
-        m=re.compile("^(.+)\s+(\d\d\d\d)$").match(dateText)  # 4-digit years
-        if m is not None and m.groups() is not None and len(m.groups())==2:
+        m=re.compile("^(.+)\s+(\d\d|\d\d\d\d)$").match(dateText)    # Month + 2- or 4-digit year
+        if m is not None and m.groups() is not None and len(m.groups()) == 2:
             mtext=m.groups()[0]
             ytext=m.groups()[1]
             if ytext is not None and mtext is not None:
                 y=YearAs4Digits(ToNumeric(ytext))
                 if y is not None and 1860 < y < 2100:  # Outside this range it can't be a fannish-relevant year (the range is oldest fan birth date to middle-future)
-                    self.Year=ytext
-                    self.Month=mtext
-                    self.Raw=dateText
-                    return self
+                    if InterpretMonth(mtext) is not None:
+                        self.Year=ytext
+                        self.Month=mtext
+                        self.Raw=dateText
+                        return self
 
         # OK, neither of those worked work.
         # Assuming that a year was found, try one of the weird month-day formats.
@@ -680,7 +683,7 @@ class FanzineIssueSpec:
             if tokens is not None and len(tokens)>0:
                 modifier=" ".join(tokens[:-1])
                 mtext=tokens[-1:][0]
-                m=MonthToInt(mtext)
+                m=MonthNameToInt(mtext)
                 d=InterpretRelativeWords(modifier)
                 if m is not None and d is not None:
                     self.Year=ytext
@@ -782,12 +785,15 @@ class FanzineIssueSpecList:
 #####################################################################################################################
 
 # Format an integer month as text
-def MonthName(month: int):
+def MonthName(month: int, short=False):
     if month is None:
         return ""
 
     if 0 < month < 13:
-        m=["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"][month-1]  # -1 is to deal with zero-based indexing...
+        if short:
+            m=["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"][month-1]  # -1 is to deal with zero-based indexing...
+        else:
+            m=["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"][month-1]  # -1 is to deal with zero-based indexing...
     else:
         m="<invalid: "+str(month)+">"
     return m
@@ -1045,7 +1051,7 @@ def InterpretMonth(monthData):
     if len(monthData) == 0:
         return None
 
-    monthInt=MonthToInt(monthData)
+    monthInt=MonthNameToInt(monthData)
     if monthInt is None:
         Log("   ***Month conversion failed: "+monthData, isError=True)
         monthInt=None
@@ -1055,7 +1061,7 @@ def InterpretMonth(monthData):
 
 # ====================================================================================
 # Convert a text month to integer
-def MonthToInt(text: str):
+def MonthNameToInt(text: str):
     monthConversionTable={"jan": 1, "january": 1, "1": 1,
                           "feb": 2, "february": 2, "feburary": 2, "2": 2,
                           "mar": 3, "march": 3, "3": 3,
@@ -1083,8 +1089,8 @@ def MonthToInt(text: str):
     # First look to see if the input is two month names separated by a non-alphabetic character (e.g., "September-November"
     m=re.compile("^([a-zA-Z]+)[-/]([a-zA-Z]+)$").match(text)
     if m is not None and len(m.groups()) == 2 and len(m.groups()[0]) > 0:
-        m1=MonthToInt(m.groups()[0])
-        m2=MonthToInt(m.groups()[1])
+        m1=MonthNameToInt(m.groups()[0])
+        m2=MonthNameToInt(m.groups()[1])
         if m1 is not None and m2 is not None:
             return math.ceil((m1+m2)/2)
 
