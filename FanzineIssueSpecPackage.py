@@ -199,7 +199,7 @@ class FanzineIssueSpec:
     @Month.setter
     def Month(self, val):
         if isinstance(val, str):
-            self._Month=ToNumeric(val)
+            self._Month=InterpretMonth(val)
             self._MonthText=val
         else:
             self._Month=val
@@ -464,7 +464,7 @@ class FanzineIssueSpec:
             m=("00"+str(self._Month))[-2:]
         d="00"
         if self._Day is not None:
-            m=("00"+str(self._Day))[-2:]
+            d=("00"+str(self._Day))[-2:]
 
         return y+"-"+m+"-"+d
 
@@ -795,18 +795,18 @@ def MonthName(month: int):
 
 # ==============================================================================
 # Format an integer day as text
-def DayName( day: int):
+def DayName(day: int):
     if day is None or day == 0:
         return ""
 
     if day < 1 or day > 31:
-        return "<invalid day>"
+        return "<invalid day="+str(day)+">"
 
     return str(day)
 
 # =============================================================================
 # Format an integer year as text.  Note that this is designed for fanzines, so two-digit years become ambiguous at 2033.
-def YearName( year: int):
+def YearName(year: int):
     if year is None or year == 0:
         return ""
 
@@ -1031,7 +1031,7 @@ def BoundDay(dayInt: int, monthInt: int):
 
 
 # =================================================================================
-# Turn month into an int
+# If necessary, turn text month into an int
 def InterpretMonth(monthData):
 
     if monthData is None:
