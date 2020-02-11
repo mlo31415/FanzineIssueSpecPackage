@@ -215,8 +215,9 @@ class FanzineIssueSpec:
         return ""
 
     @MonthText.setter
-    def MonthText(self, val):
+    def MonthText(self, val: str):
         self._MonthText=val
+        self._Month=InterpretMonth(val)
         #TODO: Compute the real month and save it in _Month
 
     #.....................
@@ -359,7 +360,7 @@ class FanzineIssueSpec:
     # Convert the FanzineIssueSpec into a pretty string for display or printing
     def __str__(self):
         if self.UninterpretableText is not None:
-            return self.UninterpretableText
+            return self.UninterpretableText.strip()
 
         tg=""
         if self.TrailingGarbage is not None:
@@ -373,19 +374,19 @@ class FanzineIssueSpec:
             if self.WSuffix is not None:
                 s+=str(self.WSuffix)
             s+=")"
-            return s+tg
+            return (s+tg).strip()
 
         if self.Vol is not None and self.Num is not None:
             s="V"+str(self.Vol)+"#"+str(self.Num)
             if self.NumSuffix is not None:
                 s+=str(self.NumSuffix)
-            return s+tg
+            return (s+tg).strip()
 
         if self.Whole is not None:
             s="#"+str(self.Whole)
             if self.WSuffix is not None:
                 s+=str(self.WSuffix)
-            return s+tg
+            return (s+tg).strip()
 
         # We don't treat a day without a month and year or a month without a year as valid and printable
         if self.Year is not None:
@@ -398,7 +399,7 @@ class FanzineIssueSpec:
             return str(self._Day)+ " "+str(self._Month)+" "+str(self._Year)+" "+tg
                 #TODO: Conver to 3-character month
 
-        return tg
+        return tg.strip()
 
     # =====================================================================================
     # Function to attempt to decode an issue designation into a volume and number
@@ -452,6 +453,20 @@ class FanzineIssueSpec:
         except:
             return None, None
 
+
+    #=============================================================================
+    def FormatDateForSorting(self):
+        if self._Year is None:
+            return "0000-00-00"
+        y=str(self._Year)
+        m="00"
+        if self._Month is not None:
+            m=("00"+str(self._Month))[-2:]
+        d="00"
+        if self._Day is not None:
+            m=("00"+str(self._Day))[-2:]
+
+        return y+"-"+m+"-"+d
 
 
     #=============================================================================
@@ -775,9 +790,9 @@ class FanacDate:
     DayText: str = None
     DayInt: int = None
     #Raw: str = None
-    Date: datetime = None
+    Datetime: datetime = None
 
-    def __init__(self, YearText=None, Year=None, MonthText=None, Month=None, DayText=None, Day=None, Raw=None, Date=None, Copy=None):
+    def __init__(self, YearText=None, Year=None, MonthText=None, Month=None, DayText=None, Day=None, Raw=None, Datetime=None, Copy=None):
         # If Copy= is specified, copy the FanacDates object over
         if Copy is not None:
             self.Copy(Copy)
@@ -796,8 +811,8 @@ class FanacDate:
                 self.DayInt=Day
             if Raw is not None:
                 self.Raw=Raw
-            if Date is not None:
-                self.Date=Date
+            if Datetime is not None:
+                self.Datetime=Datetime
             return
 
         # No copying needed
@@ -808,7 +823,7 @@ class FanacDate:
         self.DayText=DayText
         self.DayInt=Day
         self.Raw=Raw
-        self.Date=Date
+        self.Datetime=Datetime
 
     def Copy(self, other):
         self._YearText=other._YearText
@@ -818,7 +833,7 @@ class FanacDate:
         self._DayText=other._DayText
         self._DayInt=other._DayInt
         self._Raw=other._Raw
-        self._Date=other._Date
+        self._Datetime=other._Datetime
 
     #--------------------------------
     # Set values using only integer year/month/day. Day may be None
@@ -837,11 +852,11 @@ class FanacDate:
         self.DayText=dayText
         self.DayInt=BoundDay(dayInt, monthInt)
         if self.YearInt is None or self.MonthInt is None:
-            self.Date=None
+            self.Datetime=None
         elif self.DayInt is None:
-            self.Date=datetime.datetime(self.YearInt, self.MonthInt, 1)
+            self.Datetime=datetime.datetime(self.YearInt, self.MonthInt, 1)
         else:
-            self.Date=datetime.datetime(self.YearInt, self.MonthInt, self.DayInt)
+            self.Datetime=datetime.datetime(self.YearInt, self.MonthInt, self.DayInt)
 
     #--------------------------------
     # Format a FanacDate for printing using one of the the preferred formats:
@@ -906,7 +921,7 @@ class FanacDate:
     # Returns True for a FanaDate which is internally None
     # Returns False if any of the internal state is set to a value
     def IsEmpty(self):
-        return self.YearText is None and self.YearInt is None and self.MonthText is None and self.MonthInt is None and self.DayText is None and self.DayInt is None and (self.Raw is None or self.Raw == "")  and self.Date is None
+        return self.YearText is None and self.YearInt is None and self.MonthText is None and self.MonthInt is None and self.DayText is None and self.DayInt is None and (self.Raw is None or self.Raw == "") and self.Datetime is None
 
 
 
