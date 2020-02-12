@@ -183,7 +183,7 @@ class FanzineIssueSpec:
         if isinstance(val, str):
             self._Year=ToNumeric(YearAs4Digits(val))
         else:
-            self._Year=val
+            self._Year=YearAs4Digits(val)
 
     #.....................
     # This is a non-settable property -- it is always derived from the numeric Year
@@ -306,7 +306,7 @@ class FanzineIssueSpec:
     # .....................
     def SetDate(self, y, m):
         self.Year=ToNumeric(y)
-        self.Month=ToNumeric(m)
+        self.Month=m
         return self
 
     #.......................
@@ -475,6 +475,8 @@ class FanzineIssueSpec:
         rslt=y+"-"+m
         if self._MonthText is not None: # We add the month text on so that the sort separates dates with the same month number coming from different forms (e.g., Sept vis Sept-Oct)
             rslt+="-"+self._MonthText
+        elif self._Month is not None:
+            rslt+="-"+MonthName(self._Month)
         return rslt
 
     #=============================================================================
