@@ -453,20 +453,16 @@ class FanzineIssueSpec:
         except:
             return None, None
 
-
     #=============================================================================
-    def FormatDateForSorting(self):
+    def FormatYearMonthForSorting(self):
         if self._Year is None:
             return "0000-00-00"
         y=str(self._Year)
         m="00"
         if self._Month is not None:
             m=("00"+str(self._Month))[-2:]
-        d="00"
-        if self._Day is not None:
-            d=("00"+str(self._Day))[-2:]
 
-        rslt=y+"-"+m+"-"+d
+        rslt=y+"-"+m
         if self._MonthText is not None: # We add the month text on so that the sort separates dates with the same month number coming from different forms (e.g., Sept vis Sept-Oct)
             rslt+="-"+self._MonthText
         return rslt
