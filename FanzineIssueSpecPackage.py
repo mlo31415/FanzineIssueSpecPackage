@@ -353,8 +353,18 @@ class FanzineIssueSpec:
 
     #.......................
     def IsEmpty(self):
-        return self._Whole is None and self._Num is None and self._WSuffix is None and self._NumSuffix is None and self._Month is None and self._MonthText is None \
-            and self._Day is None and self._DayText is None and self._UninterpretableText and self._TrailingGarbage is None and self._Vol is None and self._Year is None
+        return self._Whole is None \
+               and self._Num is None \
+               and (self._WSuffix is None or len(self._WSuffix) == 0) \
+               and self._NumSuffix is None \
+               and self._Month is None \
+               and (self._MonthText is None or len(self._MonthText) == 0) \
+               and self._Day is None \
+               and (self._DayText is None or len(self._DayText) == 0) \
+               and (self._UninterpretableText is None or len(self._UninterpretableText) == 0) \
+               and (self._TrailingGarbage is None or len(self._TrailingGarbage) == 0) \
+               and self._Vol is None \
+               and self._Year is None
 
     #.......................
     # Convert the FanzineIssueSpec into a pretty string for display or printing
@@ -1113,6 +1123,8 @@ def InterpretRandomDatestring(text: str):
         return FanzineIssueSpec(Year=2014, Month=11, DayText="Grey Cup Day", Day=11)
     if text == "october 2013, halloween":
         return FanzineIssueSpec(Year=2013, Month=10, DayText="Halloween", Day=31)
+    if text == "stampede parade day 2019":
+        return FanzineIssueSpec(Year=2019, Month=7, DayText="Stampede Parade Day", Day=5)
 
     return None
 
