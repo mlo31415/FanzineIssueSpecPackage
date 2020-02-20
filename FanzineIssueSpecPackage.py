@@ -299,9 +299,6 @@ class FanzineDate:
                 self.Year=d.year
                 self.Month=d.month
                 self.Day=d.day
-                self.Raw=dateText
-                #self.Date=d
-                #TODO: Do we want a datetime element at all?
                 return self
         except:
             pass  # We'll continue with fancier things
@@ -339,7 +336,6 @@ class FanzineDate:
                         if md is not None:
                             self.Month=md[0]
                             self.Day=md[1]
-                            self.Raw=dateText
                             return self
 
         # OK, neither of those worked work.
@@ -351,7 +347,6 @@ class FanzineDate:
                 self.MonthText=mtext
                 self.Month=rslt[0]
                 self.Day=rslt[1]
-                self.Raw=dateText
                 return self
 
         # That didn't work.
@@ -370,7 +365,6 @@ class FanzineDate:
                     self.Month=mtext
                     self.DayText=modifier
                     self.Day=d
-                    self.Raw=dateText
                     return self
 
         # Nothing worked
