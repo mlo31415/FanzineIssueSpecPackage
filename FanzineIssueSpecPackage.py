@@ -325,15 +325,6 @@ class FanzineDate:
 
         ytext=None
         mtext=None
-        # m=re.compile("^(.+)\s+(\d\d)$").match(dateText)  # Month + 2- or 4-digit year
-        # if m is not None and len(m.groups()) == 2 and len(m.groups()[0]) > 0:
-        #     mtext=m.groups()[0]
-        #     ytext=m.groups()[1]
-        #     if ytext is not None and mtext is not None:
-        #         self.Year=ytext
-        #         self.Month=mtext
-        #         self.Raw=dateText
-        #         return self
 
         m=re.compile("^(.+)\s+(\d\d|\d\d\d\d)$").match(dateText)  # Month + 2- or 4-digit year
         if m is not None and m.groups() is not None and len(m.groups()) == 2:
