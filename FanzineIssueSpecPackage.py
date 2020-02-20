@@ -29,22 +29,22 @@ class FanzineDate:
         self.DayText=DayText  # In case the day is specified using something other than a numer (E.g., "Christmas Day"), we save the special text here
 
         #TODO: Where do these two go?
-        self.UninterpretableText=None  # Ok, I give up.  Just hold the text as text.
-        self.TrailingGarbage=None  # The uninterpretable stuff following the interpretable spec held in this instance
+        #self.UninterpretableText=None  # Ok, I give up.  Just hold the text as text.
+        #self.TrailingGarbage=None  # The uninterpretable stuff following the interpretable spec held in this instance
 
-    def __eq__(self, other):
+    def __eq__(self, other: FanzineDate) -> bool:
         # If we're checking against a null input, it's not equal
         if other is None:
             return False
         # If either date is entirely None, its not equal
         if self._Year is None and self._Month is None and self._Day is None:
-            return None
+            return False
         if other._Year is None and other._Month is None and other._Day is None:
-            return None
+            return False
         # OK, we know that both self and other have a non-None date element, so just check for equality
         return self._Year == other._Year and self._Month == other._Month and self._Day == other._Day
 
-    def __ne__(self, other):
+    def __ne__(self, other: FanzineDate) -> bool:
         return not self.__eq__(other)
 
     # -----------------------------
@@ -76,8 +76,8 @@ class FanzineDate:
         self._MonthText=other._MonthText
         self._Day=other._Day
         self._DayText=other._DayText
-        self._UninterpretableText=other._UninterpretableText
-        self._TrailingGarbage=other._TrailingGarbage
+        #self._UninterpretableText=other._UninterpretableText
+        #self._TrailingGarbage=other._TrailingGarbage
 
     # .....................
     @property
@@ -154,37 +154,37 @@ class FanzineDate:
         self._DayText=val
         # TODO: Compute the real day and save it in _Day
 
-    # .....................
-    @property
-    def UninterpretableText(self) -> str:
-        return self._UninterpretableText
-
-    @UninterpretableText.setter
-    def UninterpretableText(self, val: Optional[str]):
-        if val is None:
-            self._UninterpretableText=None
-            return
-        val=val.strip()
-        if len(val) == 0:
-            self._UninterpretableText=None
-            return
-        self._UninterpretableText=val
-
-    # .....................
-    @property
-    def TrailingGarbage(self) -> str:
-        return self._TrailingGarbage
-
-    @TrailingGarbage.setter
-    def TrailingGarbage(self, val: Optional[str]):
-        if val is None:
-            self._TrailingGarbage=None
-            return
-        val=val.strip()
-        if len(val) == 0:
-            self._TrailingGarbage=None
-            return
-        self._TrailingGarbage=val
+    # # .....................
+    # @property
+    # def UninterpretableText(self) -> str:
+    #     return self._UninterpretableText
+    #
+    # @UninterpretableText.setter
+    # def UninterpretableText(self, val: Optional[str]):
+    #     if val is None:
+    #         self._UninterpretableText=None
+    #         return
+    #     val=val.strip()
+    #     if len(val) == 0:
+    #         self._UninterpretableText=None
+    #         return
+    #     self._UninterpretableText=val
+    #
+    # # .....................
+    # @property
+    # def TrailingGarbage(self) -> str:
+    #     return self._TrailingGarbage
+    #
+    # @TrailingGarbage.setter
+    # def TrailingGarbage(self, val: Optional[str]):
+    #     if val is None:
+    #         self._TrailingGarbage=None
+    #         return
+    #     val=val.strip()
+    #     if len(val) == 0:
+    #         self._TrailingGarbage=None
+    #         return
+    #     self._TrailingGarbage=val
 
     # .....................
     @property
@@ -210,8 +210,8 @@ class FanzineDate:
     # .......................
     # Convert the FanzineIssueSpec into a debugging form
     def DebugStr(self) -> str:
-        if self.UninterpretableText is not None:
-            return"("+self.UninterpretableText+")"
+        #if self.UninterpretableText is not None:
+        #    return"("+self.UninterpretableText+")"
 
         d=""
         if self.Year is not None:
@@ -228,10 +228,10 @@ class FanzineDate:
             d="-"
 
         s="D"+d
-        if self.TrailingGarbage is not None:
-            s=s+", TG='"+self.TrailingGarbage+"'"
-        if self.UninterpretableText is not None:
-            s=s+", UT='"+self.UninterpretableText+"'"
+        #if self.TrailingGarbage is not None:
+        #    s=s+", TG='"+self.TrailingGarbage+"'"
+        #if self.UninterpretableText is not None:
+        #    s=s+", UT='"+self.UninterpretableText+"'"
         s=s+")"
 
         return s
@@ -242,13 +242,13 @@ class FanzineDate:
 
     # .......................
     # Convert the FanzineIssueSpec into a pretty string for display or printing
-    def __str__(self):
-        if self.UninterpretableText is not None:
-            return self.UninterpretableText.strip()
+    def __str__(self) -> str:
+        #if self.UninterpretableText is not None:
+        #    return self.UninterpretableText.strip()
 
         tg=""
-        if self.TrailingGarbage is not None:
-            tg=" "+self.TrailingGarbage
+        #if self.TrailingGarbage is not None:
+        #    tg=" "+self.TrailingGarbage
 
         # We don't treat a day without a month and year or a month without a year as valid and printable
         if self.Year is not None:
@@ -260,9 +260,10 @@ class FanzineDate:
                 tg=self._DayText+" "+str(self._Year)+" "+tg
             else:
                 tg=MonthName(self._Month, short=True)+" "+str(self._Day)+", "+str(self._Year)+" "+tg
-                # TODO: Convert to 3-character month
 
-        return tg.strip()
+        if len(tg) > 0:
+            return tg.strip()
+        return "(undated)"
 
 
     # =============================================================================
@@ -283,7 +284,7 @@ class FanzineDate:
 
     # --------------------------------
     # Parse a free-format string to find a date.  This tries to interpret the *whole* string as a date -- it doesn't find a date embeded in other text.
-    def Parse(self, s: str) -> FanzineDate:
+    def ParseGeneralDateString(self, s: str) -> FanzineDate:
 
         # Whitespace is not a date...
         dateText=s.strip()
@@ -381,6 +382,8 @@ class FanzineDate:
                     self.Raw=dateText
                     return self
 
+        # Nothing worked
+        Log("   ***Date conversion failed: '"+s+"'", isError=True)
         return self
 
 
@@ -393,8 +396,8 @@ class FanzineSerial:
         self._NumSuffix=NumSuffix  # For things like issue '17a'
         self._Whole=Whole
         self._WSuffix=WSuffix
-        self._UninterpretableText=None  # Ok, I give up.  Just hold the text as text.
-        self._TrailingGarbage=None  # The uninterpretable stuff following the interpretable spec held in this instance
+        #self._UninterpretableText=None  # Ok, I give up.  Just hold the text as text.
+        #self._TrailingGarbage=None  # The uninterpretable stuff following the interpretable spec held in this instance
 
     # Are the Num fields equal?
     # Both could be None; otherwise both must be equal
@@ -516,37 +519,37 @@ class FanzineSerial:
     def WSuffix(self, val: Optional[str]):
         self._WSuffix=val
 
+    # # .....................
+    # @property
+    # def UninterpretableText(self) -> Optional[str]:
+    #     return self._UninterpretableText
+    #
+    # @UninterpretableText.setter
+    # def UninterpretableText(self, val: Optional[str]):
+    #     if val is None:
+    #         self._UninterpretableText=None
+    #         return
+    #     val=val.strip()
+    #     if len(val) == 0:
+    #         self._UninterpretableText=None
+    #         return
+    #     self._UninterpretableText=val
+
     # .....................
     @property
-    def UninterpretableText(self) -> Optional[str]:
-        return self._UninterpretableText
-
-    @UninterpretableText.setter
-    def UninterpretableText(self, val: Optional[str]):
-        if val is None:
-            self._UninterpretableText=None
-            return
-        val=val.strip()
-        if len(val) == 0:
-            self._UninterpretableText=None
-            return
-        self._UninterpretableText=val
-
-    # .....................
-    @property
-    def TrailingGarbage(self) -> Optional[str]:
-        return self._TrailingGarbage
-
-    @TrailingGarbage.setter
-    def TrailingGarbage(self, val: Optional[str]):
-        if val is None:
-            self._TrailingGarbage=None
-            return
-        val=val.strip()
-        if len(val) == 0:
-            self._TrailingGarbage=None
-            return
-        self._TrailingGarbage=val
+    # def TrailingGarbage(self) -> Optional[str]:
+    #     return self._TrailingGarbage
+    #
+    # @TrailingGarbage.setter
+    # def TrailingGarbage(self, val: Optional[str]):
+    #     if val is None:
+    #         self._TrailingGarbage=None
+    #         return
+    #     val=val.strip()
+    #     if len(val) == 0:
+    #         self._TrailingGarbage=None
+    #         return
+    #     self._TrailingGarbage=val
 
     @property
     def Serial(self) -> Optional[str]:
@@ -570,15 +573,15 @@ class FanzineSerial:
             self.WSuffix=suffix
         elif len(suffix) == 2 and suffix[0] == '.' and suffix[1].isnumeric():  # E.g., 7.1
             self.WSuffix=suffix
-        else:
-            self.TrailingGarbage=suffix
+        # else:
+        #     self.TrailingGarbage=suffix
         return self
 
         # .......................
         # Convert the FanzineIssueSpec into a debugging form
     def DebugStr(self) -> str:
-        if self.UninterpretableText is not None:
-            return "IS("+self.UninterpretableText+")"
+        # if self.UninterpretableText is not None:
+        #     return "IS("+self.UninterpretableText+")"
 
         v="-"
         if self.Vol is not None:
@@ -595,22 +598,22 @@ class FanzineSerial:
                 w+=str(self.WSuffix)
 
         s="V"+v+", N"+n+", W"+w
-        if self.TrailingGarbage is not None:
-            s+=", TG='"+self.TrailingGarbage+"'"
-        if self.UninterpretableText is not None:
-            s+=", UT='"+self.UninterpretableText+"'"
+        # if self.TrailingGarbage is not None:
+        #     s+=", TG='"+self.TrailingGarbage+"'"
+        # if self.UninterpretableText is not None:
+        #     s+=", UT='"+self.UninterpretableText+"'"
         return s
 
         # .......................
         # Convert the FanzineIssueSpec into a pretty string for display or printing
 
     def __str__(self):
-        if self.UninterpretableText is not None:
-            return self.UninterpretableText.strip()
+        # if self.UninterpretableText is not None:
+        #     return self.UninterpretableText.strip()
 
         tg=""
-        if self.TrailingGarbage is not None:
-            tg=" "+self.TrailingGarbage
+        # if self.TrailingGarbage is not None:
+        #     tg=" "+self.TrailingGarbage
 
         if self.Vol is not None and self.Num is not None and self.Whole is not None:
             s="V"+str(self.Vol)+"#"+str(self.Num)
@@ -822,8 +825,8 @@ class FanzineIssueSpec:
     def __init__(self, Vol=None, Num=None, NumSuffix=None, Whole=None, WSuffix=None, Year=None, Month=None, MonthText=None, Day=None, DayText=None):
         self._FS=FanzineSerial(Vol=Vol, Num=Num, NumSuffix=NumSuffix, Whole=Whole, WSuffix=WSuffix)
         self._FD=FanzineDate(Year=Year, Month=Month, MonthText=MonthText, Day=Day, DayText=DayText)
-        self.UninterpretableText=None   # Ok, I give up.  Just hold the text as text.
-        self.TrailingGarbage=None       # The uninterpretable stuff following the interpretable spec held in this instance
+        #self.UninterpretableText=None   # Ok, I give up.  Just hold the text as text.
+        #self.TrailingGarbage=None       # The uninterpretable stuff following the interpretable spec held in this instance
 
     # Two issue designations are deemed to be equal if they are identical or if the VN matches while at least on of the Wholes in None or
     # is the Whole matches and at least one of the Vs and Ns is None.  (We would allow match of (W13, V3, N2) with (W13), etc.)
@@ -953,37 +956,37 @@ class FanzineIssueSpec:
     def DayText(self, val: Optional[str]):
         self._FD._DayText=val
 
-    #.....................
-    @property
-    def UninterpretableText(self) -> Optional[str]:
-        return self._UninterpretableText
-
-    @UninterpretableText.setter
-    def UninterpretableText(self, val: Optional[str]):
-        if val is None:
-            self._UninterpretableText=None
-            return
-        val=val.strip()
-        if len(val) == 0:
-            self._UninterpretableText=None
-            return
-        self._UninterpretableText=val
-
-    #.....................
-    @property
-    def TrailingGarbage(self) ->Optional[str]:
-        return self._TrailingGarbage
-
-    @TrailingGarbage.setter
-    def TrailingGarbage(self, val: Optional[str]):
-        if val is None:
-            self._TrailingGarbage=None
-            return
-        val=val.strip()
-        if len(val) == 0:
-            self._TrailingGarbage=None
-            return
-        self._TrailingGarbage=val
+    # #.....................
+    # @property
+    # def UninterpretableText(self) -> Optional[str]:
+    #     return self._UninterpretableText
+    #
+    # @UninterpretableText.setter
+    # def UninterpretableText(self, val: Optional[str]):
+    #     if val is None:
+    #         self._UninterpretableText=None
+    #         return
+    #     val=val.strip()
+    #     if len(val) == 0:
+    #         self._UninterpretableText=None
+    #         return
+    #     self._UninterpretableText=val
+    #
+    # #.....................
+    # @property
+    # def TrailingGarbage(self) ->Optional[str]:
+    #     return self._TrailingGarbage
+    #
+    # @TrailingGarbage.setter
+    # def TrailingGarbage(self, val: Optional[str]):
+    #     if val is None:
+    #         self._TrailingGarbage=None
+    #         return
+    #     val=val.strip()
+    #     if len(val) == 0:
+    #         self._TrailingGarbage=None
+    #         return
+    #     self._TrailingGarbage=val
 
     #.....................
     @property
@@ -1010,14 +1013,14 @@ class FanzineIssueSpec:
     #.......................
     # Convert the FanzineIssueSpec into a debugging form
     def DebugStr(self) -> str:
-        if self.UninterpretableText is not None:
-            return "IS("+self.UninterpretableText+")"
+        # if self.UninterpretableText is not None:
+        #     return "IS("+self.UninterpretableText+")"
 
         s="IS("+self._FS.DebugStr()+" "+self._FD.DebugStr()
-        if self.TrailingGarbage is not None:
-            s=s+", TG='"+self.TrailingGarbage+"'"
-        if self.UninterpretableText is not None:
-            s=s+", UT='"+self.UninterpretableText+"'"
+        # if self.TrailingGarbage is not None:
+        #     s=s+", TG='"+self.TrailingGarbage+"'"
+        # if self.UninterpretableText is not None:
+        #     s=s+", UT='"+self.UninterpretableText+"'"
         s=s+")"
 
         return s
@@ -1029,12 +1032,12 @@ class FanzineIssueSpec:
     #.......................
     # Convert the FanzineIssueSpec into a pretty string for display or printing
     def __str__(self):
-        if self.UninterpretableText is not None:
-            return self.UninterpretableText.strip()
+        # if self.UninterpretableText is not None:
+        #     return self.UninterpretableText.strip()
 
         tg=""
-        if self.TrailingGarbage is not None:
-            tg=" "+self.TrailingGarbage
+        # if self.TrailingGarbage is not None:
+        #     tg=" "+self.TrailingGarbage
 
         if not self._FD.IsEmpty():
             tg+=" "+str(self._FD)
@@ -1445,12 +1448,7 @@ def InterpretMonth(monthData: Optional[str, int]) -> Optional[int]:
     if len(monthData) == 0:
         return None
 
-    monthInt=MonthNameToInt(monthData)
-    if monthInt is None:
-        Log("   ***Month conversion failed: "+monthData, isError=True)
-        monthInt=None
-
-    return monthInt
+    return MonthNameToInt(monthData)
 
 
 # ====================================================================================
