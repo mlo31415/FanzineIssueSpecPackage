@@ -1552,7 +1552,7 @@ def ExtractSerialNumber(volText: str, numText: str, wholeText: str, volNumText: 
         wholeInt=InterpretNumber(wholeText)
 
     if volNumText is not None:
-        ser=FanzineIssueSpec()._FS.InterpretSerial(volNumText)
+        ser=FanzineSerial().InterpretSerial(volNumText)
         if ser.Vol is not None and ser.Num is not None:  # Otherwise, we don't actually have a volume+number
             volInt=ser.Vol
             numInt=ser.Num
@@ -1594,7 +1594,7 @@ def ExtractSerialNumber(volText: str, numText: str, wholeText: str, volNumText: 
         #   Vn  -- a volume number, but where's the issue?
         #   Vn[,] #m  -- a volume and number-within-volume
         #   Vn.m -- ditto
-        ser=FanzineIssueSpec()._FS.InterpretSerial(titleText if type(titleText) is not list else titleText[0])
+        ser=FanzineSerial().InterpretSerial(titleText if type(titleText) is not list else titleText[0])
 
         # Some indexes have fanzine names ending in <month> <year>.  We'll detect these by looking for a trailing number between 1930 and 2050, and reject
         # getting vol/ser, etc., from the title if we find it.
