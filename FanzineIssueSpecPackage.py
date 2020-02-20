@@ -367,6 +367,41 @@ class FanzineDate:
                     self.Day=d
                     return self
 
+        # There are a few annoying entries of the form "Winter 1951-52"  They all *appear* to mean something like January 1952
+        # We'll try to handle this case
+        p=re.compile("^Winter\s+\d\d\d\d\s*-\s*(\d\d)$")
+        m=p.match(dateText)
+        if m is not None and len(m.groups()) == 1:
+            self.Year=int(m.groups()[0])  # Use the second part
+            self.Month=1
+            self.MonthText="Winter"
+            return self
+
+        # There there's the equally annoying entries Month-Month year (e.g., 'June - July 2001')
+        # These will be taken to mean the first month
+        # Parsing this will be difficult.  We'll look for the pattern <text> '-' <text> <year> with (maybe) spaces between
+        p=re.compile("^(\w+)\s*-\s*(\w+)\s,?\s*(\d\d\d\d)$")
+        m=p.match(dateText)
+        if m is not None and len(m.groups()) == 3:
+            month1=m.groups()[0]
+            month2=m.groups()[1]
+            year=m.groups()[2]
+            m=InterpretMonth(month1)
+            y=int(year)
+            if m is not None:
+                self.Year=y
+                self.Month=m
+                self.MonthText=month1+"-"+month2
+                return self
+
+        # Next we'll look for yyyy-yy all alone
+        p=re.compile("^\d\d\d\d\s*-\s*(\d\d)$")
+        m=p.match(dateText)
+        if m is not None and len(m.groups()) == 1:
+            self.Year=int(m.groups()[0])  # Use the second part
+            self.Month=1    # Given that this is yyyy-yy, it probably is a vaguely winterish date
+            return self
+
         # Nothing worked
         Log("   ***Date conversion failed: '"+s+"'", isError=True)
         return self
