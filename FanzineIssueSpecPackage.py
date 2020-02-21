@@ -309,50 +309,45 @@ class FanzineDate:
             self.Copy(d)
             return self
 
-        # A common pattern of date that dateutil can't parse is <something> <some year>, where <something> might be "Easter" or "Q1" or "summer"
-        # So look for strings of the format:
-        #   Non-whitespace which includes at least one non-digit
-        #   Followed by a number between 1920 and 2050 or followed by a number between 00 and 99 inclusive.
-        # Take the first to be a strange-date-within-year string and the second to be a year string.
-
-        # That used the dateutil parser which can handle a wide variety of date formats...but not all.
+        # The dateutil parser can handle a wide variety of date formats...but not all.
         # So the next step is to reduce some of the crud used by fanzines to an actual date.
+        # We'll try a variety of patterns
         # Remove commas, which should never be significant
         dateText=dateText.replace(",", "").strip()
 
         ytext=None
+        y=None
         mtext=None
 
+        # Look for <month> <yy> or <yyyy> where month is a recognizable month name and the ys form a fannish year
+        # Note that the mtext and ytext found here may be analyzed several different ways
         m=re.compile("^(.+)\s+(\d\d|\d\d\d\d)$").match(dateText)  # Month + 2- or 4-digit year
         if m is not None and m.groups() is not None and len(m.groups()) == 2:
             mtext=m.groups()[0]
             ytext=m.groups()[1]
-            if ytext is not None and mtext is not None:
-                y=YearAs4Digits(ToNumeric(ytext))
-                if y is not None and 1860 < y < 2100:  # Outside this range it can't be a fannish-relevant year (the range is oldest fan birth date to middle-future)
-                    if InterpretMonth(mtext) is not None:
-                        self.Year=ytext
-                        md=InterpretMonthDay(mtext)
-                        if md is not None:
-                            self.Month=md[0]
-                            self.Day=md[1]
-                            return self
+            y=ValidYear(ytext)
+            if y is not None and mtext is not None:
+                if InterpretMonth(mtext) is not None:
+                    self.Year=ytext
+                    md=InterpretMonthDay(mtext)
+                    if md is not None:
+                        self.Month=md[0]
+                        self.Day=md[1]
+                        return self
 
-        # OK, neither of those worked work.
-        # Assuming that a year was found, try one of the weird month-day formats.
-        if ytext is not None and mtext is not None:
+        # If  a year was found but no valid month, try one of the weird month-day formats.
+        if y is not None and mtext is not None:
             rslt=InterpretNamedDay(mtext)  # mtext was extracted by whichever pattern recognized the year and set y to non-None
             if rslt is not None:
-                self.Year=ytext
+                self.Year=y
                 self.MonthText=mtext
                 self.Month=rslt[0]
                 self.Day=rslt[1]
                 return self
 
-        # That didn't work.
-        # There are some words used to add days which are relative terms "late september", "Mid february" etc.
+        # There are some words which are relative terms "late september", "Mid february" etc.
         # Give them a try.
-        if ytext is not None and mtext is not None:
+        if y is not None and mtext is not None:
             # In this case the *last* token is assumed to be a month and all previous tokens to be the relative stuff
             tokens=mtext.replace("-", " ").replace(",", " ").split()
             if tokens is not None and len(tokens) > 0:
@@ -361,7 +356,7 @@ class FanzineDate:
                 m=MonthNameToInt(mtext)
                 d=InterpretRelativeWords(modifier)
                 if m is not None and d is not None:
-                    self.Year=ytext
+                    self.Year=y
                     self.Month=mtext
                     self.DayText=modifier
                     self.Day=d
@@ -372,14 +367,14 @@ class FanzineDate:
         p=re.compile("^Winter\s+\d\d\d\d\s*-\s*(\d\d)$")
         m=p.match(dateText)
         if m is not None and len(m.groups()) == 1:
-            self.Year=int(m.groups()[0])  # Use the second part
+            self.Year=int(m.groups()[0])  # Use the second part (the 4-digit year)
             self.Month=1
             self.MonthText="Winter"
             return self
 
-        # There there's the equally annoying entries Month-Month year (e.g., 'June - July 2001')
+        # There there are the equally annoying entries Month-Month year (e.g., 'June - July 2001')
         # These will be taken to mean the first month
-        # Parsing this will be difficult.  We'll look for the pattern <text> '-' <text> <year> with (maybe) spaces between
+        # We'll look for the pattern <text> '-' <text> <year> with (maybe) spaces between the tokens
         p=re.compile("^(\w+)\s*-\s*(\w+)\s,?\s*(\d\d\d\d)$")
         m=p.match(dateText)
         if m is not None and len(m.groups()) == 3:
@@ -402,8 +397,26 @@ class FanzineDate:
             self.Month=1    # Given that this is yyyy-yy, it probably is a vaguely winterish date
             return self
 
+        # Another form is the fannish "April 31, 1967" -- didn't want to miss that April mailing date!
+        # We look for <month><number>,<year> with possible spaces between. Comma is optional.
+        m=re.match(r"^(\w+)\s+(\d+),?\s+(\d\d|\d\d\d\d)$", dateText)  # Month + Day, + 2- or 4-digit year
+        if m is not None and m.groups() is not None and len(m.groups()) == 3:
+            mtext=m.groups()[0]
+            dtext=m.groups()[1]
+            ytext=m.groups()[2]
+            y=ValidYear(ytext)
+            m=InterpretMonth(mtext)
+            d=InterpretDay(dtext)
+            if y is not None and m is not None and d is not None:
+                bd, bm=BoundDay(d, m)
+                if bd != d or bm != m:
+                    self.Year=y
+                    self.Month=bm
+                    self.Day=bd
+                    return self
+
         # Nothing worked
-        Log("   ***Date conversion failed: '"+s+"'", isError=True)
+        Log("ParseGeneralDateString('"+s+"') failed\n", False)
         return self
 
 
@@ -882,6 +895,24 @@ class FanzineIssueSpec:
 
     # .....................
     @property
+    def FD(self) -> Optional[FanzineDate]:
+        return self._FD
+
+    @FD.setter
+    def FD(self, val: FanzineDate):
+        self._FD=val
+
+    # .....................
+    @property
+    def FS(self) ->Optional[FanzineDate]:
+        return self._FS
+
+    @FS.setter
+    def FS(self, val: FanzineDate):
+        self._FS=val
+
+    # .....................
+    @property
     def Vol(self) -> Optional[int]:
         return self._FS.Vol
 
@@ -1338,6 +1369,17 @@ def YearAs4Digits(year: Optional[int, str]) -> Optional[int]:
 
 
 # =================================================================================
+# Take a string which suppoedly designates a year and return either a valid fannish year or None
+def ValidYear(ytext: str) -> Optional[str]:
+    if ytext is None:
+        return None
+    y=YearAs4Digits(ytext)
+    if 1860 < y < 2100:     # numbers outside this range of years can't be a fannish date
+        return str(y)
+    return None
+
+
+# =================================================================================
 # Turn year into an int
 def InterpretYear(yearText: Optional[int, str]) -> Optional[int, str]:
 
@@ -1400,22 +1442,39 @@ def InterpretDay(dayData: Optional[int, str]) -> Optional[int]:
     return day
 
 
+def MonthLength(m: int) -> int:
+    if m == 2:   # This messes up leap years. De minimus
+        return 28
+    if m in [4, 6, 9, 11]:
+        return 30
+    if m in [1, 3, 5, 7, 8, 10, 12]:
+        return 31
+
 # =================================================================================
 # Make sure day is within month
-def BoundDay(dayInt: Optional[int], monthInt: Optional[int]) -> Optional[int]:
-    if dayInt is None:
-        return None
-    if monthInt is None:    # Should never happen!
-        return dayInt
-    if dayInt < 1:
-        return 1
-    if monthInt == 2 and dayInt > 28:   #This messes up leap years. De minimus
-        return 28
-    if monthInt in [4, 6, 9, 11] and dayInt > 30:
-        return 30
-    if monthInt in [1, 3, 5, 7, 8, 10, 12] and dayInt > 31:
-        return 31
-    return dayInt
+# We take a month and day and return a month and day
+# TODO this probably should take years into account, too.  (Not that it's currently a problem.)
+def BoundDay(d: Optional[int], m: Optional[int]) -> Tuple[Optional[int], Optional[int]]:
+    if d is None:
+        return None, None
+    if m is None:    # Should never happen!
+        return None, None
+
+    monthLen=MonthLength(m)     # Get the length of this month
+
+    # Deal with negative days
+    if d < 1:
+        return (1, m)    # TODO: This could be more elegant...
+
+    if d < monthLen:
+        return (d, m)
+
+    # The day is past the end of the month.  Move it to the next month.
+    while d > monthLen:
+        d=d-monthLen
+        monthLen=MonthLength(m)
+        m=m+1
+    return (d, m)
 
 
 # =================================================================================
