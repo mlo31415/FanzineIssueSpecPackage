@@ -416,7 +416,7 @@ class FanzineDate:
                     return self
 
         # Nothing worked
-        Log("ParseGeneralDateString('"+s+"') failed", False)
+        Log("ParseGeneralDateString('"+s+"') failed")
         return self
 
 
@@ -1134,7 +1134,7 @@ class FanzineIssueSpecList:
         elif fanzineIssueSpec is None:
             return
         else:
-            print("****FanzineIssueSpecList.AppendIS() had strange input")
+            Log("****FanzineIssueSpecList.AppendIS() had strange input")
         return
 
     def Extend(self, isl: FanzineIssueSpecList) -> FanzineIssueSpecList:
@@ -1180,7 +1180,7 @@ class FanzineIssueSpecList:
             return
         if isinstance(val, FanzineIssueSpecList):
             self._list=val.List
-        print("****FanzineIssueSpecList.List setter() had strange input")
+        Log("****FanzineIssueSpecList.List setter() had strange input")
 
     @List.getter
     def List(self) -> FanzineIssueSpecList:
