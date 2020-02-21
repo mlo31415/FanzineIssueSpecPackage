@@ -416,7 +416,7 @@ class FanzineDate:
                     return self
 
         # Nothing worked
-        Log("ParseGeneralDateString('"+s+"') failed\n", False)
+        Log("ParseGeneralDateString('"+s+"') failed", False)
         return self
 
 
