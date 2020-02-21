@@ -1094,7 +1094,7 @@ class FanzineIssueSpec:
             tg+=" "+str(self._FD)
 
         if not self._FS.IsEmpty():
-            tg+=" "+str(self._FS)
+            tg+="  "+str(self._FS)
 
         return tg.strip()
 
