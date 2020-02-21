@@ -408,9 +408,9 @@ class FanzineDate:
             m=InterpretMonth(mtext)
             d=InterpretDay(dtext)
             if y is not None and m is not None and d is not None:
-                bd, bm=BoundDay(d, m)
-                if bd != d or bm != m:
-                    self.Year=y
+                bd, bm, by=BoundDay(d, m, y)
+                if bd != d or bm != m or by != y :
+                    self.Year=by
                     self.Month=bm
                     self.Day=bd
                     return self
@@ -1453,28 +1453,38 @@ def MonthLength(m: int) -> int:
 # =================================================================================
 # Make sure day is within month
 # We take a month and day and return a month and day
-# TODO this probably should take years into account, too.  (Not that it's currently a problem.)
-def BoundDay(d: Optional[int], m: Optional[int]) -> Tuple[Optional[int], Optional[int]]:
+def BoundDay(d: Optional[int], m: Optional[int], y: Optional[int]) -> Tuple[Optional[int], Optional[int], Optional[int]]:
     if d is None:
-        return None, None
+        return None, None, None
     if m is None:    # Should never happen!
-        return None, None
+        return None, None, None
 
-    monthLen=MonthLength(m)     # Get the length of this month
+    if d < -10 or d > 60:   # Dates this far off the month are more probably typos than deliberate.
+        return None, None, None
+
+    # Deal with the normal case
+    if d >= 1 and d <= MonthLength(m):
+        return (d, m, y)
 
     # Deal with negative days
     if d < 1:
-        return (1, m)    # TODO: This could be more elegant...
-
-    if d < monthLen:
-        return (d, m)
+        while d < 1:
+            m=m-1
+            if m < 1:
+                m=12
+                y=y-1
+            d=d+MonthLength(m)
+        return (d, m, y)
 
     # The day is past the end of the month.  Move it to the next month.
-    while d > monthLen:
-        d=d-monthLen
-        monthLen=MonthLength(m)
+    while d > MonthLength(m):
+        d=d-MonthLength(m)
         m=m+1
-    return (d, m)
+        if m > 12:
+            m=1
+            y=y+1
+
+    return (d, m, y)
 
 
 # =================================================================================
