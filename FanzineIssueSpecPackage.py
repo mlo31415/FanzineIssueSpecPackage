@@ -13,9 +13,9 @@ import datetime
 import dateutil.parser
 import dateutil.parser
 
+from Log import Log
 from HelpersPackage import ToNumeric, IsNumeric, IsInt
 from HelpersPackage import RemoveHTMLDebris
-from HelpersPackage import Log
 from HelpersPackage import InterpretNumber
 from HelpersPackage import CaseInsensitiveCompare
 
