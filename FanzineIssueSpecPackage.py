@@ -21,7 +21,7 @@ from HelpersPackage import CaseInsensitiveCompare
 
 
 class FanzineDate:
-    def __init__(self, Year=None, Month=None, MonthText=None, Day=None, DayText=None):
+    def __init__(self, Year=None, Month=None, MonthText=None, Day=None, DayText=None) -> None:
         self.Year=Year
         self.Month=Month
         self.MonthText=MonthText  # In case the month is specified using something other than a month name, we save the special text here
@@ -70,7 +70,7 @@ class FanzineDate:
             return self._Day < other._Day
         return False
 
-    def Copy(self, other: FanzineDate):
+    def Copy(self, other: FanzineDate) -> None:
         self._Year=other._Year
         self._Month=other._Month
         self._MonthText=other._MonthText
@@ -85,7 +85,7 @@ class FanzineDate:
         return self._Year
 
     @Year.setter
-    def Year(self, val: Union[int, str]):
+    def Year(self, val: Union[int, str]) -> None:
         if isinstance(val, str):
             self._Year=ToNumeric(YearAs4Digits(val))
         else:
@@ -103,7 +103,7 @@ class FanzineDate:
         return self._Month
 
     @Month.setter
-    def Month(self, val: Union[int, str]):
+    def Month(self, val: Union[int, str]) -> None:
         if isinstance(val, str):
             self._Month=InterpretMonth(val)
             self._MonthText=val
@@ -121,7 +121,7 @@ class FanzineDate:
         return ""
 
     @MonthText.setter
-    def MonthText(self, val: str):
+    def MonthText(self, val: str) -> None:
         self._MonthText=val
         self._Month=InterpretMonth(val)
         # TODO: Compute the real month and save it in _Month
@@ -132,7 +132,7 @@ class FanzineDate:
         return self._Day
 
     @Day.setter
-    def Day(self, val: Union[int, str]):
+    def Day(self, val: Union[int, str]) -> None:
         if isinstance(val, str):
             self._Day=ToNumeric(val)
             self._DayText=val
@@ -150,7 +150,7 @@ class FanzineDate:
         return None
 
     @DayText.setter
-    def DayText(self, val: str):
+    def DayText(self, val: str) -> None:
         self._DayText=val
         # TODO: Compute the real day and save it in _Day
 
@@ -203,7 +203,7 @@ class FanzineDate:
         return datetime.date(y, m, d)
 
     # .....................
-    def SetDate(self, y: Union[int, str], m: Union[int, str]):
+    def SetDate(self, y: Union[int, str], m: Union[int, str]) -> None:
         self.Year=ToNumeric(y)
         self.Month=m
 
@@ -315,7 +315,6 @@ class FanzineDate:
         # Remove commas, which should never be significant
         dateText=dateText.replace(",", "").strip()
 
-        ytext=None
         y=None
         mtext=None
 
@@ -404,7 +403,7 @@ class FanzineDate:
             mtext=m.groups()[0]
             dtext=m.groups()[1]
             ytext=m.groups()[2]
-            y=ValidYear(ytext)
+            y=int(ValidYear(ytext))
             m=InterpretMonth(mtext)
             d=InterpretDay(dtext)
             if y is not None and m is not None and d is not None:
@@ -423,7 +422,7 @@ class FanzineDate:
 #$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 class FanzineSerial:
 
-    def __init__(self, Vol=None, Num=None, NumSuffix=None, Whole=None, WSuffix=None):
+    def __init__(self, Vol=None, Num=None, NumSuffix=None, Whole=None, WSuffix=None) -> None:
         self._Vol=Vol
         self._Num=Num
         self._NumSuffix=NumSuffix  # For things like issue '17a'
@@ -448,7 +447,7 @@ class FanzineSerial:
 
     # Two issue designations are deemed to be equal if they are identical or if the VN matches while at least on of the Wholes in None or
     # is the Whole matches and at least one of the Vs and Ns is None.  (We would allow match of (W13, V3, N2) with (W13), etc.)
-    def __eq__(self, other):
+    def __eq__(self, other) -> bool:
         if self.__VNEq__(other) and self.__WEq__(other):
             return True
         if (self._Whole is None or other._Whole is None) and self.__VNEq__(other):
@@ -457,12 +456,12 @@ class FanzineSerial:
             return True
         return False
 
-    def __ne__(self, other):
+    def __ne__(self, other) -> bool:
         return not self.__eq__(other)
 
     # -----------------------------
     # Define < operator for sorting
-    def __lt__(self, other: FanzineSerial):
+    def __lt__(self, other: FanzineSerial) -> bool:
         if other is None:
             return False
         # If both have Wholes, use that
@@ -498,7 +497,7 @@ class FanzineSerial:
         return False
 
 
-    def Copy(self, other: FanzineSerial):
+    def Copy(self, other: FanzineSerial) -> None:
         self._Vol=other._Vol
         self._Num=other._Num
         self._NumSuffix=other._NumSuffix
@@ -513,7 +512,7 @@ class FanzineSerial:
         return self._Vol
 
     @Vol.setter
-    def Vol(self, val: Optional[int, str]):
+    def Vol(self, val: Optional[int, str]) -> None:
         self._Vol=ToNumeric(val)
 
     # .....................
@@ -522,7 +521,7 @@ class FanzineSerial:
         return self._Num
 
     @Num.setter
-    def Num(self, val: Optional[int, str]):
+    def Num(self, val: Optional[int, str]) -> None:
         self._Num=ToNumeric(val)
 
     # .....................
@@ -531,7 +530,7 @@ class FanzineSerial:
         return self._NumSuffix
 
     @NumSuffix.setter
-    def NumSuffix(self, val: Optional[str]):
+    def NumSuffix(self, val: Optional[str]) -> None:
         self._NumSuffix=val
 
     # .....................
@@ -540,7 +539,7 @@ class FanzineSerial:
         return self._Whole
 
     @Whole.setter
-    def Whole(self, val: Optional[int, str]):
+    def Whole(self, val: Optional[int, str]) -> None:
         self._Whole=ToNumeric(val)
 
     # .....................
@@ -549,7 +548,7 @@ class FanzineSerial:
         return self._WSuffix
 
     @WSuffix.setter
-    def WSuffix(self, val: Optional[str]):
+    def WSuffix(self, val: Optional[str]) -> None:
         self._WSuffix=val
 
     # # .....................
@@ -569,7 +568,7 @@ class FanzineSerial:
     #     self._UninterpretableText=val
 
     # .....................
-    @property
+    #@property
     # def TrailingGarbage(self) -> Optional[str]:
     #     return self._TrailingGarbage
     #
@@ -598,7 +597,7 @@ class FanzineSerial:
         return not reduce(lambda a, b: a or b, [self._NumSuffix, self._Num, self._Whole, self._WSuffix, self._Vol])
 
         # .....................
-    def SetWhole(self, num: int, suffix: str):
+    def SetWhole(self, num: int, suffix: str) -> FanzineSerial:
         self.Whole=num
         if suffix is None:
             return self
@@ -640,7 +639,7 @@ class FanzineSerial:
         # .......................
         # Convert the FanzineIssueSpec into a pretty string for display or printing
 
-    def __str__(self):
+    def __str__(self) -> str:
         # if self.UninterpretableText is not None:
         #     return self.UninterpretableText.strip()
 
@@ -760,11 +759,12 @@ class FanzineSerial:
         #       ...nn[ ]
 
 
-    def InterpretSerial(self, s: str):
+    def InterpretSerial(self, s: str) -> FanzineSerial:
         self.Vol=None
         self.Num=None
+        self.NumSuffix=None
         self.Whole=None
-        self.Suffix=None
+        self.WSuffix=None
 
         s=s.upper()
 
@@ -778,7 +778,7 @@ class FanzineSerial:
             self.Vol=int(m.groups()[0])
             self.Num=int(m.groups()[1])
             if len(m.groups()) == 3:
-                self.Suffix=m.groups()[2]
+                self.NumSuffix=m.groups()[2]
             return self
 
         p=re.compile("^.*"+  # Leading stuff
@@ -790,7 +790,7 @@ class FanzineSerial:
             self.Vol=int(m.groups()[0])
             self.Num=int(m.groups()[1])
             if len(m.groups()) == 3:
-                self.Suffix=m.groups()[2]
+                self.NumSuffix=m.groups()[2]
             return self
 
         # Now look for nnn nnn/nnn (fractions!)
@@ -839,7 +839,7 @@ class FanzineSerial:
             self.Vol=None
             self.Num=int(m.groups()[0])
             if len(m.groups()) == 2:
-                self.Suffix=m.groups()[1]
+                self.NumSuffix=m.groups()[1]
             return self
 
         # Now look for trailing Roman numerals
@@ -855,7 +855,7 @@ class FanzineSerial:
 #$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 class FanzineIssueSpec:
 
-    def __init__(self, Vol=None, Num=None, NumSuffix=None, Whole=None, WSuffix=None, Year=None, Month=None, MonthText=None, Day=None, DayText=None):
+    def __init__(self, Vol=None, Num=None, NumSuffix=None, Whole=None, WSuffix=None, Year=None, Month=None, MonthText=None, Day=None, DayText=None) -> None:
         self._FS=FanzineSerial(Vol=Vol, Num=Num, NumSuffix=NumSuffix, Whole=Whole, WSuffix=WSuffix)
         self._FD=FanzineDate(Year=Year, Month=Month, MonthText=MonthText, Day=Day, DayText=DayText)
         #self.UninterpretableText=None   # Ok, I give up.  Just hold the text as text.
@@ -870,7 +870,7 @@ class FanzineIssueSpec:
         return self._FD == other._FD
 
     # Class equality check.
-    def __eq__(self, other: FanzineIssueSpec):
+    def __eq__(self, other: FanzineIssueSpec) -> bool:
         return self._FS == other._FS and self._FD == other._FD
 
     def __ne__(self, other: FanzineIssueSpec):
@@ -887,11 +887,11 @@ class FanzineIssueSpec:
             return self._FS < other._FS
         return False
 
-    def Copy(self, other: FanzineIssueSpec):
+    def Copy(self, other: FanzineIssueSpec) -> None:
         self._FD=other._FD
         self._FS=other._FS
-        self._UninterpretableText=other._UninterpretableText
-        self._TrailingGarbage=other._TrailingGarbage
+        #self._UninterpretableText=other._UninterpretableText
+        #self._TrailingGarbage=other._TrailingGarbage
 
     # .....................
     @property
@@ -899,16 +899,16 @@ class FanzineIssueSpec:
         return self._FD
 
     @FD.setter
-    def FD(self, val: FanzineDate):
+    def FD(self, val: FanzineDate) -> None:
         self._FD=val
 
     # .....................
     @property
-    def FS(self) ->Optional[FanzineDate]:
+    def FS(self) ->Optional[FanzineSerial]:
         return self._FS
 
     @FS.setter
-    def FS(self, val: FanzineDate):
+    def FS(self, val: FanzineDate) -> None:
         self._FS=val
 
     # .....................
@@ -917,7 +917,7 @@ class FanzineIssueSpec:
         return self._FS.Vol
 
     @Vol.setter
-    def Vol(self, val: Optional[int, str]):
+    def Vol(self, val: Optional[int, str]) -> None:
         self._FS.Vol=ToNumeric(val)
 
     # .....................
@@ -926,7 +926,7 @@ class FanzineIssueSpec:
         return self._FS.Num
 
     @Num.setter
-    def Num(self, val: Optional[int, str]):
+    def Num(self, val: Optional[int, str]) -> None:
         self._FS.Num=ToNumeric(val)
 
     # .....................
@@ -935,7 +935,7 @@ class FanzineIssueSpec:
         return self._FS.NumSuffix
 
     @NumSuffix.setter
-    def NumSuffix(self, val: Optional[str]):
+    def NumSuffix(self, val: Optional[str]) -> None:
         self._FS.NumSuffix=val
 
     #.....................
@@ -944,7 +944,7 @@ class FanzineIssueSpec:
         return self._FS.Whole
 
     @Whole.setter
-    def Whole(self, val: Optional[int, str]):
+    def Whole(self, val: Optional[int, str]) -> None:
         self._FS.Whole=ToNumeric(val)
 
     # .....................
@@ -953,7 +953,7 @@ class FanzineIssueSpec:
         return self._FS.WSuffix
 
     @WSuffix.setter
-    def WSuffix(self, val: Optional[str]):
+    def WSuffix(self, val: Optional[str]) -> None:
         self._FS.WSuffix=val
 
     #.....................
@@ -962,7 +962,7 @@ class FanzineIssueSpec:
         return self._FD.Year
 
     @Year.setter
-    def Year(self, val: Optional[int, str]):
+    def Year(self, val: Optional[int, str]) -> None:
         self._FS.Year=val
 
     #.....................
@@ -977,7 +977,7 @@ class FanzineIssueSpec:
         return self._FD.Month
 
     @Month.setter
-    def Month(self, val: Optional[int, str]):
+    def Month(self, val: Optional[int, str]) -> None:
         self._FS.Month=val
 
     #.....................
@@ -986,7 +986,7 @@ class FanzineIssueSpec:
         return self._FD.MonthText
 
     @MonthText.setter
-    def MonthText(self, val: Optional[str]):
+    def MonthText(self, val: Optional[str]) -> None:
         self._FD.MonthText=val
 
     #.....................
@@ -995,7 +995,7 @@ class FanzineIssueSpec:
         return self._FD.Day
 
     @Day.setter
-    def Day(self, val: Optional[int]):
+    def Day(self, val: Optional[int]) -> None:
         self._FD.Day=val
 
     # .....................
@@ -1004,7 +1004,7 @@ class FanzineIssueSpec:
         return self._FD.DayText
 
     @DayText.setter
-    def DayText(self, val: Optional[str]):
+    def DayText(self, val: Optional[str]) -> None:
         self._FD._DayText=val
 
     # #.....................
@@ -1054,11 +1054,11 @@ class FanzineIssueSpec:
         return self._FD.Datetime
 
     # .....................
-    def SetWhole(self, num: int, suffix: str):
+    def SetWhole(self, num: int, suffix: str) -> None:
         self._FS.SetWhole(num, suffix)
 
     # .....................
-    def SetDate(self, y: int, m: int):
+    def SetDate(self, y: int, m: int) -> None:
         self._FD.SetDate(y, m)
 
     #.......................
@@ -1082,7 +1082,7 @@ class FanzineIssueSpec:
 
     #.......................
     # Convert the FanzineIssueSpec into a pretty string for display or printing
-    def __str__(self):
+    def __str__(self) -> str:
         # if self.UninterpretableText is not None:
         #     return self.UninterpretableText.strip()
 
@@ -1098,18 +1098,19 @@ class FanzineIssueSpec:
 
         return tg.strip()
 
+
     # =====================================================================================
-    def DecodeIssueDesignation(self, s: str):
+    def DecodeIssueDesignation(self, s: str) -> None:
         self._FS.DecodeIssueDesignation(s)
 
 
     #=============================================================================
-    def FormatYearMonthForSorting(self):
+    def FormatYearMonthForSorting(self) -> str:
         return self._FD.FormatYearMonthForSorting()
 
     #=============================================================================
     # Format the Vol/Num/Whole information
-    def FormatSerialForSorting(self):
+    def FormatSerialForSorting(self) -> str:
         return self._FS.FormatSerialForSorting()
 
 ######################################################################################################################
@@ -1123,10 +1124,10 @@ class FanzineIssueSpec:
 #TODO: a series does not have a consistent set throughout.
 
 class FanzineIssueSpecList:
-    def __init__(self, List: Optional[List[FanzineIssueSpec]]=None):
+    def __init__(self, List: Optional[List[FanzineIssueSpec]]=None) -> None:
         self._List=List  # Use setter
 
-    def AppendIS(self, fanzineIssueSpec: FanzineIssueSpec):
+    def AppendIS(self, fanzineIssueSpec: FanzineIssueSpec) -> None:
         if isinstance(fanzineIssueSpec, FanzineIssueSpec):
             self._List.append(fanzineIssueSpec)
         elif isinstance(fanzineIssueSpec, FanzineIssueSpecList):
@@ -1143,7 +1144,7 @@ class FanzineIssueSpecList:
 
     def DebugStr(self) -> str:
         s=""
-        for i in self._list:
+        for i in self._List:
             if len(s) > 0:
                 s=s+",  "
             if i is not None:
@@ -1154,43 +1155,43 @@ class FanzineIssueSpecList:
             s="Empty ISlist"
         return s
 
-    def __str__(self):   # Format the ISL for pretty
+    def __str__(self) -> str:   # Format the ISL for pretty
         s=""
-        for i in self._list:
+        for i in self._List:
             if i is not None:
                 if len(s) > 0:
                     s=s+", "
                 s=s+str(i)
         return s
 
-    def __len__(self):
-        return len(self._list)
+    def __len__(self) -> int:
+        return len(self._List)
 
     @property
     def List(self) -> FanzineIssueSpecList:
-        return self._list
+        return self._List
 
     @List.setter
-    def List(self, val: Optional[FanzineIssueSpec, FanzineIssueSpecList]):
+    def List(self, val: Optional[FanzineIssueSpec, FanzineIssueSpecList]) -> None:
         if val is None:
-            self._list=[]
+            self._List=[]
             return
         if isinstance(val, FanzineIssueSpec):
-            self._list=[val]
+            self._List=[val]
             return
         if isinstance(val, FanzineIssueSpecList):
-            self._list=val.List
+            self._List=val.List
         Log("****FanzineIssueSpecList.List setter() had strange input")
 
     @List.getter
     def List(self) -> FanzineIssueSpecList:
-        return self._list
+        return self._List
 
     def __getitem__(self, key: int) -> FanzineIssueSpec:
-        return self._list[key]
+        return self._List[key]
 
-    def __setitem__(self, key: int, value: FanzineIssueSpec):
-        self._list[key]=value
+    def __setitem__(self, key: int, value: FanzineIssueSpec) -> FanzineIssueSpecList:
+        self.List[key]=value
         return self
 
 
@@ -1464,7 +1465,7 @@ def BoundDay(d: Optional[int], m: Optional[int], y: Optional[int]) -> Tuple[Opti
 
     # Deal with the normal case
     if d >= 1 and d <= MonthLength(m):
-        return (d, m, y)
+        return d, m, y
 
     # Deal with negative days
     if d < 1:
@@ -1474,7 +1475,7 @@ def BoundDay(d: Optional[int], m: Optional[int], y: Optional[int]) -> Tuple[Opti
                 m=12
                 y=y-1
             d=d+MonthLength(m)
-        return (d, m, y)
+        return d, m, y
 
     # The day is past the end of the month.  Move it to the next month.
     while d > MonthLength(m):
@@ -1484,7 +1485,7 @@ def BoundDay(d: Optional[int], m: Optional[int], y: Optional[int]) -> Tuple[Opti
             m=1
             y=y+1
 
-    return (d, m, y)
+    return d, m, y
 
 
 # =================================================================================
@@ -1632,8 +1633,9 @@ def ExtractSerialNumber(volText: str, numText: str, wholeText: str, volNumText: 
     wholeInt=None
     volInt=None
     numInt=None
+    numsuffix=None
     maybeWholeInt=None
-    suffix=None
+    wsuffix=None
 
     if wholeText is not None:
         wholeInt=InterpretNumber(wholeText)
@@ -1643,7 +1645,7 @@ def ExtractSerialNumber(volText: str, numText: str, wholeText: str, volNumText: 
         if ser.Vol is not None and ser.Num is not None:  # Otherwise, we don't actually have a volume+number
             volInt=ser.Vol
             numInt=ser.Num
-            suffix=ser.Suffix
+            numsuffix=ser.NumSuffix
 
     if volText is not None:
         volInt=InterpretNumber(volText)
@@ -1670,7 +1672,7 @@ def ExtractSerialNumber(volText: str, numText: str, wholeText: str, volNumText: 
     # If the wholeInt is missing and maybeWholeInt hasn't been used up, make it the wholeInt
     if wholeInt is None and maybeWholeInt is not None:
         wholeInt=maybeWholeInt
-        maybeWholeInt=None
+        maybeWholeInt=None  #TODO: What is this?
 
     # Next, look at the title -- titles often have a serial designation at their end.
 
@@ -1708,6 +1710,7 @@ def ExtractSerialNumber(volText: str, numText: str, wholeText: str, volNumText: 
             if ser.Whole is not None:
                 wholeInt=ser.Whole
 
-            suffix=ser.Suffix
+            numsuffix=ser.NumSuffix
+            wsuffix=ser.WSuffix
 
-    return FanzineSerial(Vol=volInt, Num=numInt, Whole=wholeInt, WSuffix=suffix)
+    return FanzineSerial(Vol=volInt, Num=numInt, NumSuffix=numsuffix, Whole=wholeInt, WSuffix=wsuffix)
