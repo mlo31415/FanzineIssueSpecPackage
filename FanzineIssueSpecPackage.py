@@ -11,7 +11,6 @@ import roman
 from functools import reduce
 import datetime
 import dateutil.parser
-import dateutil.parser
 
 from Log import Log
 from HelpersPackage import ToNumeric, IsNumeric, IsInt
@@ -23,10 +22,14 @@ from HelpersPackage import CaseInsensitiveCompare
 class FanzineDate:
     def __init__(self, Year=None, Month=None, MonthText=None, Day=None, DayText=None) -> None:
         self.Year=Year
-        self.Month=Month
-        self.MonthText=MonthText  # In case the month is specified using something other than a month name, we save the special text here
-        self.Day=Day
-        self.DayText=DayText  # In case the day is specified using something other than a numer (E.g., "Christmas Day"), we save the special text here
+
+        self.Month=(Month, MonthText)
+        if Month is None and MonthText is not None:
+            self.Month=InterpretMonth(MonthText)        # If only Monthtext is defined, use it to calculate Month
+
+        self.Day=(Day, DayText)
+        if Day is None and DayText is not None:        # If only DayText is defined, use it to calculate Day
+            self.Day=InterpretDay(DayText)
 
         #TODO: Where do these two go?
         #self.UninterpretableText=None  # Ok, I give up.  Just hold the text as text.
@@ -103,10 +106,13 @@ class FanzineDate:
         return self._Month
 
     @Month.setter
-    def Month(self, val: Union[int, str]) -> None:
+    def Month(self, val: Union[int, str, Tuple[int, str]]) -> None:
         if isinstance(val, str):
-            self._Month=InterpretMonth(val)
+            self._Month=InterpretMonth(val)     # If you supply only the MonthText, the Month number is computed
             self._MonthText=val
+        elif isinstance(val, Tuple):    # Use the Tuple to set both Month and MonthText
+            self._Month=val[0]
+            self._MonthText=val[1]
         else:
             self._Month=val
             self._MonthText=None  # If we set a numeric month, any text month gets blown away as no longer relevant
@@ -119,12 +125,7 @@ class FanzineDate:
         if self._Month is not None:
             return MonthName(self._Month)
         return ""
-
-    @MonthText.setter
-    def MonthText(self, val: str) -> None:
-        self._MonthText=val
-        self._Month=InterpretMonth(val)
-        # TODO: Compute the real month and save it in _Month
+    # There is no MonthText setter -- to set it unse the init or the Month setter
 
     # .....................
     @property
@@ -132,13 +133,16 @@ class FanzineDate:
         return self._Day
 
     @Day.setter
-    def Day(self, val: Union[int, str]) -> None:
-        if isinstance(val, str):
+    def Day(self, val: Union[int, str, Tuple[int, str]]) -> None:
+        if isinstance(val, str):    # If you supply only the DayText, the Day number is computed
             self._Day=ToNumeric(val)
             self._DayText=val
+        elif isinstance(val, Tuple):    # Use the Tuple to set both Day and DayText
+            self._Day=val[0]
+            self._DayText=val[1]
         else:
             self._Day=val
-            self._DayText=None  # If we set a numeric month, any text month gets blown away as no longer relevant
+            self._DayText=None  # If we set a numeric day, any day text gets blown away as no longer relevant
 
     # .....................
     @property
@@ -148,11 +152,18 @@ class FanzineDate:
         if self._Day is not None:
             return DayName(self._Day)
         return None
+    # There is no DayText setter -- to set it use the init or the Day setter
 
-    @DayText.setter
-    def DayText(self, val: str) -> None:
-        self._DayText=val
-        # TODO: Compute the real day and save it in _Day
+    # .....................
+    @property
+    def Date(self) -> Optional[datetime.date]:
+        if self.IsEmpty():
+            return None
+        y=self._Year if self._Year is not None else 1
+        m=self._Month if self._Month is not None else 1
+        d=self._Day if self._Day is not None else 1
+        return datetime.date(y, m, d)
+
 
     # # .....................
     # @property
@@ -186,26 +197,6 @@ class FanzineDate:
     #         return
     #     self._TrailingGarbage=val
 
-    # .....................
-    @property
-    def Date(self) -> Optional[str]:
-        if not self.IsEmpty():
-            return self.FormatYearMonthForSorting()
-        return None
-    # TODO Do this right
-
-    # .....................
-    # Return a datetime object
-    def Datexxx(self) -> datetime:
-        y=self._Year if self._Year is not None else 1
-        m=self._Month if self._Month is not None else 1
-        d=self._Day if self._Day is not None else 1
-        return datetime.date(y, m, d)
-
-    # .....................
-    def SetDate(self, y: Union[int, str], m: Union[int, str]) -> None:
-        self.Year=ToNumeric(y)
-        self.Month=m
 
     # .......................
     # Convert the FanzineIssueSpec into a debugging form
@@ -339,8 +330,7 @@ class FanzineDate:
             rslt=InterpretNamedDay(mtext)  # mtext was extracted by whichever pattern recognized the year and set y to non-None
             if rslt is not None:
                 self.Year=y
-                self.MonthText=mtext
-                self.Month=rslt[0]
+                self.Month=(rslt[0], mtext)
                 self.Day=rslt[1]
                 return self
 
@@ -357,8 +347,7 @@ class FanzineDate:
                 if m is not None and d is not None:
                     self.Year=y
                     self.Month=mtext
-                    self.DayText=modifier
-                    self.Day=d
+                    self.Day=(d, modifier)
                     return self
 
         # There are a few annoying entries of the form "Winter 1951-52"  They all *appear* to mean something like January 1952
@@ -367,8 +356,7 @@ class FanzineDate:
         m=p.match(dateText)
         if m is not None and len(m.groups()) == 1:
             self.Year=int(m.groups()[0])  # Use the second part (the 4-digit year)
-            self.Month=1
-            self.MonthText="Winter"
+            self.Month=(1, "Winter")
             return self
 
         # There there are the equally annoying entries Month-Month year (e.g., 'June - July 2001')
@@ -384,8 +372,7 @@ class FanzineDate:
             y=int(year)
             if m is not None:
                 self.Year=y
-                self.Month=m
-                self.MonthText=month1+"-"+month2
+                self.Month=(m, month1+"-"+month2)
                 return self
 
         # Next we'll look for yyyy-yy all alone
@@ -503,8 +490,8 @@ class FanzineSerial:
         self._NumSuffix=other._NumSuffix
         self._Whole=other._Whole
         self._WSuffix=other._WSuffix
-        self._UninterpretableText=other._UninterpretableText
-        self._TrailingGarbage=other._TrailingGarbage
+        #self._UninterpretableText=other._UninterpretableText
+        #self._TrailingGarbage=other._TrailingGarbage
 
     # .....................
     @property
@@ -512,7 +499,7 @@ class FanzineSerial:
         return self._Vol
 
     @Vol.setter
-    def Vol(self, val: Optional[int, str]) -> None:
+    def Vol(self, val: Union[None, int, str]) -> None:
         self._Vol=ToNumeric(val)
 
     # .....................
@@ -521,7 +508,7 @@ class FanzineSerial:
         return self._Num
 
     @Num.setter
-    def Num(self, val: Optional[int, str]) -> None:
+    def Num(self, val: Union[None, int, str]) -> None:
         self._Num=ToNumeric(val)
 
     # .....................
@@ -539,7 +526,7 @@ class FanzineSerial:
         return self._Whole
 
     @Whole.setter
-    def Whole(self, val: Optional[int, str]) -> None:
+    def Whole(self, val: Union[None, int, str]) -> None:
         self._Whole=ToNumeric(val)
 
     # .....................
@@ -583,16 +570,9 @@ class FanzineSerial:
     #         return
     #     self._TrailingGarbage=val
 
-    @property
-    def Serial(self) -> Optional[str]:
-        if not self.IsEmpty():
-            return self.FormatSerialForSorting()
-        return None
 
-        # TODO Do this right
-
-        # .....................
-        # Does this class have anything defined for the serial number?
+    # .....................
+    # Does this instance have anything defined for the serial number?
     def IsEmpty(self) -> bool:
         return not reduce(lambda a, b: a or b, [self._NumSuffix, self._Num, self._Whole, self._WSuffix, self._Vol])
 
@@ -985,9 +965,6 @@ class FanzineIssueSpec:
     def MonthText(self) -> Optional[str]:
         return self._FD.MonthText
 
-    @MonthText.setter
-    def MonthText(self, val: Optional[str]) -> None:
-        self._FD.MonthText=val
 
     #.....................
     @property
@@ -1002,10 +979,7 @@ class FanzineIssueSpec:
     @property
     def DayText(self) -> Optional[str]:
         return self._FD.DayText
-
-    @DayText.setter
-    def DayText(self, val: Optional[str]) -> None:
-        self._FD._DayText=val
+    # There is no setter; Setting should be done when creating the instance or through the Day setter
 
     # #.....................
     # @property
@@ -1041,25 +1015,21 @@ class FanzineIssueSpec:
 
     #.....................
     @property
-    def Date(self) -> str:
-        return self._FD.Date
+    def DateStr(self) -> str:
+        return str(self._FD)
 
     @property
-    def Serial(self) -> str:
-        return self._FS.Serial
+    def SerialStr(self) -> str:
+        return str(self._FS)
 
     # .....................
-    # Return a datetime object
-    def Datetime(self) -> datetime:
-        return self._FD.Datetime
+    # Return a datetime.date object
+    def Date(self) -> datetime.date:
+        return self._FD.Date
 
     # .....................
     def SetWhole(self, num: int, suffix: str) -> None:
         self._FS.SetWhole(num, suffix)
-
-    # .....................
-    def SetDate(self, y: int, m: int) -> None:
-        self._FD.SetDate(y, m)
 
     #.......................
     # Convert the FanzineIssueSpec into a debugging form
