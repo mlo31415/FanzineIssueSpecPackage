@@ -7,7 +7,6 @@ import math
 import re
 from typing import Union, Tuple, Optional
 
-import roman
 from functools import reduce
 import datetime
 import dateutil.parser
@@ -15,7 +14,7 @@ import dateutil.parser
 from Log import Log
 from HelpersPackage import ToNumeric, IsNumeric, IsInt
 from HelpersPackage import RemoveHTMLDebris
-from HelpersPackage import InterpretNumber
+from HelpersPackage import InterpretNumber, InterpretRoman
 from HelpersPackage import CaseInsensitiveCompare
 
 
@@ -792,7 +791,7 @@ class FanzineSerial:
         p=re.compile("^\s*([IVXLC]+)/([0-9]+)\s*$")  # Leading whitespace + roman numeral characters + slash + nnn + whitespace
         m=p.match(s)
         if m is not None and len(m.groups()) == 2:
-            self.Vol=roman.fromRoman(m.groups()[0])
+            self.Vol=InterpretRoman(m.groups()[0])
             self.Num=int(m.groups()[1])
             return self
 
@@ -826,7 +825,7 @@ class FanzineSerial:
         p=re.compile("^.*?\s+([IVXLC]+)\s*$")  # Leading stuff + mandatory whitespace + roman numeral characters + optional trailing whitespace
         m=p.match(s)
         if m is not None and len(m.groups()) == 1:
-            self.Num=roman.fromRoman(m.groups()[0])
+            self.Num=InterpretRoman(m.groups()[0])
             return self
 
         # No good, return failure
