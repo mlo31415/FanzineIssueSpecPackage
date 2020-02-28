@@ -12,11 +12,11 @@ import datetime
 import dateutil.parser
 
 from Log import Log
-from HelpersPackage import ToNumeric, IsNumeric, IsInt
+from HelpersPackage import ToNumeric, IsNumeric, IsInt, Int
 from HelpersPackage import RemoveHTMLDebris
 from HelpersPackage import InterpretNumber, InterpretRoman
 from HelpersPackage import CaseInsensitiveCompare
-
+from HelpersPackage import CanonicizeColumnHeaders
 
 class FanzineDate:
     def __init__(self, Year=None, Month=None, MonthText=None, Day=None, DayText=None) -> None:
@@ -1397,7 +1397,7 @@ def InterpretDay(dayData: Optional[int, str]) -> Optional[int]:
         return None
     if isinstance(dayData, int):  # If it's already an int, not to worry
         return dayData
-    if len(dayData.strip()) == 0:  # If it's blank, return 0
+    if len(dayData.strip()) == 0:  # If it's blank, return None
         return None
 
     # Convert to int
@@ -1407,11 +1407,46 @@ def InterpretDay(dayData: Optional[int, str]) -> Optional[int]:
     try:
         day=int(dayData)
     except:
-        Log("   ***Day conversion failed: '"+dayData+"'", isError=True)
-        day=None
+        d=InterpretNamedDay(dayData)
+        if d is None:
+            Log("   ***Day conversion failed: '"+dayData+"'", isError=True)
+            day=None
+        else:
+            day=d[0]
     return day
 
 
+# =================================================================================
+# Validate data according to its type
+def ValidateData(val: str, type: str) -> int:
+    if val is None or len(val) == 0:
+        return True
+
+    type=CanonicizeColumnHeaders(type)
+    if type == "Date":
+        return InterpretRandomDatestring(val) is not None
+    if type == "Day":
+        return InterpretDay(val)
+    if type == "Month":
+        return InterpretMonth(val) is not None
+    if type == "Number":
+        return IsInt(val)
+    if type == "Pages":
+        return IsInt(val)
+    if type == "Volume":
+        return IsInt(val)
+    if type == "Vol+Num":
+        return False        # TODO: Fix this
+    if type == "Whole":
+        return IsInt(val)
+    if type == "Year":
+        return len(val) == 4 and  IsInt(val) and Int(val) > 1860 and Int(val) < 2050      # These numbers are chosen to represent the range of potentially valid fannish years.
+
+    # For all other types we return True as we can't judge validity.
+    return True
+
+
+# =================================================================================
 def MonthLength(m: int) -> int:
     if m == 2:   # This messes up leap years. De minimus
         return 28
