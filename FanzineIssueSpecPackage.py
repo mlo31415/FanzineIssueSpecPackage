@@ -828,7 +828,7 @@ class FanzineSerial:
             return True
 
         # Next look for nnn-nnn (which is a range of issue numbers; only the start is returned)
-        p=re.compile("^.*?(\d+)-(\d+)$")  # Leading stuff + nnn + dash + nnn
+        p=re.compile("^(\d+)-(\d+)$")  # Leading stuff + nnn + dash + nnn
         m=p.match(s)
         if m is not None and len(m.groups()) == 2:
             self.Whole=int(m.groups()[0])
@@ -1317,14 +1317,19 @@ class FanzineIssueSpecList:
         # A FISL is comma-delimited with one exception: some dates include a comma (e.g., January 1, 2001")
         tokens=[t.strip() for t in s.split(",")]
         while len(tokens) > 0:
-            # If there are at least two tokens left, re-join them and see if the result is an FIS
+            # If there are at least two tokens left, re-join them and see if the result is an FIS of the form <Month> [day], yyyy
             if len(tokens) > 1:
-                trial=tokens[0]+", "+tokens[1]
-                fis=FanzineIssueSpec()
-                if fis.Match(trial, strict=True):
-                    fisl.Append(fis)
-                    del tokens[0:1]
-                    continue
+                # Token 0 must contain a month name as its first token and may not start with a digit
+                if not tokens[0][0].isdigit() and MonthNameToInt(tokens[0].split()[0]) is not None:
+                    # Token 1 must be a 4-digit year
+                    if re.match("^\d{4}$", tokens[1]) is not None:
+                        # The put them together and try to interpret as a date
+                        trial=tokens[0]+", "+tokens[1]
+                        fis=FanzineIssueSpec()
+                        if fis.Match(trial, strict=True):
+                            fisl.Append(fis)
+                            del tokens[0:1]
+                            continue
             # The two together didn't work, so just try one
             # The first thing to look for is a range denoting multiple issues.  This will necessarily contain a hyphen.
             if "-" in tokens[0]:
@@ -1336,10 +1341,10 @@ class FanzineIssueSpecList:
                 if not IsInt(subtokens[0]) or not IsInt(subtokens[1]) or int(subtokens[0]) >= int(subtokens[1]):
                     Log("FanzineIssueSpecList:Match: bad range values in '"+s+"'")
                     return False
-                fisl=FanzineIssueSpecList()
                 for i in range(int(subtokens[0]), int(subtokens[1])+1):
-                    self.Append(FanzineIssueSpec(Whole=i))
-                return True
+                    fisl.Append(FanzineIssueSpec(Whole=i))
+                del tokens[0]
+                continue
 
             # Now just look for a single issue
             fis=FanzineIssueSpec()
@@ -1347,7 +1352,8 @@ class FanzineIssueSpecList:
                 fisl.Append(fis)
                 del tokens[0]
                 continue
-            # Neither worked, so we won't have an FISL
+
+            # Nothing worked, so we won't have an FISL
             return False
 
         # Apparently we consumed the whole input.  Update self and return True
