@@ -1719,7 +1719,7 @@ def BoundDay(d: Optional[int], m: Optional[int], y: Optional[int]) -> Tuple[Opti
 # Deal with things of the form "June 20," and "20 June" and just "June"
 # Return a tuple of (month, day)
 # (Day defaults to 1 if no day was supplied.)
-def InterpretMonthDay(s: str) -> Optional[Tuple[int, int]]:
+def InterpretMonthDay(s: str) -> Optional[Tuple[int, Optional[int]]]:
     s=s.strip() # Get rid of leading and traling blanks as they can't possibly be of interest
     if s[-1] == ",":    # Get rid of trailing comma
         s=s[:-1]
@@ -1733,7 +1733,7 @@ def InterpretMonthDay(s: str) -> Optional[Tuple[int, int]]:
     if len(pieces) == 1:
         m=MonthNameToInt(pieces[0])
         if m is not None:
-            return m, 1
+            return m, None
 
     # Ok, we know that there are at least two pieces
     if len(pieces) > 2:     # Currently uninterpretable
