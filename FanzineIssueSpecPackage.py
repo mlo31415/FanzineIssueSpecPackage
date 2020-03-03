@@ -415,7 +415,6 @@ class FanzineDate:
 
 
         # Nothing worked
-        Log("FanzineDate.Match('"+s+"') failed")
         return False
 
 
@@ -448,13 +447,16 @@ class FanzineSerial:
     # Two issue designations are deemed to be equal if they are identical or if the VN matches while at least on of the Wholes in None or
     # is the Whole matches and at least one of the Vs and Ns is None.  (We would allow match of (W13, V3, N2) with (W13), etc.)
     def __eq__(self, other) -> bool:             # FanzineSerial
+        # if the Whole numbers match, the two are the same. (Even if the Vol/Num differ.)
+        # TODO: Should we check WSuffix?
         if self._Whole is not None and self._Whole == other._Whole:
             return True
-        if self.__VNEq__(other) and self.__WEq__(other):
+        # If the wholes match and the Vol/Num match, they are the same
+        if self.__WEq__(other) and self.__VNEq__(other):
             return True
+        # if one of the Wholes is None and the Vol/Num match, the two are the same
+        # TODO: Should we check NumSuffix?
         if (self._Whole is None or other._Whole is None) and self.__VNEq__(other):
-            return True
-        if (self._Num is None or self._Vol is None or other._Num is None or other._Vol is None) and self.__WEq__(other):
             return True
         return False
 
