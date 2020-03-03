@@ -30,6 +30,8 @@ class FanzineDate:
         if Day is None and DayText is not None:        # If only DayText is defined, use it to calculate Day
             self.Day=InterpretDay(DayText)
 
+        self._LongDates=False
+
         #TODO: Where do these two go?
         #self.UninterpretableText=None  # Ok, I give up.  Just hold the text as text.
         #self.TrailingGarbage=None  # The uninterpretable stuff following the interpretable spec held in this instance
@@ -81,8 +83,15 @@ class FanzineDate:
         self._MonthText=other._MonthText
         self._Day=other._Day
         self._DayText=other._DayText
+        self._LongDates=other._LongDates        # Used only to coerce the __str__ to use long dates one time only
         #self._UninterpretableText=other._UninterpretableText
         #self._TrailingGarbage=other._TrailingGarbage
+
+    # .....................
+    @property
+    def LongDates(self):               # FanzineDate
+        self._LongDates=True        # Set _LongDates to True.  The next use of __str__() will set it back to False
+        return self                 # This was str(FD) will yield short dates and str(FD.LongDates) will yield long dates
 
     # .....................
     @property
