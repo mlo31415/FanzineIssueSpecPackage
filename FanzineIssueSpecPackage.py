@@ -120,10 +120,10 @@ class FanzineDate:
     def Month(self, val: Union[int, str, Tuple[int, str]]) -> None:               # FanzineDate
         if isinstance(val, str):
             self._Month=InterpretMonth(val)     # If you supply only the MonthText, the Month number is computed
-            self._MonthText=val
+            self._MonthText=val if (val is not None and len(val) > 0) else None
         elif isinstance(val, Tuple):    # Use the Tuple to set both Month and MonthText
             self._Month=val[0]
-            self._MonthText=val[1]
+            self._MonthText=val[1] if (val[1] is not None and len(val) > 0) else None
         else:
             self._Month=val
             self._MonthText=None  # If we set a numeric month, any text month gets blown away as no longer relevant
@@ -146,11 +146,11 @@ class FanzineDate:
     @Day.setter
     def Day(self, val: Union[int, str, Tuple[int, str]]) -> None:               # FanzineDate
         if isinstance(val, str):    # If you supply only the DayText, the Day number is computed
-            self._Day=ToNumeric(val)
-            self._DayText=val
+            self._Day=ToNumeric(val) if (val is not None and len(val) > 0) else None
+            self._DayText=val if (val is not None and len(val) > 0) else None
         elif isinstance(val, Tuple):    # Use the Tuple to set both Day and DayText
             self._Day=val[0]
-            self._DayText=val[1]
+            self._DayText=val[1] if (val[1] is not None  and len(val) > 0) else None
         else:
             self._Day=val
             self._DayText=None  # If we set a numeric day, any day text gets blown away as no longer relevant
@@ -252,26 +252,36 @@ class FanzineDate:
         #if self.TrailingGarbage is not None:
         #    tg=" "+self.TrailingGarbage
 
-        # We don't treat a day without a month and year or a month without a year as valid and printable
-        if self.Year is not None:
-            if self.Month is None:
-                tg=str(self.Year)+" "+tg
-            elif self._MonthText is not None:
-                tg=self._MonthText+" "+str(self._Year)+" "+tg  # There's never a monthtext+day combination
-            elif self._DayText is not None:
-                tg=self._DayText+" "+str(self._Year)+" "+tg
-            else:
-                tg=MonthName(self._Month, short=True)+" "+str(self._Day)+", "+str(self._Year)+" "+tg
-        else:
-            if self._MonthText is not None:
-                tg=self._MonthText+" "+tg  # There's never a monthtext+day combination
-            elif self._DayText is not None:
-                tg=self._DayText+" "+tg
-            else:
-                tg=MonthName(self._Month, short=True)+" "+str(self._Day)+", "+tg
+        y=self.Year
+        yt=str(y) if y is not None else None
 
-        if len(tg) > 0:
-            return tg.strip()
+        m=self.Month
+        mt=MonthName(m, short=not self._LongDates) if m is not None else None
+        self._LongDates=False       # LongDates only stays set for a single use of str()
+        if self._MonthText is not None:
+            mt=self._MonthText
+
+        d=self.Day
+        dt=str(d) if d is not None else None
+        if self._DayText is not None:
+            dt=self._DayText
+
+        # We don't treat a day without a month and year or a month without a year as valid and printable
+        if y is not None and m is not None and d is not None:
+            return mt +" "+dt+", "+yt
+        if y is not None and m is not None and d is None:
+            return mt+" "+yt
+        if y is not None and m is None and d is not None:
+            return "mon?"+" "+dt+", "+yt
+        if y is not None and m is None and d is None:
+            return yt
+        if y is None and m is not None and d is not None:
+            return mt +" "+dt
+        if y is None and m is not None and d is None:
+            return mt
+        if y is None and m is None and d is not None:
+            return "Mon? "+dt+", Yr?"
+
         return "(undated)"
 
 
