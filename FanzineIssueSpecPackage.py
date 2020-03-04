@@ -361,6 +361,14 @@ class FanzineDate:
         y=None
         mtext=None
 
+        # A 4-digit number all alone is a year
+        m=re.compile("^(\d\d\d\d)$").match(dateText)  # Month + 2- or 4-digit year
+        if m is not None and m.groups() is not None and len(m.groups()) == 1:
+            y=ValidYear(m.groups()[0])
+            if y is not None:
+                self.Year=y
+                return True
+
         # Look for <month> <yy> or <yyyy> where month is a recognizable month name and the ys form a fannish year
         # Note that the mtext and ytext found here may be analyzed several different ways
         m=re.compile("^(.+)\s+(\d\d|\d\d\d\d)$").match(dateText)  # Month + 2- or 4-digit year
