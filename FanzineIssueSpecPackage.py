@@ -321,20 +321,20 @@ class FanzineDate:
 
 
     # =============================================================================
-    def FormatYearMonthForSorting(self) -> str:               # FanzineDate
-        if self._Year is None:
-            return "0000-00-00"
-        y=str(self._Year)
+    def FormatDateForSorting(self) -> str:               # FanzineDate
+        y="0000"
+        if self._Year is not None:
+            y=YearName(self._Year)
+
         m="00"
         if self._Month is not None:
-            m=("00"+str(self._Month))[-2:]
+            m=format(self._Month, '02d')
 
-        rslt=y+"-"+m
-        if self._MonthText is not None:  # We add the month text on so that the sort separates dates with the same month number coming from different forms (e.g., Sept vis Sept-Oct)
-            rslt+="-"+self._MonthText
-        elif self._Month is not None:
-            rslt+="-"+MonthName(self._Month)
-        return rslt
+        d="00"
+        if self._Day is not None:
+            d=format(self._Day, '02d')
+
+        return y+"-"+m+"_"+d
 
 
     # =============================================================================
@@ -993,7 +993,7 @@ class FanzineIssueSpec:
 
     @Vol.setter
     def Vol(self, val: Optional[int, str]) -> None:         # FanzineIssueSpec
-        if val is not None and isinstance(val, str) and len(str) == 0:
+        if val is not None and isinstance(val, str) and len(val) == 0:
             self._FS.Vol=None
         else:
             self._FS.Vol=ToNumeric(val)
@@ -1005,7 +1005,7 @@ class FanzineIssueSpec:
 
     @Num.setter
     def Num(self, val: Optional[int, str]) -> None:         # FanzineIssueSpec
-        if val is not None and isinstance(val, str) and len(str) == 0:
+        if val is not None and isinstance(val, str) and len(val) == 0:
             self._FS.Num=None
         else:
             self._FS.Num=ToNumeric(val)
@@ -1017,7 +1017,7 @@ class FanzineIssueSpec:
 
     @NumSuffix.setter
     def NumSuffix(self, val: Optional[str]) -> None:         # FanzineIssueSpec
-        if val is not None and isinstance(val, str) and len(str) == 0:
+        if val is not None and isinstance(val, str) and len(val) == 0:
             self._FS.NumSuffix=None
         else:
             self._FS.NumSuffix=val
@@ -1029,7 +1029,7 @@ class FanzineIssueSpec:
 
     @Whole.setter
     def Whole(self, val: Optional[int, str]) -> None:         # FanzineIssueSpec
-        if val is not None and isinstance(val, str) and len(str) == 0:
+        if val is not None and isinstance(val, str) and len(val) == 0:
             self._FS.Whole=None
         else:
             self._FS.Whole=ToNumeric(val)
@@ -1042,7 +1042,7 @@ class FanzineIssueSpec:
 
     @WSuffix.setter
     def WSuffix(self, val: Optional[str]) -> None:         # FanzineIssueSpec
-        if val is not None and isinstance(val, str) and len(str) == 0:
+        if val is not None and isinstance(val, str) and len(val) == 0:
             self._FS.WSuffix=None
         else:
             self._FS.WSuffix=val
@@ -1245,8 +1245,8 @@ class FanzineIssueSpec:
 
 
     #=============================================================================
-    def FormatYearMonthForSorting(self) -> str:         # FanzineIssueSpec
-        return self._FD.FormatYearMonthForSorting()
+    def FormatDateForSorting(self) -> str:         # FanzineIssueSpec
+        return self._FD.FormatDateForSorting()
 
     #=============================================================================
     # Format the Vol/Num/Whole information
