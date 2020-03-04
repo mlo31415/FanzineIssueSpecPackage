@@ -19,7 +19,8 @@ from HelpersPackage import CaseInsensitiveCompare
 from HelpersPackage import CanonicizeColumnHeaders
 
 class FanzineDate:
-    def __init__(self, Year=None, Month=None, MonthText=None, Day=None, DayText=None) -> None:
+    def __init__(self, Year: Optional[int]=None, Month: Optional[int]=None, MonthText: Optional[str]=None, Day: Optional[int]=None,
+                 DayText: Optional[str]=None, MonthDayText: Optional[str] =None) -> None:
         self.Year=Year
 
         self.Month=(Month, MonthText)
@@ -29,6 +30,8 @@ class FanzineDate:
         self.Day=(Day, DayText)
         if Day is None and DayText is not None:        # If only DayText is defined, use it to calculate Day
             self.Day=InterpretDay(DayText)
+
+        self._MonthDayText=MonthDayText                 # Overrides display of both month and day, but has no other effect
 
         self._LongDates=False
 
@@ -83,6 +86,7 @@ class FanzineDate:
         self._MonthText=other._MonthText
         self._Day=other._Day
         self._DayText=other._DayText
+        self._MonthDayText=other._MonthDayText
         self._LongDates=other._LongDates        # Used only to coerce the __str__ to use long dates one time only
         #self._UninterpretableText=other._UninterpretableText
         #self._TrailingGarbage=other._TrailingGarbage
@@ -167,6 +171,15 @@ class FanzineDate:
 
     # .....................
     @property
+    def MonthDayText(self):
+        return self._MonthDayText
+
+    @MonthDayText.setter
+    def MonthDayText(self,val):
+        self._MonthDayText=val
+
+    # .....................
+    @property
     def Date(self) -> Optional[datetime.date]:               # FanzineDate
         if self.IsEmpty():
             return None
@@ -226,6 +239,8 @@ class FanzineDate:
             d=d+"::"+str(self.Day)
         if self.DayText is not None:
             d=d+"::"+self.DayText
+        if self.MonthDayText is not None:
+            d=d+":::"+self.MonthDayText
         if d == "":
             d="-"
 
@@ -252,19 +267,39 @@ class FanzineDate:
         #if self.TrailingGarbage is not None:
         #    tg=" "+self.TrailingGarbage
 
+        # y, m, d will be None if there is no data; yt, mt, dt will contain the display text or ""
         y=self.Year
-        yt=str(y) if y is not None else None
+        yt=str(y) if y is not None else ""
 
         m=self.Month
-        mt=MonthName(m, short=not self._LongDates) if m is not None else None
+        mt=""
+        if m is not None:
+            mt=MonthName(m, short=not self._LongDates) if m is not None else None
         self._LongDates=False       # LongDates only stays set for a single use of str()
         if self._MonthText is not None:
             mt=self._MonthText
+            m=0
 
         d=self.Day
-        dt=str(d) if d is not None else None
+        dt=str(d) if d is not None else ""
         if self._DayText is not None:
             dt=self._DayText
+            d=0
+
+        # If DayText is "Early", "Mid" or "Late", or such-like we attach it to the front of the month
+        if dt is not None:
+            if dt in ["Early", "Mid", "Middle", "Late"]:
+                mt=dt+" "+mt
+                dt=""
+                d=None
+
+        # But if MonthDayText is defined, it overrides both the month and the day as far as display goes. (It replaces the month and the day is set to None)
+        if self._MonthDayText is not None:
+            mt=self._MonthDayText
+            m=0     # This value is only here to trigger display of the revised mt
+            d=None
+            dt=None
+
 
         # We don't treat a day without a month and year or a month without a year as valid and printable
         if y is not None and m is not None and d is not None:
@@ -347,8 +382,9 @@ class FanzineDate:
             rslt=InterpretNamedDay(mtext)  # mtext was extracted by whichever pattern recognized the year and set y to non-None
             if rslt is not None:
                 self.Year=y
-                self.Month=(rslt[0], mtext)
+                self.Month=rslt[0]
                 self.Day=rslt[1]
+                self.MonthDayText=mtext
                 return True
 
         # There are some words which are relative terms "late september", "Mid february" etc.
