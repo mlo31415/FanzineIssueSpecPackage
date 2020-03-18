@@ -6,6 +6,7 @@ from __future__ import annotations
 import math
 import re
 from typing import Union, Tuple, Optional, List
+from contextlib import suppress
 
 from functools import reduce
 import datetime
@@ -466,16 +467,13 @@ class FanzineDate:
         # If it works, we've got an answer. If not, we'll keep trying.
         # It is pretty aggressive, so only use it when strict is not set
         if not strict:
-            try:
+            with suppress(Exception):
                 d=parser.parse(dateText, default=datetime.datetime(1, 1, 1))
                 if d != datetime.datetime(1, 1, 1):
                     self.Year=d.year
                     self.Month=d.month
                     self.Day=d.day
                     return True
-            except:
-                pass  # We'll continue with fancier things
-
 
         # Nothing worked
         return False
@@ -753,10 +751,8 @@ class FanzineSerial:
         # If there's no volume specified, Volume is None and Number is the whole number
         # If we can't make sense of it, return (None, None), so if the 2nd member of the tuple is None, conversion failed.
     def DecodeIssueDesignation(self, s: str) -> Tuple[ Optional[int], Optional[int] ]:             # FanzineSerial
-        try:
+        with suppress(Exception):
             return None, int(s)
-        except:
-            pass  # A dummy statement since all we want to do with an exception is move on to the next option.
 
         # Ok, it's not a simple number.  Drop leading and trailing spaces and see if it of the form #nn
         s=s.strip().lower()
@@ -766,10 +762,8 @@ class FanzineSerial:
             s=s[1:]
             if len(s) == 0:
                 return None, None
-            try:
+            with suppress(Exception):
                 return None, int(s)
-            except:
-                pass  # A dummy statement since all we want to do with an exception is move on to the next option.
 
         # This exhausts the single number possibilities
         # Maybe it's of the form Vnn, #nn (or Vnn.nn or Vnn,#nn)
@@ -794,10 +788,10 @@ class FanzineSerial:
         spl=s.replace(".", " ").replace("#", " ").split()
         if len(spl) != 2:
             return None, None
-        try:
+        with suppress(Exception):
             return int(spl[0]), int(spl[1])
-        except:
-            return None, None
+
+        return None, None
 
 
     # =============================================================================
@@ -1535,10 +1529,10 @@ def InterpretNamedDay(dayString: str) -> Optional[Tuple[int, int]]:
         "hogmanay": (12, 31),
         "auld lang syne": (12, 31),
     }
-    try:
+    with suppress(Exception):
         return namedDayConverstionTable[dayString.lower()]
-    except:
-        return None
+
+    return None
 
 
 # ====================================================================================
@@ -1559,10 +1553,10 @@ def InterpretRelativeWords(daystring: str) -> Optional[int]:
         "around the end of": 30
     }
 
-    try:
+    with suppress(Exception):
         return conversionTable[daystring.replace(",", " ").replace("-", " ").lower()]
-    except:
-        return None
+
+    return None
 
 
 # =============================================================================
@@ -1642,15 +1636,13 @@ def InterpretYear(yearText: Optional[int, str]) -> Optional[int, str]:
         return YearAs4Digits(int(yearText))
     except:
         # OK, that failed. Could it be because it's something like '1953-54'?
-        try:
+        with suppress(Exception):
             if '-' in yearText:
                 years=yearText.split("-")
                 if len(years) == 2:
                     y1=YearAs4Digits(int(years[0]))
                     y2=YearAs4Digits(int(years[1]))
                     return max(y1, y2)
-        except:
-            pass
 
     Log("   ***Year conversion failed: '"+yearText+"'", isError=True)
     return None
@@ -1847,10 +1839,10 @@ def MonthNameToInt(text: str) -> Optional[int]:
         if m1 is not None and m2 is not None:
             return math.ceil((m1+m2)/2)
 
-    try:
+    with suppress(Exception):
         return monthConversionTable[text]
-    except:
-        return None
+
+    return None
 
 
 # ====================================================================================
@@ -1924,12 +1916,10 @@ def ExtractSerialNumber(volText: str, numText: str, wholeText: str, volNumText: 
 
     # If there's no vol, anything under "Num", etc., must actually be a whole number
     if volText is None:
-        try:
+        with suppress(Exception):
             maybeWholeText=numText
             maybeWholeInt=int(maybeWholeText)
             numText=None
-        except:
-            pass
 
     # But if the *is* a volume specified, than any number not labelled "whole" must be a number within the volume
     if volText is not None and numText is not None:
