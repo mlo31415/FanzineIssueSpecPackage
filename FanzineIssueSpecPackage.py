@@ -20,16 +20,32 @@ from HelpersPackage import CaseInsensitiveCompare
 from HelpersPackage import CanonicizeColumnHeaders
 
 class FanzineDate:
-    def __init__(self, Year: Optional[int]=None, Month: Optional[int]=None, MonthText: Optional[str]=None, Day: Optional[int]=None,
-                 DayText: Optional[str]=None, MonthDayText: Optional[str] =None) -> None:
+    def __init__(self,
+                 Year: Union[int, str, None]=None,
+                 Month: Union[int, str, Tuple[int, str], None]=None,
+                 MonthText: Optional[str]=None,
+                 Day: Union[int, str, Tuple[int, str], None]=None,
+                 DayText: Optional[str]=None,
+                 MonthDayText: Optional[str] =None) -> None:
         self.Year=Year
 
-        self.Month=(Month, MonthText)
+        self._Month=None
+        self._MonthText=None
+        if type(Month) is not tuple and MonthText is not None:
+            Month=(Month, MonthText)
+        self.Month=Month
         if Month is None and MonthText is not None:
             self.Month=InterpretMonth(MonthText)        # If only Monthtext is defined, use it to calculate Month
 
-        self.Day=(Day, DayText)
-        if Day is None and DayText is not None:        # If only DayText is defined, use it to calculate Day
+        self._Day=None
+        self._DayText=None
+        if type(Day) is tuple:
+            self.Day=Day
+        elif Day is not None and DayText is not None:
+            self.Day=(Day, DayText)
+        elif Day is not None and DayText is None:
+            self.Day=Day
+        elif Day is None and DayText is not None:        # If only DayText is defined, use it to calculate Day
             self.Day=InterpretDay(DayText)
 
         self._MonthDayText=MonthDayText                 # Overrides display of both month and day, but has no other effect
@@ -141,7 +157,7 @@ class FanzineDate:
         if self._Month is not None:
             return MonthName(self._Month)
         return ""
-    # There is no MonthText setter -- to set it unse the init or the Month setter
+    # There is no MonthText setter -- to set it use the init or the Month setter
 
     # .....................
     @property
@@ -340,18 +356,18 @@ class FanzineDate:
 
     # =============================================================================
     # Parse a free-format string to find a date.  This tries to interpret the *whole* string as a date -- it doesn't find a date embeded in other text.
-    def Match(self, s: str, strict: bool=False) -> bool:               # FanzineDate
+    @classmethod
+    def Match(cls, s: str, strict: bool=False) -> FanzineDate:               # FanzineDate
 
         # Whitespace is not a date...
         dateText=s.strip()
         if len(dateText) == 0:
-            return False
+            return cls()
 
         # There are some dates which follow no useful pattern.  Check for them
         d=InterpretRandomDatestring(dateText)
         if d is not None:
-            self.Copy(d)
-            return True
+            return d
 
         # The dateutil parser can handle a wide variety of date formats...but not all.
         # So the next step is to reduce some of the crud used by fanzines to an actual date.
@@ -359,16 +375,12 @@ class FanzineDate:
         # Remove commas, which should never be significant
         dateText=dateText.replace(",", "").strip()
 
-        y=None
-        mtext=None
-
         # A 4-digit number all alone is a year
         m=re.compile("^(\d\d\d\d)$").match(dateText)  # Month + 2- or 4-digit year
         if m is not None and m.groups() is not None and len(m.groups()) == 1:
             y=ValidYear(m.groups()[0])
             if y is not None:
-                self.Year=y
-                return True
+                return cls(Year=y)
 
         # Look for <month> <yy> or <yyyy> where month is a recognizable month name and the ys form a fannish year
         # Note that the mtext and ytext found here may be analyzed several different ways
@@ -379,47 +391,35 @@ class FanzineDate:
             y=ValidYear(ytext)
             if y is not None and mtext is not None:
                 if InterpretMonth(mtext) is not None:
-                    self.Year=ytext
                     md=InterpretMonthDay(mtext)
                     if md is not None:
-                        self.Month=md[0]
-                        self.Day=md[1]
-                        return True
+                        return cls(Year=ytext, Month=md[0], Day=md[1])
 
-        # If  a year was found but no valid month, try one of the weird month-day formats.
-        if y is not None and mtext is not None:
-            rslt=InterpretNamedDay(mtext)  # mtext was extracted by whichever pattern recognized the year and set y to non-None
-            if rslt is not None:
-                self.Year=y
-                self.Month=rslt[0]
-                self.Day=rslt[1]
-                self.MonthDayText=mtext
-                return True
+            # If  a year was found but no valid month, try one of the weird month-day formats.
+            if y is not None and mtext is not None:
+                rslt=InterpretNamedDay(mtext)  # mtext was extracted by whichever pattern recognized the year and set y to non-None
+                if rslt is not None:
+                    return cls(Year=y, Month=rslt[0], Day=rslt[1], MonthDayText=mtext)
 
-        # There are some words which are relative terms "late september", "Mid february" etc.
-        # Give them a try.
-        if y is not None and mtext is not None:
-            # In this case the *last* token is assumed to be a month and all previous tokens to be the relative stuff
-            tokens=mtext.replace("-", " ").replace(",", " ").split()
-            if tokens is not None and len(tokens) > 0:
-                modifier=" ".join(tokens[:-1])
-                mtext=tokens[-1:][0]
-                m=MonthNameToInt(mtext)
-                d=InterpretRelativeWords(modifier)
-                if m is not None and d is not None:
-                    self.Year=y
-                    self.Month=mtext
-                    self.Day=(d, modifier)
-                    return True
+            # There are some words which are relative terms "late september", "Mid february" etc.
+            # Give them a try.
+            if y is not None and mtext is not None:
+                # In this case the *last* token is assumed to be a month and all previous tokens to be the relative stuff
+                tokens=mtext.replace("-", " ").replace(",", " ").split()
+                if tokens is not None and len(tokens) > 0:
+                    modifier=" ".join(tokens[:-1])
+                    mtext=tokens[-1:][0]
+                    m=MonthNameToInt(mtext)
+                    d=InterpretRelativeWords(modifier)
+                    if m is not None and d is not None:
+                        return cls(Year=y, Month=m, Day=(d, modifier))
 
         # There are a few annoying entries of the form "Winter 1951-52"  They all *appear* to mean something like January 1952
         # We'll try to handle this case
         p=re.compile("^Winter\s+\d\d\d\d\s*-\s*(\d\d)$")
         m=p.match(dateText)
         if m is not None and len(m.groups()) == 1:
-            self.Year=int(m.groups()[0])  # Use the second part (the 4-digit year)
-            self.Month=(1, "Winter")
-            return True
+            return cls(Year=int(m.groups()[0]), Month=1, MonthText="Winter")  # Use the second part (the 4-digit year)
 
         # There there are the equally annoying entries Month-Month year (e.g., 'June - July 2001')
         # These will be taken to mean the first month
@@ -433,17 +433,13 @@ class FanzineDate:
             m=InterpretMonth(month1)
             y=int(year)
             if m is not None:
-                self.Year=y
-                self.Month=(m, month1+"-"+month2)
-                return True
+                return cls(Year=y, Month=m, MonthText=month1+"-"+month2)
 
         # Next we'll look for yyyy-yy all alone
         p=re.compile("^\d\d\d\d\s*-\s*(\d\d)$")
         m=p.match(dateText)
         if m is not None and len(m.groups()) == 1:
-            self.Year=int(m.groups()[0])  # Use the second part
-            self.Month=1    # Given that this is yyyy-yy, it probably is a vaguely winterish date
-            return True
+            return cls(Year=int(m.groups()[0]), Month=1)    # Use the second part of the year, and given that this is yyyy-yy, it probably is a vaguely winterish date
 
         # Another form is the fannish "April 31, 1967" -- didn't want to miss that April mailing date!
         # We look for <month><number>,<year> with possible spaces between. Comma is optional.
@@ -458,10 +454,7 @@ class FanzineDate:
             if y is not None and m is not None and d is not None:
                 bd, bm, by=BoundDay(d, m, y)
                 if bd != d or bm != m or by != y :
-                    self.Year=by
-                    self.Month=bm
-                    self.Day=bd
-                    return True
+                    return cls(Year=by, Month=bm, Day=bd)
 
         # Try dateutil's parser on the string
         # If it works, we've got an answer. If not, we'll keep trying.
@@ -470,13 +463,10 @@ class FanzineDate:
             with suppress(Exception):
                 d=parser.parse(dateText, default=datetime.datetime(1, 1, 1))
                 if d != datetime.datetime(1, 1, 1):
-                    self.Year=d.year
-                    self.Month=d.month
-                    self.Day=d.day
-                    return True
+                    return cls(Year=d.year, Month=d.month, Day=d.day)
 
         # Nothing worked
-        return False
+        return cls()
 
 
 #$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
@@ -1205,9 +1195,8 @@ class FanzineIssueSpec:
             return True
 
         # First try a date, and interpret it strictly no matter what the parameter says -- we can try non-strict later
-        fd=FanzineDate()
-        rslt=fd.Match(s, strict=True)
-        if rslt:
+        fd=FanzineDate().Match(s, strict=True)
+        if not fd.IsEmpty():
             fis.FD=fd
             self.Copy(fis)
             return True
@@ -1220,22 +1209,15 @@ class FanzineIssueSpec:
             self.Copy(fis)
             return True
 
-        # That didn't work, either.  If strict is false, try a non-strict date followed by a non-strict serial
-        if not strict:
-            fd=FanzineDate()
-            rslt=fd.Match(s)
-            if rslt:
-                fis.FD=fd
-                self.Copy(fis)
-                return True
+        # That didn't work, either.  Try a non-strict date followed by a non-strict serial
+        # OK, it's probably not a date.  So try it as a serial ID
+        fs=FanzineSerial()
+        rslt=fs.Match(s)
+        if rslt:
+            fis.FS=fs
+            self.Copy(fis)
+            return True
 
-            # OK, it's probably not a date.  So try it as a serial ID
-            fs=FanzineSerial()
-            rslt=fs.Match(s)
-            if rslt:
-                fis.FS=fs
-                self.Copy(fis)
-                return True
         # No good.  Failed.
         return False
 
