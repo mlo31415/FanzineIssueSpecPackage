@@ -375,9 +375,6 @@ class FanzineDate:
         # Remove commas, which should never be significant
         dateText=dateText.replace(",", "").strip()
 
-        #y=None
-        #mtext=None
-
         # A 4-digit number all alone is a year
         m=re.compile("^(\d\d\d\d)$").match(dateText)  # Month + 2- or 4-digit year
         if m is not None and m.groups() is not None and len(m.groups()) == 1:
@@ -490,20 +487,25 @@ class FanzineSerial:
         #self._UninterpretableText=None  # Ok, I give up.  Just hold the text as text.
         #self._TrailingGarbage=None  # The uninterpretable stuff following the interpretable spec held in this instance
 
+    # -----------------------------
     # Are the Num fields equal?
     # Both could be None; otherwise both must be equal
     def __NumEq__(self, other) -> bool:             # FanzineSerial
         return self._Num == other._Num and CaseInsensitiveCompare(self._NumSuffix, other._NumSuffix)
 
+    # -----------------------------
     def __VolEq__(self, other) -> bool:             # FanzineSerial
         return self._Vol == other._Vol
 
+    # -----------------------------
     def __WEq__(self, other) -> bool:             # FanzineSerial
         return self._Whole == other._Whole and CaseInsensitiveCompare(self._WSuffix, other._WSuffix)
 
+    # -----------------------------
     def __VNEq__(self, other) -> bool:             # FanzineSerial
         return self.__VolEq__(other) and self.__NumEq__(other)
 
+    # -----------------------------
     # Two issue designations are deemed to be equal if they are identical or if the VN matches while at least on of the Wholes in None or
     # is the Whole matches and at least one of the Vs and Ns is None.  (We would allow match of (W13, V3, N2) with (W13), etc.)
     def __eq__(self, other) -> bool:             # FanzineSerial
@@ -520,6 +522,8 @@ class FanzineSerial:
             return True
         return False
 
+
+    # -----------------------------
     def __ne__(self, other) -> bool:             # FanzineSerial
         return not self.__eq__(other)
 
@@ -534,6 +538,7 @@ class FanzineSerial:
                 return True
             if self._Whole > other._Whole:
                 return False
+
             # OK, the Wholes must be equal.  See if one of them has a suffix (e.g., #133 and #133A). Suffixed Wholes are always larger.
             if self._WSuffix is None and other._WSuffix is None:
                 return False
@@ -561,6 +566,7 @@ class FanzineSerial:
         return False
 
 
+    # -----------------------------
     def Copy(self, other: FanzineSerial) -> None:             # FanzineSerial
         self._Vol=other._Vol
         self._Num=other._Num
@@ -623,7 +629,6 @@ class FanzineSerial:
         else:
             self._Whole=val
 
-
     # .....................
     @property
     def WSuffix(self) -> Optional[str]:             # FanzineSerial
@@ -670,19 +675,6 @@ class FanzineSerial:
     # Does this instance have anything defined for the serial number?
     def IsEmpty(self) -> bool:             # FanzineSerial
         return not reduce(lambda a, b: a or b, [self._NumSuffix, self._Num, self._Whole, self._WSuffix, self._Vol])
-
-    # .....................
-    def SetWhole(self, num: int, suffix: str) -> FanzineSerial:             # FanzineSerial
-        self.Whole=num
-        if suffix is None:
-            return self
-        if len(suffix) == 1 and suffix.isalpha():  # E.g., 7a
-            self.WSuffix=suffix
-        elif len(suffix) == 2 and suffix[0] == '.' and suffix[1].isnumeric():  # E.g., 7.1
-            self.WSuffix=suffix
-        # else:
-        #     self.TrailingGarbage=suffix
-        return self
 
     # .......................
     # Convert the FanzineIssueSpec into a debugging form
@@ -1137,10 +1129,6 @@ class FanzineIssueSpec:
     def Date(self) -> datetime.date:         # FanzineIssueSpec
         return self._FD.Date
 
-    # .....................
-    def SetWhole(self, num: int, suffix: str) -> None:         # FanzineIssueSpec
-        self._FS.SetWhole(num, suffix)
-
     #.......................
     # Convert the FanzineIssueSpec into a debugging form
     def DebugStr(self) -> str:         # FanzineIssueSpec
@@ -1270,6 +1258,10 @@ class FanzineIssueSpecList:
         return self
 
 
+    def IsEmpty(self) -> bool:
+        return self._List is None or len(self._List) == 0
+
+
     def DebugStr(self) -> str:      # FanzineIssueSpecList
         s=""
         if self._List is not None:
@@ -1314,9 +1306,6 @@ class FanzineIssueSpecList:
             return
         Log("****FanzineIssueSpecList.List setter() had strange input")
 
-    @List.getter
-    def List(self) -> FanzineIssueSpecList:      # FanzineIssueSpecList
-        return self._List
 
     def __getitem__(self, key: int) -> FanzineIssueSpec:      # FanzineIssueSpecList
         return self._List[key]
@@ -1329,7 +1318,7 @@ class FanzineIssueSpecList:
     # =====================================================================================
     # Pull a Serial off of the end of a string, returning a FISL and the remainder of the string
     def GetTrailingSerial(self, s: str) -> Tuple[Optional[FanzineIssueSpecList], str]:       # FanzineIssueSpecList
-        # Try to greedily interpret the trailing text as a FanzineIssueSpec.
+        # Try to greedily (reverse-greedily?) interpret the trailing text as a FanzineIssueSpec.
         # We do this by interpreting more and more tokens starting from the end until we have something that is no longer recognizable as a FanzineIssueSpec
         # The just-previous set of tokens constitutes the full IssueSpec, and the remaining leading tokens are the series name.
         tokens=s.split()  # Split into tokens on spaces
@@ -1339,8 +1328,8 @@ class FanzineIssueSpecList:
             trailingText=" ".join(tokens[index:])
             leadingText=" ".join(tokens[:index])
             print("     index="+str(index)+"   leading='"+leadingText+"'    trailing='"+trailingText+"'")
-            trialfisl=FanzineIssueSpecList()
-            if not trialfisl.Match(trailingText, strict=True):  # Failed.  We've gone one too far. Quit trying and use what we found on the previous iteration
+            trialfisl=FanzineIssueSpecList().Match(trailingText, strict=True)  # Failed.  We've gone one too far. Quit trying and use what we found on the previous iteration
+            if trialfisl.IsEmpty():
                 print("     ...backtracking. FISL="+trialfisl.DebugStr())
                 leadingText=" ".join(tokens[0:index+1])
                 break
@@ -1350,8 +1339,9 @@ class FanzineIssueSpecList:
 
     #------------------------------------------------------------------------------------
     # Take the input string and turn it into a FISL
-    def Match(self, s: str, strict: bool=False) -> bool:      # FanzineIssueSpecList
-        fisl=FanzineIssueSpecList()
+    @classmethod
+    def Match(cls, s: str, strict: bool=False) -> FanzineIssueSpecList:      # FanzineIssueSpecList
+        fislist=[]
 
         # A FISL is comma-delimited with one exception: some dates include a comma (e.g., January 1, 2001")
         tokens=[t.strip() for t in s.split(",")]
@@ -1366,7 +1356,7 @@ class FanzineIssueSpecList:
                         trial=tokens[0]+", "+tokens[1]
                         fis=FanzineIssueSpec()
                         if fis.Match(trial, strict=True):
-                            fisl.Append(fis)
+                            fislist.append(fis)
                             del tokens[0:1]
                             continue
             # The two together didn't work, so just try one
@@ -1376,28 +1366,27 @@ class FanzineIssueSpecList:
                 # For now, at least, we can only handle the case of two subtokens, each of which are integers and the first is the smaller
                 if len(subtokens) != 2:
                     Log("FanzineIssueSpecList:Match: Other than two subtokens found in '"+s+"'")
-                    return False
+                    return cls()
                 if not IsInt(subtokens[0]) or not IsInt(subtokens[1]) or int(subtokens[0]) >= int(subtokens[1]):
                     Log("FanzineIssueSpecList:Match: bad range values in '"+s+"'")
-                    return False
+                    return cls()
                 for i in range(int(subtokens[0]), int(subtokens[1])+1):
-                    fisl.Append(FanzineIssueSpec(Whole=i))
+                    fislist.append(FanzineIssueSpec(Whole=i))
                 del tokens[0]
                 continue
 
             # Now just look for a single issue
             fis=FanzineIssueSpec()
             if fis.Match(tokens[0], strict=strict):
-                fisl.Append(fis)
+                fislist.append(fis)
                 del tokens[0]
                 continue
 
             # Nothing worked, so we won't have an FISL
-            return False
+            return cls()
 
         # Apparently we consumed the whole input.  Update self and return True
-        self.List=fisl
-        return True
+        return cls(List=fislist)
 
 
     #------------------------------------------------------------------------------------
