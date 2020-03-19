@@ -1189,7 +1189,6 @@ class FanzineIssueSpec:
     # Take the input string and turn it into a FIS
     # The input could be a single date or it could be a single serial ID or it could be a range (e.g., 12-17)
     def Match(self, s: str, strict: bool = False):        # FanzineIssueSpec
-        fis=FanzineIssueSpec()
 
         # A number standing by itself is messy, since it's easy to confuse with a date
         # In the FanzineIssueSpec world, we will always treat it as a Serial, so look for that first
@@ -1201,8 +1200,7 @@ class FanzineIssueSpec:
         # First try a date, and interpret it strictly no matter what the parameter says -- we can try non-strict later
         fd=FanzineDate().Match(s, strict=True)
         if not fd.IsEmpty():
-            fis.FD=fd
-            self.Copy(fis)
+            self.FD=fd
             return True
 
         # OK, it's probably not a date.  So try it as a serial ID
@@ -1329,7 +1327,7 @@ class FanzineIssueSpecList:
 
 
     # =====================================================================================
-    # Pull a Serial off of the end of a string
+    # Pull a Serial off of the end of a string, returning a FISL and the remainder of the string
     def GetTrailingSerial(self, s: str) -> Tuple[Optional[FanzineIssueSpecList], str]:       # FanzineIssueSpecList
         # Try to greedily interpret the trailing text as a FanzineIssueSpec.
         # We do this by interpreting more and more tokens starting from the end until we have something that is no longer recognizable as a FanzineIssueSpec
