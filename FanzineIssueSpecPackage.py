@@ -375,6 +375,9 @@ class FanzineDate:
         # Remove commas, which should never be significant
         dateText=dateText.replace(",", "").strip()
 
+        #y=None
+        #mtext=None
+
         # A 4-digit number all alone is a year
         m=re.compile("^(\d\d\d\d)$").match(dateText)  # Month + 2- or 4-digit year
         if m is not None and m.groups() is not None and len(m.groups()) == 1:
@@ -472,7 +475,13 @@ class FanzineDate:
 #$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 class FanzineSerial:
 
-    def __init__(self, Vol=None, Num=None, NumSuffix=None, Whole=None, WSuffix=None) -> None:
+    def __init__(self, Vol=None, Num=None, NumSuffix="", Whole=None, WSuffix="") -> None:
+        self._Vol=None
+        self._Num=None
+        self._Whole=None
+        self._WSuffix=""
+        self._NumSuffix=""
+
         self.Vol=Vol
         self.Num=Num
         self.NumSuffix=NumSuffix  # For things like issue '17a'
@@ -596,6 +605,8 @@ class FanzineSerial:
 
     @NumSuffix.setter
     def NumSuffix(self, val: Optional[str]) -> None:             # FanzineSerial
+        if val is None:
+            val=""
         self._NumSuffix=val
 
     # .....................
@@ -660,7 +671,7 @@ class FanzineSerial:
     def IsEmpty(self) -> bool:             # FanzineSerial
         return not reduce(lambda a, b: a or b, [self._NumSuffix, self._Num, self._Whole, self._WSuffix, self._Vol])
 
-        # .....................
+    # .....................
     def SetWhole(self, num: int, suffix: str) -> FanzineSerial:             # FanzineSerial
         self.Whole=num
         if suffix is None:
@@ -673,8 +684,8 @@ class FanzineSerial:
         #     self.TrailingGarbage=suffix
         return self
 
-        # .......................
-        # Convert the FanzineIssueSpec into a debugging form
+    # .......................
+    # Convert the FanzineIssueSpec into a debugging form
     def DebugStr(self) -> str:             # FanzineSerial
         # if self.UninterpretableText is not None:
         #     return "IS("+self.UninterpretableText+")"
@@ -700,9 +711,8 @@ class FanzineSerial:
         #     s+=", UT='"+self.UninterpretableText+"'"
         return s
 
-        # .......................
-        # Convert the FanzineIssueSpec into a pretty string for display or printing
-
+    # .......................
+    # Convert the FanzineIssueSpec into a pretty string for display or printing
     def __str__(self) -> str:             # FanzineSerial
         # if self.UninterpretableText is not None:
         #     return self.UninterpretableText.strip()
@@ -819,12 +829,13 @@ class FanzineSerial:
     #       ...rrr/nnn          vol (in Roman numerals)/num
     #       ...nn.mm
     #       ...nn[ ]
-    def Match(self, s: str, scan: bool=False, strict: bool=False) -> bool:             # FanzineSerial
-        self.Vol=None
-        self.Num=None
-        self.NumSuffix=None
-        self.Whole=None
-        self.WSuffix=None
+    @classmethod
+    def Match(cls, s: str, scan: bool=False, strict: bool=False):             # FanzineSerial
+        cls.Vol=None
+        cls.Num=None
+        cls.NumSuffix=""
+        cls.Whole=None
+        cls.WSuffix=""
 
         s=s.strip()     # Remove leading and trailing whitespace
 
@@ -835,11 +846,10 @@ class FanzineSerial:
         # #nnn + optional single alphabetic character suffix
         m=re.match(pat, s)
         if m is not None and len(m.groups()) in [2, 3]:
-            self.Vol=int(m.groups()[0])
-            self.Num=int(m.groups()[1])
+            ns=None
             if len(m.groups()) == 3:
-                self.NumSuffix=m.groups()[2]
-            return True
+                ns=m.groups()[2]
+            return cls(Vol=int(m.groups()[0]), Num=int(m.groups()[1]), NumSuffix=ns)
 
         p=re.compile("V[oO][lL]\s*(\d+)\s*#(\d+)(\w?)$")
         # # Leading stuff
@@ -847,84 +857,81 @@ class FanzineSerial:
         # + #nnn + optional single alphabetic character suffix
         m=p.match(s)
         if m is not None and len(m.groups()) in [2, 3]:
-            self.Vol=int(m.groups()[0])
-            self.Num=int(m.groups()[1])
+            ns=None
             if len(m.groups()) == 3:
-                self.NumSuffix=m.groups()[2]
-            return True
+                ns=m.groups()[2]
+            return cls(Vol=int(m.groups()[0]), Num=int(m.groups()[1]), NumSuffix=ns)
 
         # Now look for nnn nnn/nnn (fractions!)
         p=re.compile("^(\d+)\s+(\d+)/(\d+)$")  # nnn + mandatory whitespace + nnn + slash + nnn * optional whitespace
         m=p.match(s)
         if m is not None and len(m.groups()) == 3:
-            self.Whole=int(m.groups()[0])+int(m.groups()[1])/int(m.groups()[2])
-            return True
+            return cls(Whole=int(m.groups()[0])+int(m.groups()[1])/int(m.groups()[2]))
 
         # Now look for nnn/nnn (which is understood as vol/num
         p=re.compile("^(\d+)/(\d+)$")  # Leading stuff + nnn + slash + nnn * optional whitespace
         m=p.match(s)
         if m is not None and len(m.groups()) == 2:
-            self.Vol=int(m.groups()[0])
-            self.Num=int(m.groups()[1])
-            return True
+            return cls(Vol=int(m.groups()[0]), Num=int(m.groups()[1]))
 
         # Now look for xxx/nnn, where xxx is in Roman numerals
         p=re.compile("^([IVXLC]+)/(\d+)$")  # Leading whitespace + roman numeral characters + slash + nnn + whitespace
         m=p.match(s)
         if m is not None and len(m.groups()) == 2:
-            self.Vol=InterpretRoman(m.groups()[0])  #TODO: the regex detects more than just Roman numerals.  We need to bail out of this branch if that happens and not return
-            self.Num=int(m.groups()[1])
-            return True
+            #TODO: the regex detects more than just Roman numerals.  We need to bail out of this branch if that happens and not return
+            return cls(Vol=InterpretRoman(m.groups()[0]), Num=int(m.groups()[1]))
 
         # Next look for nnn-nnn (which is a range of issue numbers; only the start is returned)
         p=re.compile("^(\d+)-(\d+)$")  # Leading stuff + nnn + dash + nnn
         m=p.match(s)
         if m is not None and len(m.groups()) == 2:
-            self.Whole=int(m.groups()[0])
-            return True
+            return cls(Whole=int(m.groups()[0]))
 
         # Next look for #nnn
         p=re.compile("^#(\d+)$")  # Leading stuff + nnn
         m=p.match(s)
         if m is not None and len(m.groups()) == 1:
-            self.Whole=int(m.groups()[0])
-            return True
+            return cls(Whole=int(m.groups()[0]))
 
         # Now look for a trailing decimal number
         p=re.compile("^.*?(\d+\.\d+)$")  # Leading characters + single non-digit + nnn + dot + nnn + whitespace
         # the ? makes * a non-greedy quantifier
         m=p.match(s)
         if m is not None and len(m.groups()) == 1:
-            self.Vol=None
-            self.Num=float(m.groups()[0])
-            return True
+            return cls(Num=float(m.groups()[0]))
 
         if not strict:
             # Now look for a single trailing number
             p=re.compile("^.*?([0-9]+)([a-zA-Z]?)\s*$")  # Leading stuff + nnn + optional single alphabetic character suffix + whitespace
             m=p.match(s)
             if m is not None and len(m.groups()) in [1, 2]:
-                self.Whole=int(m.groups()[0])
+                ws=None
                 if len(m.groups()) == 2:
-                    self.WSuffix=m.groups()[1].strip()
-                return True
+                    ws=m.groups()[1].strip()
+                return cls(Whole=int(m.groups()[0]), WSuffix=ws)
 
             # Now look for trailing Roman numerals
             p=re.compile("^.*?\s+([IVXLC]+)\s*$")  # Leading stuff + mandatory whitespace + roman numeral characters + optional trailing whitespace
             m=p.match(s)
             if m is not None and len(m.groups()) == 1:
-                self.Num=InterpretRoman(m.groups()[0])
-                return True
+                return cls(Num=InterpretRoman(m.groups()[0]))
 
         # No good, return failure
-        return False
+        return cls()
+
 
 #$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 class FanzineIssueSpec:
 
-    def __init__(self, Vol=None, Num=None, NumSuffix=None, Whole=None, WSuffix=None, Year=None, Month=None, MonthText=None, Day=None, DayText=None) -> None:
+    def __init__(self, Vol: Optional[int]=None, Num: Optional[int]=None, NumSuffix: Optional[str]=None, Whole: Optional[int]=None, WSuffix: Optional[str]=None,
+                 Year: Optional[int]=None, Month: Optional[int]=None, MonthText: Optional[str]=None, Day: Optional[int]=None, DayText: Optional[str]=None,
+                 FS: Optional[FanzineSerial]=None, FD: Optional[FanzineDate]=None) -> None:
         self._FS=FanzineSerial(Vol=Vol, Num=Num, NumSuffix=NumSuffix, Whole=Whole, WSuffix=WSuffix)
+        if FS is not None:
+            self._FS=FS
         self._FD=FanzineDate(Year=Year, Month=Month, MonthText=MonthText, Day=Day, DayText=DayText)
+        if FD is not None:
+            self._FD=FD
         #self.UninterpretableText=None   # Ok, I give up.  Just hold the text as text.
         #self.TrailingGarbage=None       # The uninterpretable stuff following the interpretable spec held in this instance
 
@@ -975,7 +982,7 @@ class FanzineIssueSpec:
         return self._FS
 
     @FS.setter
-    def FS(self, val: FanzineDate) -> None:         # FanzineIssueSpec
+    def FS(self, val: FanzineSerial) -> None:         # FanzineIssueSpec
         self._FS=val
 
     # .....................
@@ -1188,10 +1195,7 @@ class FanzineIssueSpec:
         # In the FanzineIssueSpec world, we will always treat it as a Serial, so look for that first
         m=re.match("^(\d+)$", s)
         if m is not None and len(m.groups()) == 1:
-            fs=FanzineSerial()
-            fs.Whole=m.groups()[0]
-            fis.FS=fs
-            self.Copy(fis)  # We do the copy so any pre-existing date information gets overwritten
+            self.FS=FanzineSerial(Whole=m.groups()[0])
             return True
 
         # First try a date, and interpret it strictly no matter what the parameter says -- we can try non-strict later
@@ -1202,20 +1206,16 @@ class FanzineIssueSpec:
             return True
 
         # OK, it's probably not a date.  So try it as a serial ID
-        fs=FanzineSerial()
-        rslt=fs.Match(s, strict=strict)
-        if rslt:
-            fis.FS=fs
-            self.Copy(fis)
+        fs=FanzineSerial().Match(s, strict=strict)
+        if not fs.IsEmpty():
+            self.FS=fs
             return True
 
         # That didn't work, either.  Try a non-strict date followed by a non-strict serial
         # OK, it's probably not a date.  So try it as a serial ID
-        fs=FanzineSerial()
-        rslt=fs.Match(s)
-        if rslt:
-            fis.FS=fs
-            self.Copy(fis)
+        fs=FanzineSerial().Match(s)
+        if fs:
+            self.FS=fs
             return True
 
         # No good.  Failed.
@@ -1886,8 +1886,7 @@ def ExtractSerialNumber(volText: str, numText: str, wholeText: str, volNumText: 
         wholeInt=InterpretNumber(wholeText)
 
     if volNumText is not None:
-        ser=FanzineSerial()
-        ser.Match(volNumText)
+        ser=FanzineSerial().Match(volNumText)
         if ser.Vol is not None and ser.Num is not None:  # Otherwise, we don't actually have a volume+number
             volInt=ser.Vol
             numInt=ser.Num
@@ -1927,8 +1926,7 @@ def ExtractSerialNumber(volText: str, numText: str, wholeText: str, volNumText: 
         #   Vn  -- a volume number, but where's the issue?
         #   Vn[,] #m  -- a volume and number-within-volume
         #   Vn.m -- ditto
-        ser=FanzineSerial()
-        ser.Match(titleText if type(titleText) is not list else titleText[0])
+        ser=FanzineSerial().Match(titleText if type(titleText) is not list else titleText[0])
 
         # Some indexes have fanzine names ending in <month> <year>.  We'll detect these by looking for a trailing number between 1930 and 2050, and reject
         # getting vol/ser, etc., from the title if we find it.
