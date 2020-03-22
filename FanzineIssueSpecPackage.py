@@ -1,16 +1,22 @@
 # A FanzineIssueSpec contains the information for one fanzine issue's specification, e.g.:
 #  V1#2, #3, #2a, Dec 1967, etc.
 # It can be a volume+number or a whole numer or a date. (It can be more than one of these, also, and all are retained.)
+
+# The top level is a FanzineIssueSpecList which holds many FanzineIssueSpecs
+# A FanzineIssueSpec holds the serial number and date for a single issue
+#     It also holds a FanzineSerial and a FanzineDate which hold, respectively, the issue designation and the issue date
+#     (This would also be the right place to put other issue-specific information such as editor, pagecount, etc.)
+#     (It probably should be merged with the FanzineIssueData class of 1943FanzineList)
 from __future__ import annotations
 
 import math
 import re
 from typing import Union, Tuple, Optional, List
 from contextlib import suppress
-
-from functools import reduce
 import datetime
 from dateutil import parser
+
+import inspect
 
 from Log import Log
 from HelpersPackage import ToNumeric, IsNumeric, IsInt, Int
@@ -49,13 +55,9 @@ class FanzineDate:
             self.Day=InterpretDay(DayText)
 
         self._MonthDayText=MonthDayText                 # Overrides display of both month and day, but has no other effect
-
         self._LongDates=False
 
-        #TODO: Where do these two go?
-        #self.UninterpretableText=None  # Ok, I give up.  Just hold the text as text.
-        #self.TrailingGarbage=None  # The uninterpretable stuff following the interpretable spec held in this instance
-
+    # -----------------------------
     def __eq__(self, other: FanzineDate) -> bool:               # FanzineDate
         # Empty dates are equal
         if (self is None and other is None) or (self.IsEmpty() and other.IsEmpty()):
@@ -71,6 +73,7 @@ class FanzineDate:
         # OK, we know that both self and other have a non-None date element, so just check for equality
         return self._Year == other._Year and self._Month == other._Month and self._Day == other._Day
 
+    # -----------------------------
     def __ne__(self, other: FanzineDate) -> bool:               # FanzineDate
         return not self.__eq__(other)
 
@@ -97,6 +100,7 @@ class FanzineDate:
             return self._Day < other._Day
         return False
 
+    # -----------------------------
     def Copy(self, other: FanzineDate) -> None:               # FanzineDate
         self._Year=other._Year
         self._Month=other._Month
@@ -272,18 +276,21 @@ class FanzineDate:
 
     # .......................
     def IsEmpty(self) -> bool:               # FanzineDate
-        return not reduce(lambda a, b: a or b, [self._DayText, self._Day, self._MonthText, self._Month, self._Year])
+        if self._DayText is not None and len(self._DayText) > 0:
+            return False
+        if self._Day is not None:
+            return False
+        if self._Month is not None:
+            return False
+        if self._Year is not None:
+            return False
+        if self._MonthText is not None and len(self._MonthText) > 0:
+            return False
+        return True
 
     # .......................
     # Convert the FanzineIssueSpec into a pretty string for display or printing
     def __str__(self) -> str:               # FanzineDate
-        #if self.UninterpretableText is not None:
-        #    return self.UninterpretableText.strip()
-
-        tg=""
-        #if self.TrailingGarbage is not None:
-        #    tg=" "+self.TrailingGarbage
-
         # y, m, d will be None if there is no data; yt, mt, dt will contain the display text or ""
         y=self.Year
         yt=str(y) if y is not None else ""
@@ -316,7 +323,6 @@ class FanzineDate:
             m=0     # This value is only here to trigger display of the revised mt
             d=None
             dt=None
-
 
         # We don't treat a day without a month and year or a month without a year as valid and printable
         if y is not None and m is not None and d is not None:
@@ -356,8 +362,10 @@ class FanzineDate:
 
     # =============================================================================
     # Parse a free-format string to find a date.  This tries to interpret the *whole* string as a date -- it doesn't find a date embeded in other text.
+    # strict=true means that dubious forms will be rejected
+    # complete=True means that *all* the input string much be part of the date
     @classmethod
-    def Match(cls, s: str, strict: bool=False) -> FanzineDate:               # FanzineDate
+    def Match(cls, s: str, strict: bool=False, complete: bool=True) -> FanzineDate:               # FanzineDate
 
         # Whitespace is not a date...
         dateText=s.strip()
@@ -459,7 +467,7 @@ class FanzineDate:
         # Try dateutil's parser on the string
         # If it works, we've got an answer. If not, we'll keep trying.
         # It is pretty aggressive, so only use it when strict is not set
-        if not strict:
+        if not strict and not complete:
             with suppress(Exception):
                 d=parser.parse(dateText, default=datetime.datetime(1, 1, 1))
                 if d != datetime.datetime(1, 1, 1):
@@ -484,31 +492,39 @@ class FanzineSerial:
         self.NumSuffix=NumSuffix  # For things like issue '17a'
         self.Whole=Whole
         self.WSuffix=WSuffix
-        #self._UninterpretableText=None  # Ok, I give up.  Just hold the text as text.
-        #self._TrailingGarbage=None  # The uninterpretable stuff following the interpretable spec held in this instance
+        pass
+
+    # List class properties: [p for p in dir(FanzineSerial) if isinstance(getattr(FanzineSerial, p), property)]
+
+    # import inspect
+    # All functions: [name for (name, value) in inspect.getmembers(FanzineSerial)]
+    # All functions and instance variables: [(name, value) for (name, value) in inspect.getmembers(self)]
+    # Just properties [(name, value) for (name, value) in inspect.getmembers(self, lambda o: isinstance(o, property))]
+    # source code: inspect.getsource(FanzineIssueSpecList.List.fget)
+    # inspect.getsource(FanzineSerial.Whole.fget)
 
     # -----------------------------
     # Are the Num fields equal?
     # Both could be None; otherwise both must be equal
-    def __NumEq__(self, other) -> bool:             # FanzineSerial
+    def __NumEq__(self, other: FanzineSerial) -> bool:             # FanzineSerial
         return self._Num == other._Num and CaseInsensitiveCompare(self._NumSuffix, other._NumSuffix)
 
     # -----------------------------
-    def __VolEq__(self, other) -> bool:             # FanzineSerial
+    def __VolEq__(self, other: FanzineSerial) -> bool:             # FanzineSerial
         return self._Vol == other._Vol
 
     # -----------------------------
-    def __WEq__(self, other) -> bool:             # FanzineSerial
+    def __WEq__(self, other: FanzineSerial) -> bool:             # FanzineSerial
         return self._Whole == other._Whole and CaseInsensitiveCompare(self._WSuffix, other._WSuffix)
 
     # -----------------------------
-    def __VNEq__(self, other) -> bool:             # FanzineSerial
+    def __VNEq__(self, other: FanzineSerial) -> bool:             # FanzineSerial
         return self.__VolEq__(other) and self.__NumEq__(other)
 
     # -----------------------------
     # Two issue designations are deemed to be equal if they are identical or if the VN matches while at least on of the Wholes in None or
     # is the Whole matches and at least one of the Vs and Ns is None.  (We would allow match of (W13, V3, N2) with (W13), etc.)
-    def __eq__(self, other) -> bool:             # FanzineSerial
+    def __eq__(self, other: FanzineSerial) -> bool:             # FanzineSerial
         # if the Whole numbers match, the two are the same. (Even if the Vol/Num differ.)
         # TODO: Should we check WSuffix?
         if self._Whole is not None and self._Whole == other._Whole:
@@ -522,33 +538,34 @@ class FanzineSerial:
             return True
         return False
 
-
     # -----------------------------
-    def __ne__(self, other) -> bool:             # FanzineSerial
+    def __ne__(self, other: FanzineSerial) -> bool:             # FanzineSerial
         return not self.__eq__(other)
 
     # -----------------------------
     # Define < operator for sorting
+    # Is self less than other?
     def __lt__(self, other: FanzineSerial) -> bool:             # FanzineSerial
         if other is None:
             return False
-        # If both have Wholes, use that
+        # If both have Wholes, use Whole for the comparison
         if self._Whole is not None and other._Whole is not None:
             if self._Whole < other._Whole:
                 return True
             if self._Whole > other._Whole:
                 return False
 
-            # OK, the Wholes must be equal.  See if one of them has a suffix (e.g., #133 and #133A). Suffixed Wholes are always larger.
-            if self._WSuffix is None and other._WSuffix is None:
-                return False
-            if self._WSuffix is None and other._WSuffix is not None:
-                return True
-            if self._WSuffix is not None and other._WSuffix is None:
-                return False
-            # Both have suffixes
-            return self._WSuffix < other._WSuffix
+            # Can the suffixes provide a tie breaker?
+            if self._WSuffix is not None or other._WSuffix is not None:
+                # OK, the Wholes are equal.  Can the suffixs (e.g., #133 and #133A) be used to distinguish?  Suffixed Wholes are always larger.
+                if other._WSuffix is None:
+                    return False            # If other is None it can't be less that self, even if self, also, is None
+                if self._WSuffix is None:
+                    return True             # Other has a suffix and self doesn't, so self is less than other
+                # Both have suffixes
+                return self._WSuffix < other._WSuffix
 
+        # Wholes were no help
         if self._Vol is not None and other._Vol is not None:
             if self._Vol < other._Vol:
                 return True
@@ -565,7 +582,6 @@ class FanzineSerial:
         # Who knows?
         return False
 
-
     # -----------------------------
     def Copy(self, other: FanzineSerial) -> None:             # FanzineSerial
         self._Vol=other._Vol
@@ -576,6 +592,14 @@ class FanzineSerial:
         #self._UninterpretableText=other._UninterpretableText
         #self._TrailingGarbage=other._TrailingGarbage
 
+    # -----------------------------
+    def SetIntProperty(self, val: Union[None, int, str]) -> Optional[int]:
+        if val is None:
+            return None
+        elif isinstance(val, str):
+            return ToNumeric(val)
+        return val
+
     # .....................
     @property
     def Vol(self) -> Optional[int]:             # FanzineSerial
@@ -583,12 +607,7 @@ class FanzineSerial:
 
     @Vol.setter
     def Vol(self, val: Union[None, int, str]) -> None:             # FanzineSerial
-        if val is None:
-            self._Vol=None
-        elif isinstance(val, str):
-            self._Vol=ToNumeric(val)
-        else:
-            self._Vol=val
+        self._Vol=self.SetIntProperty(val)
 
     # .....................
     @property
@@ -597,12 +616,7 @@ class FanzineSerial:
 
     @Num.setter
     def Num(self, val: Union[None, int, str]) -> None:             # FanzineSerial
-        if val is None:
-            self._Num=None
-        elif isinstance(val, str):
-            self._Num=ToNumeric(val)
-        else:
-            self._Num=val
+        self._Num=self.SetIntProperty(val)
 
     # .....................
     @property
@@ -617,17 +631,12 @@ class FanzineSerial:
 
     # .....................
     @property
-    def Whole(self) -> Optional[int]:             # FanzineSerial
+    def Whole(self) -> Optional[int]:                 # FanzineSerial
         return self._Whole
 
     @Whole.setter
     def Whole(self, val: Union[None, int, str]) -> None:             # FanzineSerial
-        if val is None:
-            self._Whole=None
-        elif isinstance(val, str):
-            self._Whole=ToNumeric(val)
-        else:
-            self._Whole=val
+        self._Whole=self.SetIntProperty(val)
 
     # .....................
     @property
@@ -636,45 +645,24 @@ class FanzineSerial:
 
     @WSuffix.setter
     def WSuffix(self, val: Optional[str]) -> None:             # FanzineSerial
+        if val is None:
+            val=""
         self._WSuffix=val
-
-    # # .....................
-    # @property
-    # def UninterpretableText(self) -> Optional[str]:
-    #     return self._UninterpretableText
-    #
-    # @UninterpretableText.setter
-    # def UninterpretableText(self, val: Optional[str]):
-    #     if val is None:
-    #         self._UninterpretableText=None
-    #         return
-    #     val=val.strip()
-    #     if len(val) == 0:
-    #         self._UninterpretableText=None
-    #         return
-    #     self._UninterpretableText=val
-
-    # .....................
-    #@property
-    # def TrailingGarbage(self) -> Optional[str]:
-    #     return self._TrailingGarbage
-    #
-    # @TrailingGarbage.setter
-    # def TrailingGarbage(self, val: Optional[str]):
-    #     if val is None:
-    #         self._TrailingGarbage=None
-    #         return
-    #     val=val.strip()
-    #     if len(val) == 0:
-    #         self._TrailingGarbage=None
-    #         return
-    #     self._TrailingGarbage=val
-
 
     # .....................
     # Does this instance have anything defined for the serial number?
     def IsEmpty(self) -> bool:             # FanzineSerial
-        return not reduce(lambda a, b: a or b, [self._NumSuffix, self._Num, self._Whole, self._WSuffix, self._Vol])
+        if self._NumSuffix is not None and len(self._NumSuffix) > 0:
+            return False
+        if self._Num is not None:
+            return False
+        if self._Whole is not None:
+            return False
+        if self._Vol is not None:
+            return False
+        if self._WSuffix is not None and len(self._WSuffix) > 0:
+            return False
+        return True
 
     # .......................
     # Convert the FanzineIssueSpec into a debugging form
@@ -807,12 +795,12 @@ class FanzineSerial:
 
         return "V"+v+"#"+n+self.NumSuffix
 
-
     # =============================================================================================
     # Try to interpret a complex string as serial information
     # If there's a trailing Vol+Num designation at the end of a string, interpret it.
     #  leading=True means that we don't try to match the entire input, but just a greedy chunk at the beginning.
     #  strict=True means that we will not match potentially ambiguous or ill-formed strings
+    # complete=True means that we will only match the *complete* input (other than leading and trailing whitespace).
 
     # We accept:
     #       ...Vnn[,][ ]#nnn[ ]
@@ -822,13 +810,7 @@ class FanzineSerial:
     #       ...nn.mm
     #       ...nn[ ]
     @classmethod
-    def Match(cls, s: str, scan: bool=False, strict: bool=False):             # FanzineSerial
-        cls.Vol=None
-        cls.Num=None
-        cls.NumSuffix=""
-        cls.Whole=None
-        cls.WSuffix=""
-
+    def Match(cls, s: str, scan: bool=False, strict: bool=False, complete: bool=False):             # FanzineSerial
         s=s.strip()     # Remove leading and trailing whitespace
 
         # First look for a Vol+Num designation: Vnnn #mmm
@@ -844,7 +826,7 @@ class FanzineSerial:
             return cls(Vol=int(m.groups()[0]), Num=int(m.groups()[1]), NumSuffix=ns)
 
         p=re.compile("V[oO][lL]\s*(\d+)\s*#(\d+)(\w?)$")
-        # # Leading stuff
+        #
         #  Vol (or VOL) + optional space + nnn + optional comma + optional space
         # + #nnn + optional single alphabetic character suffix
         m=p.match(s)
@@ -892,7 +874,7 @@ class FanzineSerial:
         if m is not None and len(m.groups()) == 1:
             return cls(Num=float(m.groups()[0]))
 
-        if not strict:
+        if not strict and not complete:
             # Now look for a single trailing number
             p=re.compile("^.*?([0-9]+)([a-zA-Z]?)\s*$")  # Leading stuff + nnn + optional single alphabetic character suffix + whitespace
             m=p.match(s)
@@ -915,25 +897,38 @@ class FanzineSerial:
 #$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 class FanzineIssueSpec:
 
-    def __init__(self, Vol: Optional[int]=None, Num: Optional[int]=None, NumSuffix: Optional[str]=None, Whole: Optional[int]=None, WSuffix: Optional[str]=None,
-                 Year: Optional[int]=None, Month: Optional[int]=None, MonthText: Optional[str]=None, Day: Optional[int]=None, DayText: Optional[str]=None,
-                 FS: Optional[FanzineSerial]=None, FD: Optional[FanzineDate]=None) -> None:
-        self._FS=FanzineSerial(Vol=Vol, Num=Num, NumSuffix=NumSuffix, Whole=Whole, WSuffix=WSuffix)
+    def __init__(self, Vol: Optional[int]=None,
+                 Num: Optional[int]=None,
+                 NumSuffix: Optional[str]=None,
+                 Whole: Optional[int]=None,
+                 WSuffix: Optional[str]=None,
+                 Year: Optional[int]=None,
+                 Month: Optional[int]=None,
+                 MonthText: Optional[str]=None,
+                 Day: Optional[int]=None,
+                 DayText: Optional[str]=None,
+                 FS: Optional[FanzineSerial]=None,
+                 FD: Optional[FanzineDate]=None)\
+            -> None:
+
         if FS is not None:
             self._FS=FS
-        self._FD=FanzineDate(Year=Year, Month=Month, MonthText=MonthText, Day=Day, DayText=DayText)
+        else:
+            self._FS=FanzineSerial(Vol=Vol, Num=Num, NumSuffix=NumSuffix, Whole=Whole, WSuffix=WSuffix)
+
         if FD is not None:
             self._FD=FD
-        #self.UninterpretableText=None   # Ok, I give up.  Just hold the text as text.
-        #self.TrailingGarbage=None       # The uninterpretable stuff following the interpretable spec held in this instance
+        else:
+            self._FD=FanzineDate(Year=Year, Month=Month, MonthText=MonthText, Day=Day, DayText=DayText)
 
     # Two issue designations are deemed to be equal if they are identical or if the VN matches while at least on of the Wholes in None or
     # is the Whole matches and at least one of the Vs and Ns is None.  (We would allow match of (W13, V3, N2) with (W13), etc.)
-    def __IssueEQ__(self, other: FanzineIssueSpec) -> bool:         # FanzineIssueSpec
-        return self._FS == other._FS
 
-    def __DateEq__(self, other: FanzineIssueSpec) -> bool:         # FanzineIssueSpec
-        return self._FD == other._FD
+# def __IssueEQ__(self, other: FanzineIssueSpec) -> bool:         # FanzineIssueSpec
+#     return self._FS == other._FS
+#
+# def __DateEq__(self, other: FanzineIssueSpec) -> bool:         # FanzineIssueSpec
+#     return self._FD == other._FD
 
     # Class equality check.
     def __eq__(self, other: FanzineIssueSpec) -> bool:         # FanzineIssueSpec
@@ -1020,6 +1015,7 @@ class FanzineIssueSpec:
 
     @Whole.setter
     def Whole(self, val: Optional[int, str]) -> None:         # FanzineIssueSpec
+        print("Setting _FS.Whole to "+str(val))
         if val is not None and isinstance(val, str) and len(val) == 0:
             self._FS.Whole=None
         else:
@@ -1070,7 +1066,7 @@ class FanzineIssueSpec:
 
     #.....................
     @property
-    def Day(self) -> Optional[int]:         # FanzineIssueSpec
+    def Day(self) -> Optional[int]:             # FanzineIssueSpec
         return self._FD.Day
 
     @Day.setter
@@ -1083,55 +1079,23 @@ class FanzineIssueSpec:
         return self._FD.DayText
     # There is no setter; Setting should be done when creating the instance or through the Day setter
 
-    # #.....................
-    # @property
-    # def UninterpretableText(self) -> Optional[str]:
-    #     return self._UninterpretableText
-    #
-    # @UninterpretableText.setter
-    # def UninterpretableText(self, val: Optional[str]):
-    #     if val is None:
-    #         self._UninterpretableText=None
-    #         return
-    #     val=val.strip()
-    #     if len(val) == 0:
-    #         self._UninterpretableText=None
-    #         return
-    #     self._UninterpretableText=val
-    #
-    # #.....................
-    # @property
-    # def TrailingGarbage(self) ->Optional[str]:
-    #     return self._TrailingGarbage
-    #
-    # @TrailingGarbage.setter
-    # def TrailingGarbage(self, val: Optional[str]):
-    #     if val is None:
-    #         self._TrailingGarbage=None
-    #         return
-    #     val=val.strip()
-    #     if len(val) == 0:
-    #         self._TrailingGarbage=None
-    #         return
-    #     self._TrailingGarbage=val
-
     #.....................
     @property
-    def DateStr(self) -> str:         # FanzineIssueSpec
+    def DateStr(self) -> str:                   # FanzineIssueSpec
         return str(self._FD)
 
     @property
-    def SerialStr(self) -> str:         # FanzineIssueSpec
+    def SerialStr(self) -> str:                  # FanzineIssueSpec
         return str(self._FS)
 
     # .....................
     # Return a datetime.date object
-    def Date(self) -> datetime.date:         # FanzineIssueSpec
+    def Date(self) -> datetime.date:                     # FanzineIssueSpec
         return self._FD.Date
 
     #.......................
     # Convert the FanzineIssueSpec into a debugging form
-    def DebugStr(self) -> str:         # FanzineIssueSpec
+    def DebugStr(self) -> str:                          # FanzineIssueSpec
         # if self.UninterpretableText is not None:
         #     return "IS("+self.UninterpretableText+")"
 
@@ -1144,15 +1108,13 @@ class FanzineIssueSpec:
 
         return s
 
-
     #.......................
-    def IsEmpty(self) -> bool:         # FanzineIssueSpec
+    def IsEmpty(self) -> bool:                          # FanzineIssueSpec
         return self._FD.IsEmpty() and self._FS.IsEmpty()
-
 
     #.......................
     # Convert the FanzineIssueSpec into a pretty string for display or printing
-    def __str__(self) -> str:         # FanzineIssueSpec
+    def __str__(self) -> str:                           # FanzineIssueSpec
         # if self.UninterpretableText is not None:
         #     return self.UninterpretableText.strip()
 
@@ -1176,36 +1138,35 @@ class FanzineIssueSpec:
     # =====================================================================================
     # Take the input string and turn it into a FIS
     # The input could be a single date or it could be a single serial ID or it could be a range (e.g., 12-17)
-    def Match(self, s: str, strict: bool = False):        # FanzineIssueSpec
+    @classmethod
+    def Match(cls, s: str, strict: bool = False, complete: bool=False):                   # FanzineIssueSpec
 
         # A number standing by itself is messy, since it's easy to confuse with a date
         # In the FanzineIssueSpec world, we will always treat it as a Serial, so look for that first
         m=re.match("^(\d+)$", s)
         if m is not None and len(m.groups()) == 1:
-            self.FS=FanzineSerial(Whole=m.groups()[0])
-            return True
+            w=m.groups()[0]
+            fs=FanzineSerial(Whole=w)
+            return cls(FS=fs)
 
         # First try a date, and interpret it strictly no matter what the parameter says -- we can try non-strict later
-        fd=FanzineDate().Match(s, strict=True)
+        fd=FanzineDate().Match(s, strict=True, complete=True)
         if not fd.IsEmpty():
-            self.FD=fd
-            return True
+            return cls(FD=fd)
 
         # OK, it's probably not a date.  So try it as a serial ID
-        fs=FanzineSerial().Match(s, strict=strict)
+        fs=FanzineSerial().Match(s, strict=strict, complete=True)
         if not fs.IsEmpty():
-            self.FS=fs
-            return True
+            return cls(FS=fs)
 
         # That didn't work, either.  Try a non-strict date followed by a non-strict serial
         # OK, it's probably not a date.  So try it as a serial ID
-        fs=FanzineSerial().Match(s)
-        if fs:
-            self.FS=fs
-            return True
+        fs=FanzineSerial().Match(s, complete=complete)
+        if not fs.IsEmpty():
+            return cls(FS=fs)
 
         # No good.  Failed.
-        return False
+        return cls()
 
 
     # =====================================================================================
@@ -1235,33 +1196,55 @@ class FanzineIssueSpec:
 
 class FanzineIssueSpecList:
     def __init__(self, List: Optional[List[FanzineIssueSpec]]=None) -> None:      # FanzineIssueSpecList
+        self._List=None
         self.List=List  # Use setter
+        pass
 
+    # ...............................
     def AppendIS(self, fanzineIssueSpec: Union[None, FanzineIssueSpec, FanzineIssueSpecList]) -> None:      # FanzineIssueSpecList
         if fanzineIssueSpec is None:
             return
         self.Extend(fanzineIssueSpec)
         return
 
-    def Append(self, lst: Union[List[FanzineIssueSpec], FanzineIssueSpec]) -> FanzineIssueSpecList:      # FanzineIssueSpecList
+    # ...............................
+    # Basically, this is just a synonym for Extend
+    def Append(self, lst: Union[FanzineIssueSpecList, List[FanzineIssueSpec], FanzineIssueSpec, None]) -> FanzineIssueSpecList:      # FanzineIssueSpecList
         return self.Extend(lst)
 
-    def Extend(self, val: Union[List[FanzineIssueSpec], FanzineIssueSpec]) -> FanzineIssueSpecList:      # FanzineIssueSpecList
+    # ...............................
+    def Extend(self, val: Union[FanzineIssueSpecList, List[FanzineIssueSpec], FanzineIssueSpec, None]) -> FanzineIssueSpecList:      # FanzineIssueSpecList
         if self._List is None:
             self._List=[]
-        if isinstance(val, list):
-            raise Exception("FanzineIssueSpecList.Extend was called with a plain old list[]")
-        elif isinstance(val, FanzineIssueSpecList):
-            self._List.extend(val)
-        else:
+
+        if isinstance(val, FanzineIssueSpecList):
+            lst=val.List
+            if lst is None or len(lst) == 0:
+                pass      # Nothing to do
+            else:
+                self._List.extend(lst)
+        elif isinstance(val, list):
+            if len(val) == 0:
+                pass        # Nothing to do
+            else:
+                self._List.extend(val)
+        elif isinstance(val, FanzineIssueSpec):
             self._List.append(val)
+        else:
+            Exception("FanzineIssueSpecList.Extend: Uninterpretable val type")
         return self
 
+    # ...............................
+    def IsEmpty(self) -> bool:      # FanzineIssueSpecList
+        if self._List is None or len(self._List) == 0:
+            return True
+        # Next we go through the elements of the list. If *any* element is non-empty, then the whole FISL is non-empty
+        for fis in self._List:
+            if not fis.IsEmpty():
+                return False
+        return True
 
-    def IsEmpty(self) -> bool:
-        return self._List is None or len(self._List) == 0
-
-
+    # ...............................
     def DebugStr(self) -> str:      # FanzineIssueSpecList
         s=""
         if self._List is not None:
@@ -1277,6 +1260,7 @@ class FanzineIssueSpecList:
         return s
 
 
+    #...............................
     def __str__(self) -> str:   # Format the ISL for pretty      # FanzineIssueSpecList
         s=""
         for i in self._List:
@@ -1284,11 +1268,15 @@ class FanzineIssueSpecList:
                 if len(s) > 0:
                     s=s+", "
                 s=s+str(i)
-        return s
+        return "FISL("+str(len(self._List))+"): "+s
 
+    # ...............................
     def __len__(self) -> int:
+        if self._List is None:
+            return 0
         return len(self._List)
 
+    # ...............................
     @property
     def List(self) -> FanzineIssueSpecList:      # FanzineIssueSpecList
         return self._List
@@ -1304,7 +1292,14 @@ class FanzineIssueSpecList:
         if isinstance(val, FanzineIssueSpecList):
             self._List=val.List
             return
-        Log("****FanzineIssueSpecList.List setter() had strange input")
+        if isinstance(val, list):
+            if len(val) == 0:
+                self._List=[]
+                return
+            if isinstance(val[0], FanzineIssueSpec):
+                self._List=val
+                return
+        Log("****FanzineIssueSpecList.List setter() had strange input: "+str(val))
 
 
     def __getitem__(self, key: int) -> FanzineIssueSpec:      # FanzineIssueSpecList
@@ -1322,50 +1317,64 @@ class FanzineIssueSpecList:
         # We do this by interpreting more and more tokens starting from the end until we have something that is no longer recognizable as a FanzineIssueSpec
         # The just-previous set of tokens constitutes the full IssueSpec, and the remaining leading tokens are the series name.
         tokens=s.split()  # Split into tokens on spaces
-        leadingText=s
-        fisl=None
+        if len(tokens) == 0:
+            return None, s
+
+        leadingText=" ".join(tokens)
+        longestFISL=None
         for index in range(len(tokens)-1, -1, -1):  # Ugly, but I need index to be the indexes of the tokens
             trailingText=" ".join(tokens[index:])
             leadingText=" ".join(tokens[:index])
             print("     index="+str(index)+"   leading='"+leadingText+"'    trailing='"+trailingText+"'")
-            trialfisl=FanzineIssueSpecList().Match(trailingText, strict=True)  # Failed.  We've gone one too far. Quit trying and use what we found on the previous iteration
-            if trialfisl.IsEmpty():
-                print("     ...backtracking. FISL="+trialfisl.DebugStr())
+            trialFISL=FanzineIssueSpecList().Match(trailingText, strict=True, complete=True)  # Failed.  We've gone one too far. Quit trying and use what we found on the previous iteration
+            if trialFISL.IsEmpty():
+                print("     ...backtracking. Found FISL="+trialFISL.DebugStr())
                 leadingText=" ".join(tokens[0:index+1])
                 break
-            fisl=trialfisl
-        # At this point, leadingText is the fanzine's series name and fisl is a list of FanzineSerials found for it
-        return fisl, leadingText
+            longestFISL=trialFISL
+        # At this point, leadingText is the fanzine's series name and longestFISL is a list of FanzineSerials found for it
+        print("     Found: "+str(longestFISL))
+        return longestFISL, leadingText
 
     #------------------------------------------------------------------------------------
     # Take the input string and turn it into a FISL
+    # The input string is a comma-separated list of issue numbers and dates, including ranges:
+    # 1, 2, 3, 7, 9-12, 14A, V7#40, VIII, IX, 99, Jan 1999, March 31, 2005, 2007
+    # The one place we allow internal commas is in a date where the month/day can be separated from the year by a comma.
     @classmethod
-    def Match(cls, s: str, strict: bool=False) -> FanzineIssueSpecList:      # FanzineIssueSpecList
-        fislist=[]
+    def Match(cls, s: str, strict: bool=False, complete: bool=False) -> FanzineIssueSpecList:      # FanzineIssueSpecList
+        fislist=[]      # Accumulate the list of FISs here
 
-        # A FISL is comma-delimited with one exception: some dates include a comma (e.g., January 1, 2001")
-        tokens=[t.strip() for t in s.split(",")]
+        tokens=[t.strip() for t in s.split(",")]        # Split the input on commas
+
+        # The strategy will be to worth through the list of issue information, taking one at a time.
         while len(tokens) > 0:
+            # Because some legitimate FISs have an internal comma, they may have been split into two tokens, so we first joing the leading two tokens and see if they make sense
             # If there are at least two tokens left, re-join them and see if the result is an FIS of the form <Month> [day], yyyy
+            # We can't allow 2-digit years here because they are indistinguishable from issue numbers.
             if len(tokens) > 1:
+                #TODO: We are currently being very conservative in what we recognize here.  This might well be improved.
                 # Token 0 must contain a month name as its first token and may not start with a digit
                 if not tokens[0][0].isdigit() and MonthNameToInt(tokens[0].split()[0]) is not None:
                     # Token 1 must be a 4-digit year
                     if re.match("^\d{4}$", tokens[1]) is not None:
                         # The put them together and try to interpret as a date
                         trial=tokens[0]+", "+tokens[1]
-                        fis=FanzineIssueSpec()
-                        if fis.Match(trial, strict=True):
+                        fis=FanzineIssueSpec().Match(trial, strict=True, complete=True)    # This match must consume the entire input -- no partial matches
+                        if not fis.IsEmpty():
                             fislist.append(fis)
-                            del tokens[0:1]
+                            del tokens[0:1]     # Delete both leading tokens.
                             continue
-            # The two together didn't work, so just try one
-            # The first thing to look for is a range denoting multiple issues.  This will necessarily contain a hyphen.
+
+            # Interpreting the first two tokensas one  didn't work, so now try just the first token
+            # The first thing to look for is a range denoting multiple issues.  This will necessarily contain a hyphen, which can only appear to denote a range
+            # nnn-nnn
+            #TODO: Consider also handling date ranges, e.g., Jan-Jun 2001
             if "-" in tokens[0]:
                 subtokens=tokens[0].split("-")
-                # For now, at least, we can only handle the case of two subtokens, each of which are integers and the first is the smaller
+                # For now, at least, we can only handle the case of two subtokens, both of which are integers with the first the smaller
                 if len(subtokens) != 2:
-                    Log("FanzineIssueSpecList:Match: Other than two subtokens found in '"+s+"'")
+                    Log("FanzineIssueSpecList:Match: More than one hyphen found in '"+s+"'")
                     return cls()
                 if not IsInt(subtokens[0]) or not IsInt(subtokens[1]) or int(subtokens[0]) >= int(subtokens[1]):
                     Log("FanzineIssueSpecList:Match: bad range values in '"+s+"'")
@@ -1375,17 +1384,20 @@ class FanzineIssueSpecList:
                 del tokens[0]
                 continue
 
+            # It's neither a group including a comma nor a range.  Try to interpret the token as a single FIS
             # Now just look for a single issue
-            fis=FanzineIssueSpec()
-            if fis.Match(tokens[0], strict=strict):
+            # nnn or Vnn #nn or variants or dates, etc.
+            fis=FanzineIssueSpec().Match(tokens[0], strict=strict, complete=complete)
+            if not fis.IsEmpty():
                 fislist.append(fis)
                 del tokens[0]
                 continue
 
             # Nothing worked, so we won't have an FISL
-            return cls()
+            Log("FanzineIssueSpecList.Match can't interpret '"+str(tokens[0]+"' as an issue spec.  It is ignored."))
+            del tokens[0]
 
-        # Apparently we consumed the whole input.  Update self and return True
+        # We have consumed the whole input.  Return a FISL
         return cls(List=fislist)
 
 
@@ -1889,7 +1901,7 @@ def ExtractSerialNumber(volText: str, numText: str, wholeText: str, volNumText: 
             maybeWholeInt=int(maybeWholeText)
             numText=None
 
-    # But if the *is* a volume specified, than any number not labelled "whole" must be a number within the volume
+    # But if there *is* a volume specified, than any number not labelled "whole" must be a number within the volume
     if volText is not None and numText is not None:
         numInt=InterpretNumber(numText)
 
