@@ -377,37 +377,45 @@ class FanzineDate:
         if d is not None:
             return d
 
-        # The dateutil parser can handle a wide variety of date formats...but not all.
-        # So the next step is to reduce some of the crud used by fanzines to an actual date.
-        # We'll try a variety of patterns
-        # Remove commas, which should never be significant
-        dateText=dateText.replace(",", "").strip()
-
         # A 4-digit number all alone is a year
         m=re.compile("^(\d\d\d\d)$").match(dateText)  # Month + 2- or 4-digit year
         if m is not None and m.groups() is not None and len(m.groups()) == 1:
-            y=ValidYear(m.groups()[0])
+            y=ValidFannishYear(m.groups()[0])
             if y is not None:
                 return cls(Year=y)
 
-        # Look for <month> <yy> or <yyyy> where month is a recognizable month name and the ys form a fannish year
+        # Look for mm/dd/yy and mm/dd/yyyy
+        m=re.compile("^(\d{1,2})/(\d{1,2})/(\d{2}|\d{4})$").match(dateText)
+        if m is not None and m.groups() is not None and len(m.groups()) == 3:
+            g1t=m.groups()[0]
+            g2t=m.groups()[1]
+            yt=m.groups()[2]
+            y=int(ValidFannishYear(yt))
+            if y is not None:
+                # The US date format has the first group as the month and the second as the day.  See if this works.
+                m=int(g1t)
+                d=int(g2t)
+                if ValidateDay(d, m, y):
+                    return cls(Year=y, Month=m, Day=d)
+
+                # Maybe European date format?
+                d=int(g1t)
+                m=int(g2t)
+                if ValidateDay(d, m, y):
+                    return cls(Year=y, Month=m, Day=d)
+
+        # Look for <month> <yy> or <yyyy> where month is a recognizable month name and the <y>s form a fannish year
         # Note that the mtext and ytext found here may be analyzed several different ways
-        m=re.compile("^(.+)\s+(\d\d|\d\d\d\d)$").match(dateText)  # Month + 2- or 4-digit year
+        m=re.compile("^([\s\w\-',]+)\s+(\d\d|\d\d\d\d)$").match(dateText)  # Month + 2- or 4-digit year
         if m is not None and m.groups() is not None and len(m.groups()) == 2:
-            mtext=m.groups()[0]
+            mtext=m.groups()[0].replace(","," ").replace("  ", " ")     # Turn a comma-space combination into a single space
             ytext=m.groups()[1]
-            y=ValidYear(ytext)
+            y=ValidFannishYear(ytext)
             if y is not None and mtext is not None:
                 if InterpretMonth(mtext) is not None:
                     md=InterpretMonthDay(mtext)
                     if md is not None:
                         return cls(Year=ytext, Month=md[0], Day=md[1])
-
-            # If  a year was found but no valid month, try one of the weird month-day formats.
-            if y is not None and mtext is not None:
-                rslt=InterpretNamedDay(mtext)  # mtext was extracted by whichever pattern recognized the year and set y to non-None
-                if rslt is not None:
-                    return cls(Year=y, Month=rslt[0], Day=rslt[1], MonthDayText=mtext)
 
             # There are some words which are relative terms "late september", "Mid february" etc.
             # Give them a try.
@@ -422,18 +430,29 @@ class FanzineDate:
                     if m is not None and d is not None:
                         return cls(Year=y, Month=m, Day=(d, modifier))
 
+        # There are some weird day/month formats (E.g., "St. Urho's Day 2013")
+        # Look for a pattern of: <strange day/month> <year>
+        m=re.compile("^(.+?)[,\s]+(\d\d|\d\d\d\d)$").match(dateText)  # random text + space + 2- or 4-digit year
+        if m is not None and m.groups() is not None and len(m.groups()) == 2:
+            mtext=m.groups()[0].replace(","," ").replace("  ", " ")     # Turn a comma-space combination into a single space
+            ytext=m.groups()[1]
+            y=ValidFannishYear(ytext)
+            if y is not None and mtext is not None:
+                rslt=InterpretNamedDay(mtext)  # mtext was extracted by whichever pattern recognized the year and set y to non-None
+                if rslt is not None:
+                    return cls(Year=y, Month=rslt[0], Day=rslt[1], MonthDayText=mtext)
+
         # There are a few annoying entries of the form "Winter 1951-52"  They all *appear* to mean something like January 1952
         # We'll try to handle this case
-        p=re.compile("^Winter\s+\d\d\d\d\s*-\s*(\d\d)$")
+        p=re.compile("^Winter[,\s]+\d\d\d\d\s*-\s*(\d\d)$")
         m=p.match(dateText)
         if m is not None and len(m.groups()) == 1:
             return cls(Year=int(m.groups()[0]), Month=1, MonthText="Winter")  # Use the second part (the 4-digit year)
 
-        # There there are the equally annoying entries Month-Month year (e.g., 'June - July 2001')
+        # There there are the equally annoying entries Month-Month year (e.g., 'June - July 2001') and Month/Month year.
         # These will be taken to mean the first month
         # We'll look for the pattern <text> '-' <text> <year> with (maybe) spaces between the tokens
-        p=re.compile("^(\w+)\s*-\s*(\w+)\s,?\s*(\d\d\d\d)$")
-        m=p.match(dateText)
+        m=re.compile("^(\w+)\s*[-/]\s*(\w+)\s,?\s*(\d\d\d\d)$").match(dateText)
         if m is not None and len(m.groups()) == 3:
             month1=m.groups()[0]
             month2=m.groups()[1]
@@ -456,13 +475,12 @@ class FanzineDate:
             mtext=m.groups()[0]
             dtext=m.groups()[1]
             ytext=m.groups()[2]
-            y=int(ValidYear(ytext))
+            y=int(ValidFannishYear(ytext))
             m=InterpretMonth(mtext)
             d=InterpretDay(dtext)
             if y is not None and m is not None and d is not None:
                 bd, bm, by=BoundDay(d, m, y)
-                if bd != d or bm != m or by != y :
-                    return cls(Year=by, Month=bm, Day=bd)
+                return cls(Year=by, Month=bm, Day=bd)
 
         # Try dateutil's parser on the string
         # If it works, we've got an answer. If not, we'll keep trying.
@@ -1511,7 +1529,7 @@ def InterpretNamedDay(dayString: str) -> Optional[Tuple[int, int]]:
         "auld lang syne": (12, 31),
     }
     with suppress(Exception):
-        return namedDayConverstionTable[dayString.lower()]
+        return namedDayConverstionTable[dayString.lower().replace(",", "")]
 
     return None
 
@@ -1582,13 +1600,24 @@ def YearAs4Digits(year: Optional[int, str]) -> Optional[int]:
 
 # =================================================================================
 # Take a string which suppoedly designates a year and return either a valid fannish year or None
-def ValidYear(ytext: str) -> Optional[str]:
+def ValidFannishYear(ytext: str) -> Optional[str]:
     if ytext is None:
         return None
     y=YearAs4Digits(ytext)
     if 1860 < y < 2100:     # numbers outside this range of years can't be a fannish date
         return str(y)
     return None
+
+
+# =================================================================================
+# Take a day and month and (optionally) year and check for consistency
+def ValidateDay(d: int, m: int, year: int=None) -> bool:
+    monthlength=MonthLength(m)
+    # Handle leap years
+    if year is not None and year%4 == 0 and year % 400 != 0:
+        if m is 2:
+            monthlength=29
+    return d > 0 and d <= monthlength
 
 
 # =================================================================================
@@ -1830,7 +1859,7 @@ def MonthNameToInt(text: str) -> Optional[int]:
 # Deal with completely random date strings that we've uncovered and added
 # There's no rhyme nor reason here -- just otherwise uninterpretable things we've run across.
 def InterpretRandomDatestring(text: str) -> Optional[FanzineDate]:
-    text=text.lower()
+    text=text.lower().replace(",", "")
     if text == "solar eclipse 2017":
         return FanzineDate(Year=2017, Month=8, DayText="Solar Eclipse", Day=21)
     if text == "2018 new year's day":
@@ -1841,8 +1870,12 @@ def InterpretRandomDatestring(text: str) -> Optional[FanzineDate]:
         return FanzineDate(Year=1991, Month=12, DayText="Hogmany", Day=31)
     if text == "grey cup day 2014":
         return FanzineDate(Year=2014, Month=11, DayText="Grey Cup Day", Day=11)
-    if text == "october 2013, halloween":
+    if text == "october 2013 halloween":
         return FanzineDate(Year=2013, Month=10, DayText="Halloween", Day=31)
+    if text == "october (halloween) 2015":
+        return FanzineDate(Year=2015, Month=10, DayText="Halloween", Day=31)
+    if text == "november (december) 2015":
+        return FanzineDate(Year=2015, Month=12, DayText="November (December)", Day=1)
     if text == "stampede parade day 2019":
         return FanzineDate(Year=2019, Month=7, DayText="Stampede Parade Day", Day=5)
 
