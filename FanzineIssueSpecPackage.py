@@ -498,7 +498,7 @@ class FanzineDate:
 #$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 class FanzineSerial:
 
-    def __init__(self, Vol=None, Num=None, NumSuffix="", Whole=None, WSuffix="") -> None:
+    def __init__(self, Vol: Union[None, int, str]=None, Num: Union[None, int, str]=None, NumSuffix: Optional[str]="", Whole: Union[None, int, str]=None, WSuffix: Optional[str]="") -> None:
         self._Vol=None
         self._Num=None
         self._Whole=None
@@ -915,10 +915,10 @@ class FanzineSerial:
 #$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 class FanzineIssueSpec:
 
-    def __init__(self, Vol: Optional[int]=None,
-                 Num: Optional[int]=None,
+    def __init__(self, Vol: Union[None, int, str]=None,
+                 Num: Union[None, int, str]=None,
                  NumSuffix: Optional[str]=None,
-                 Whole: Optional[int]=None,
+                 Whole: Union[None, int, str]=None,
                  WSuffix: Optional[str]=None,
                  Year: Optional[int]=None,
                  Month: Optional[int]=None,
