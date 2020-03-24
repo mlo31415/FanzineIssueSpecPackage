@@ -6,7 +6,7 @@
 #   FanzineIssueSpecList    -- contains a list of FanzineIssueSpecs all relevant to a single fanzine
 #                              It differs  from a FanzineSeriesSpecin that it contains a list of FanzineIssueSpecs and not a list of FanzineIssueInfos
 #   FanzineIssueInfo        -- contains information for a single issue (title, editor, sequence, etc). Includes a FanzineIssueSpec
-#   FanzineSeriesSpec       -- contains information for a fanzine series (Locus, VOID, File 770, Axe, etc). Includes a FanzineIssueSpecList
+#   FanzineSeriesList       -- contains information for a fanzine series (Locus, VOID, File 770, Axe, etc). Includes a FanzineIssueSpecList
 
 # A FanzineIssueSpec contains the information for one fanzine issue's specification, e.g.:
 #  V1#2, #3, #2a, Dec 1967, etc.
