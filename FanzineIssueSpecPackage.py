@@ -2,8 +2,9 @@
 # It consists of five classes
 #   FanzineSerial           -- contains a single serial number (V4#3, #22, #7A, VII, etc)
 #   FanzineDate             -- contains a date (June, 1949; 2005; 2/22/79; etc)
-#   FanzineIssueSpec        -- contains a date and/or a serial providing a complete sequence designation for an issue
+#   FanzineIssueSpec        -- contains a FanzineDate and a FanzineSerial providing a complete sequence designation for an issue
 #   FanzineIssueSpecList    -- contains a list of FanzineIssueSpecs all relevant to a single fanzine
+#                              It differs  from a FanzineSeriesSpecin that it contains a list of FanzineIssueSpecs and not a list of FanzineIssueInfos
 #   FanzineIssueInfo        -- contains information for a single issue (title, editor, sequence, etc). Includes a FanzineIssueSpec
 #   FanzineSeriesSpec       -- contains information for a fanzine series (Locus, VOID, File 770, Axe, etc). Includes a FanzineIssueSpecList
 
@@ -1328,7 +1329,8 @@ class FanzineIssueSpecList:
                 return
         Log("****FanzineIssueSpecList.List setter() had strange input: "+str(val))
 
-
+    #-----------------------------------
+    # Iterators which allow a FanzineIssueSpecList to be iterated directly and not through _List
     def __getitem__(self, key: int) -> FanzineIssueSpec:      # FanzineIssueSpecList
         return self._List[key]
 
