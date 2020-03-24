@@ -1,3 +1,12 @@
+# This package of classes provides support for naming and listing fanzines.
+# It consists of five classes
+#   FanzineSerial           -- contains a single serial number (V4#3, #22, #7A, VII, etc)
+#   FanzineDate             -- contains a date (June, 1949; 2005; 2/22/79; etc)
+#   FanzineIssueSpec        -- contains a date and/or a serial providing a complete sequence designation for an issue
+#   FanzineIssueSpecList    -- contains a list of FanzineIssueSpecs all relevant to a single fanzine
+#   FanzineIssueInfo        -- contains information for a single issue (title, editor, sequence, etc). Includes a FanzineIssueSpec
+#   FanzineSeriesSpec       -- contains information for a fanzine series (Locus, VOID, File 770, Axe, etc). Includes a FanzineIssueSpecList
+
 # A FanzineIssueSpec contains the information for one fanzine issue's specification, e.g.:
 #  V1#2, #3, #2a, Dec 1967, etc.
 # It can be a volume+number or a whole numer or a date. (It can be more than one of these, also, and all are retained.)
@@ -1433,23 +1442,33 @@ class FanzineIssueSpecList:
 
 class FanzineIssueInfo:
 
-    def __init__(self, SeriesName=None, IssueName=None, DirURL=None, URL=None, FIS=None, Pagecount=None) -> None:
-        _SeriesName: Optional[str]=None  # Name of the fanzine series of which this is an issue
-        _IssueName: Optional[str]=None  # Name of this issue (does not include issue #/date info)
+    def __init__(self, SeriesName: Optional[str]=None, IssueName: Optional[str]=None, DisplayName: Optional[str]=None,
+                 DirURL: Optional[str]=None, URL: Optional[str]=None,
+                 FIS: Optional[FanzineIssueSpec]=None, Pagecount: Optional[int]=None, Editor: Optional[str]=None) -> None:
+        _SeriesName: Optional[str]=None     # Name of the fanzine series of which this is an issue
+        _IssueName: Optional[str]=None      # Name of this issue (does not include issue #/date info)
+        _DisplayName: Optional[str]=None    # Name to use for this issue. Includes issue serial and or date
         _DirURL: Optional[str]=None  # URL of fanzine directory
         _URL: Optional[str]=None  # URL of specific issue in directory
         _FIS: Optional[FanzineIssueSpec]=None  # FIS for this issue
         _Pagecount: Optional[str]=None  # Page count for this issue
+        _Editor: Optional[str]=None     # The editor for this issue.  If None, use the editor of the series
 
         self.SeriesName=SeriesName
         self.IssueName=IssueName
+        self._DisplayName=DisplayName
         self.DirURL=DirURL
         self.URL=URL
         self.FIS=FIS
         self.Pagecount=Pagecount
+        self.Editor=Editor
 
+    # .....................
     def __str__(self) -> str:
-        return self.SeriesName+": "+self.IssueName+"  "+str(self._FIS)
+        out=""
+        if self.DisplayName is not None:
+            out=self.DisplayName
+        return out.strip()
 
     # .....................
     @property
@@ -1458,6 +1477,8 @@ class FanzineIssueInfo:
 
     @SeriesName.setter
     def SeriesName(self, val: Optional[str]) -> None:
+        if val is not None:
+            val=val.strip()
         self._SeriesName=val
 
     # .....................
@@ -1468,6 +1489,21 @@ class FanzineIssueInfo:
     @IssueName.setter
     def IssueName(self, val: Optional[str]) -> None:
         self._IssueName=val
+
+    # .....................
+    @property
+    def DisplayName(self) -> Optional[str]:
+        if self._DisplayName is not None:
+            return self._DisplayName
+        if self.FIS is not None:
+            return self._SeriesName+" "+str(self.FIS)
+        return self._SeriesName
+
+    @DisplayName.setter
+    def DisplayName(self, val: Optional[str]) -> None:
+        if val is not None:
+            val=val.strip()
+        self._DisplayName=val
 
     # .....................
     @property
@@ -1504,6 +1540,15 @@ class FanzineIssueInfo:
     @Pagecount.setter
     def Pagecount(self, val: Optional[int]) -> None:
         self._Pagecount=val
+
+    # .....................
+    @property
+    def Editor(self) -> Optional[str]:
+        return self._Editor
+
+    @Editor.setter
+    def Editor(self, val: Optional[str]) -> None:
+        self._Editor=val
 
 
 ######################################################################################################################
