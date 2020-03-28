@@ -509,7 +509,7 @@ class FanzineDate:
 #$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 class FanzineSerial:
 
-    def __init__(self, Vol: Union[None, int, str]=None, Num: Union[None, int, str]=None, NumSuffix: Optional[str]="", Whole: Union[None, int, str]=None, WSuffix: Optional[str]="") -> None:
+    def __init__(self, Vol: Union[None, int, str]=None, Num: Union[None, int, str, float]=None, NumSuffix: Optional[str]="", Whole: Union[None, int, str, float]=None, WSuffix: Optional[str]="") -> None:
         self._Vol=None
         self._Num=None
         self._Whole=None
@@ -2304,7 +2304,7 @@ def ExtractSerialNumber(volText: str, numText: str, wholeText: str, volNumText: 
         numInt=InterpretNumber(numText)
 
     # OK, now figure out the vol, num and whole.
-    # First, if a Vol is present, and an unambigious num is absent, the an ambigious Num must be the Vol's num
+    # First, if a Vol is present, and an unambigious Num is absent, the an ambigious Num must be the Vol's num
     if volInt is not None and numInt is None and maybeWholeInt is not None:
         numInt=maybeWholeInt
         maybeWholeInt=None
