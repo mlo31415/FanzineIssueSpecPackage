@@ -7,7 +7,7 @@
 #   FanzineIssueSpecList    -- contains a list of FanzineIssueSpecs all relevant to a single fanzine
 #                              It differs  from a FanzineSeriesList in that it contains a list of FanzineIssueSpecs and not a list of FanzineIssueInfos
 #   FanzineIssueInfo        -- contains information for a single issue (title, editor, sequence, etc). Includes a FanzineIssueSpec
-#   FanzineSeriesList       -- contains information for a fanzine series (Locus, VOID, File 770, Axe, etc). Includes a FanzineIssueSpecList and a list of FanzineIssueInfos
+#   FanzineSeriesList       -- contains information for a fanzine series (Locus, VOID, File 770, Axe, etc). Includes a list of FanzineIssueInfos
 
 # A FanzineIssueSpec contains the information for one fanzine issue's specification, e.g.:
 #  V1#2, #3, #2a, Dec 1967, etc.
@@ -1701,6 +1701,7 @@ class FanzineSeriesList:
     # .....................
     @property
     def FIIL(self) -> Optional[List[FanzineIssueInfo]]:            # FanzineSeriesList
+        #TODO: If we're returning an FIIL independent of the FSL, shouldn't we fill in the values which would be gotten by reference to the FSL?
         return self._FIIL
 
     @FIIL.setter
@@ -1710,12 +1711,7 @@ class FanzineSeriesList:
             raise(Exception("FIIL setter: FIIL is non-empty"))
         self._FIIL=[]
         for el in val:
-            fii=FanzineIssueInfo()
-            fii.FIS=el
-            fii.SeriesName=self.SeriesName
-            fii.Editor=self.Editor
-            fii.DirURL=self.SeriesURL
-            self._FIIL.append(fii)
+            self._FIIL.append(FanzineIssueInfo(FIS=el, SeriesName=self.SeriesName, Editor=self.Editor, DirURL=self.SeriesURL))
 
     # .....................
     @property
