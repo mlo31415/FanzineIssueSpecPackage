@@ -3,14 +3,15 @@
 #   FanzineSerial           -- contains a single serial number (V4#3, #22, #7A, VII, etc)
 #   FanzineDate             -- contains a date (June, 1949; 2005; 2/22/79; etc)
 #   FanzineIssueSpec        -- contains a FanzineDate and a FanzineSerial providing a complete sequence designation for an issue
+#                              it contains no other information about the issue such as name or series
 #   FanzineIssueSpecList    -- contains a list of FanzineIssueSpecs all relevant to a single fanzine
-#                              It differs  from a FanzineSeriesSpecin that it contains a list of FanzineIssueSpecs and not a list of FanzineIssueInfos
+#                              It differs  from a FanzineSeriesList in that it contains a list of FanzineIssueSpecs and not a list of FanzineIssueInfos
 #   FanzineIssueInfo        -- contains information for a single issue (title, editor, sequence, etc). Includes a FanzineIssueSpec
-#   FanzineSeriesList       -- contains information for a fanzine series (Locus, VOID, File 770, Axe, etc). Includes a FanzineIssueSpecList
+#   FanzineSeriesList       -- contains information for a fanzine series (Locus, VOID, File 770, Axe, etc). Includes a FanzineIssueSpecList and a list of FanzineIssueInfos
 
 # A FanzineIssueSpec contains the information for one fanzine issue's specification, e.g.:
 #  V1#2, #3, #2a, Dec 1967, etc.
-# It can be a volume+number or a whole numer or a date. (It can be more than one of these, also, and all are retained.)
+# It can be a volume+number or a whole number or a date. (It can be more than one of these, also, and all are retained.)
 
 # The top level is a FanzineIssueSpecList which holds many FanzineIssueSpecs
 # A FanzineIssueSpec holds the serial number and date for a single issue
@@ -255,7 +256,7 @@ class FanzineDate:
 
     # .......................
     # Convert the FanzineIssueSpec into a debugging form
-    def DebugStr(self) -> str:               # FanzineDate
+    def __repr__(self) -> str:               # FanzineDate
         #if self.UninterpretableText is not None:
         #    return"("+self.UninterpretableText+")"
 
@@ -694,7 +695,7 @@ class FanzineSerial:
 
     # .......................
     # Convert the FanzineIssueSpec into a debugging form
-    def DebugStr(self) -> str:             # FanzineSerial
+    def __repr__(self) -> str:             # FanzineSerial
         # if self.UninterpretableText is not None:
         #     return "IS("+self.UninterpretableText+")"
 
@@ -952,12 +953,6 @@ class FanzineIssueSpec:
     # Two issue designations are deemed to be equal if they are identical or if the VN matches while at least on of the Wholes in None or
     # is the Whole matches and at least one of the Vs and Ns is None.  (We would allow match of (W13, V3, N2) with (W13), etc.)
 
-# def __IssueEQ__(self, other: FanzineIssueSpec) -> bool:         # FanzineIssueSpec
-#     return self._FS == other._FS
-#
-# def __DateEq__(self, other: FanzineIssueSpec) -> bool:         # FanzineIssueSpec
-#     return self._FD == other._FD
-
     # Class equality check.
     def __eq__(self, other: FanzineIssueSpec) -> bool:         # FanzineIssueSpec
         return self._FS == other._FS and self._FD == other._FD
@@ -1123,11 +1118,11 @@ class FanzineIssueSpec:
 
     #.......................
     # Convert the FanzineIssueSpec into a debugging form
-    def DebugStr(self) -> str:                          # FanzineIssueSpec
+    def __repr__(self) -> str:                          # FanzineIssueSpec
         # if self.UninterpretableText is not None:
         #     return "IS("+self.UninterpretableText+")"
 
-        s="IS("+self._FS.DebugStr()+" "+self._FD.DebugStr()
+        s="IS("+repr(self._FS)+" "+repr(self._FD)
         # if self.TrailingGarbage is not None:
         #     s=s+", TG='"+self.TrailingGarbage+"'"
         # if self.UninterpretableText is not None:
@@ -1219,7 +1214,7 @@ class FanzineIssueSpec:
 ######################################################################################################################
 # A Fanzine issue spec list contains the information to handle a list of issues of a single fanzine.
 # It includes the series name, editors(s), and a list of Fanzine Issue specs.
-#TODO: This can be profitably extended by changing the ISL class to include specific names and editors for each issue, since sometimes
+#TODO: This can be profitably extended by changing the FISL class to include specific names and editors for each issue, since sometimes
 #TODO: a series does not have a consistent set throughout.
 
 class FanzineIssueSpecList:
@@ -1273,14 +1268,14 @@ class FanzineIssueSpecList:
         return True
 
     # ...............................
-    def DebugStr(self) -> str:      # FanzineIssueSpecList
+    def __repr__(self) -> str:      # FanzineIssueSpecList
         s=""
         if self._List is not None:
-            for i in self._List:
+            for i in self:
                 if len(s) > 0:
                     s=s+",  "
                 if i is not None:
-                    s=s+i.DebugStr()
+                    s=s+repr(i)
                 else:
                     s=s+"Missing ISList"
         if len(s) == 0:
@@ -1291,7 +1286,7 @@ class FanzineIssueSpecList:
     #...............................
     def __str__(self) -> str:   # Format the ISL for pretty      # FanzineIssueSpecList
         s=""
-        for i in self._List:
+        for i in self:
             if i is not None:
                 if len(s) > 0:
                     s=s+", "
@@ -1357,7 +1352,7 @@ class FanzineIssueSpecList:
             print("     index="+str(index)+"   leading='"+leadingText+"'    trailing='"+trailingText+"'")
             trialFISL=FanzineIssueSpecList().Match(trailingText, strict=True, complete=True)  # Failed.  We've gone one too far. Quit trying and use what we found on the previous iteration
             if trialFISL.IsEmpty():
-                print("     ...backtracking. Found FISL="+trialFISL.DebugStr())
+                print("     ...backtracking. Found FISL="+repr(trialFISL))
                 leadingText=" ".join(tokens[0:index+1])
                 break
             longestFISL=trialFISL
@@ -1466,90 +1461,189 @@ class FanzineIssueInfo:
         self.Editor=Editor
 
     # .....................
-    def __str__(self) -> str:
+    def __str__(self) -> str:                       # FanzineIssueInfo
         out=""
         if self.DisplayName is not None:
-            out=self.DisplayName
+            return self.DisplayName
+
+        if self.IssueName is not None:
+            out=self.IssueName
+        elif self.SeriesName is not None:
+            out=self.SeriesName
+
+        if self.FIS is not None and len(str(self.FIS)) > 0:
+            out+=" "+str(self.FIS)
+
+        # if self.Editor is not None:
+        #     out+="  ed:"+self.Editor
+        # if self.Pagecount is not None:
+        #     out+="  "+str(self.Pagecount)+" pp"
+
         return out.strip()
 
     # .....................
+    def __repr__(self) -> str:                       # FanzineIssueInfo
+        out=""
+        if self.DisplayName is not None:
+            out="'"+self.DisplayName+"'"
+        elif self.IssueName is not None:
+            out=self.IssueName
+        elif self.SeriesName is not None:
+            out=self.SeriesName
+
+        if self.FIS is not None and len(str(self.FIS)) > 0:
+            out+=" {"+str(self.FIS)+"}"
+
+        if self.Editor is not None:
+            out+="  ed:"+self.Editor
+        if self.Pagecount is not None:
+            out+="  "+str(self.Pagecount)+" pp"
+
+        return out.strip()
+
+    # .....................
+    def __eq__(self, other:FanzineIssueInfo) -> bool:                       # FanzineIssueInfo
+        if self._SeriesName is not None:
+            if other._SeriesName is None:
+                return False
+            if self._SeriesName != other._SeriesName:
+                return False
+        if self._Editor is not None:
+            if other._Editor is None:
+                return False
+            if self._Editor != other._Editor:
+                return False
+        if self._IssueName is not None:
+            if other._IssueName is None:
+                return False
+            if self._IssueName != other._IssueName:
+                return False
+        if self._DisplayName is not None:
+            if other._DisplayName is None:
+                return False
+            if self._DisplayName != other._DisplayName:
+                return False
+        if self._DirURL is not None:
+            if other._DirURL is None:
+                return False
+            if self._DirURL != other._DirURL:
+                return False
+        if self._URL is not None:
+            if other._URL is None:
+                return False
+            if self._URL != other._URL:
+                return False
+        if self._Pagecount is not None:
+            if other._Pagecount is None:
+                return False
+            if self._Pagecount != other._Pagecount:
+                return False
+        if self._FIS is not None and not self._FIS.IsEmpty():
+            if other._FIS is None or other._FIS.IsEmpty():
+                return False
+            if self._FIS != other._FIS:
+                return False
+        return True
+
+
+    # .....................
+    def IsEmpty(self) -> bool:                       # FanzineIssueInfo
+        if self.SeriesName is not None:
+            return False
+        if self.IssueName is not None:
+            return False
+        if self._DisplayName is not None:
+            return False
+        if self.DirURL is not None:
+            return False
+        if self.URL is not None:
+            return False
+        if self.Pagecount is not None:
+            return False
+        if self.Editor is not None:
+            return False
+        
+        return self.FIS.IsEmpty()
+        
+
+    # .....................
     @property
-    def SeriesName(self) -> Optional[str]:
+    def SeriesName(self) -> Optional[str]:                       # FanzineIssueInfo
         return self._SeriesName
 
     @SeriesName.setter
-    def SeriesName(self, val: Optional[str]) -> None:
+    def SeriesName(self, val: Optional[str]) -> None:                       # FanzineIssueInfo
         if val is not None:
             val=val.strip()
         self._SeriesName=val
 
     # .....................
     @property
-    def IssueName(self) -> Optional[str]:
+    def IssueName(self) -> Optional[str]:                       # FanzineIssueInfo
         return self._IssueName
 
     @IssueName.setter
-    def IssueName(self, val: Optional[str]) -> None:
+    def IssueName(self, val: Optional[str]) -> None:                       # FanzineIssueInfo
         self._IssueName=val
 
     # .....................
     @property
-    def DisplayName(self) -> Optional[str]:
+    def DisplayName(self) -> Optional[str]:                       # FanzineIssueInfo
         if self._DisplayName is not None:
             return self._DisplayName
-        if self.FIS is not None:
+        if self.FIS is not None and self._SeriesName is not None:
             return self._SeriesName+" "+str(self.FIS)
         return self._SeriesName
 
     @DisplayName.setter
-    def DisplayName(self, val: Optional[str]) -> None:
+    def DisplayName(self, val: Optional[str]) -> None:                       # FanzineIssueInfo
         if val is not None:
             val=val.strip()
         self._DisplayName=val
 
     # .....................
     @property
-    def DirURL(self) -> Optional[str]:
+    def DirURL(self) -> Optional[str]:                       # FanzineIssueInfo
         return self._DirURL
 
     @DirURL.setter
-    def DirURL(self, val: Optional[str]) -> None:
+    def DirURL(self, val: Optional[str]) -> None:                       # FanzineIssueInfo
         self._DirURL=val
 
     # .....................
     @property
-    def URL(self) -> Optional[str]:
+    def URL(self) -> Optional[str]:                       # FanzineIssueInfo
         return self._URL
 
     @URL.setter
-    def URL(self, val: Optional[str]) -> None:
+    def URL(self, val: Optional[str]) -> None:                       # FanzineIssueInfo
         self._URL=val
 
     # .....................
     @property
-    def FIS(self) -> Optional[FanzineIssueSpec]:
+    def FIS(self) -> Optional[FanzineIssueInfo]:                       # FanzineIssueInfo
         return self._FIS
 
     @FIS.setter
-    def FIS(self, val: FanzineIssueSpec) -> None:
+    def FIS(self, val: FanzineIssueInfo) -> None:                       # FanzineIssueInfo
         self._FIS=val
 
     # .....................
     @property
-    def Pagecount(self) -> Optional[int]:
+    def Pagecount(self) -> Optional[int]:                       # FanzineIssueInfo
         return self._Pagecount
 
     @Pagecount.setter
-    def Pagecount(self, val: Optional[int]) -> None:
+    def Pagecount(self, val: Optional[int]) -> None:                       # FanzineIssueInfo
         self._Pagecount=val
 
     # .....................
     @property
-    def Editor(self) -> Optional[str]:
+    def Editor(self) -> Optional[str]:                       # FanzineIssueInfo
         return self._Editor
 
     @Editor.setter
-    def Editor(self, val: Optional[str]) -> None:
+    def Editor(self, val: Optional[str]) -> None:                       # FanzineIssueInfo
         self._Editor=val
 
 
@@ -1565,6 +1659,7 @@ class FanzineSeriesList:
 
     def __init__(self)  -> None:
         self._FISL: Optional[FanzineIssueSpecList]=None     # A list of FanzineIssueSpecs
+        self._FIIL: Optional[List[FanzineIssueInfo]]=[]
         self._SeriesName: Optional[str]=None
         self._Editor: Optional[str]=None
         self._Eligible: Optional[bool]=None     # Is this eligible for the Hugos in a year in question?
@@ -1606,6 +1701,17 @@ class FanzineSeriesList:
 
     # .....................
     @property
+    def FIIL(self) -> Optional[List[FanzineIssueInfo]]:            # FanzineSeriesList
+        if self._FIIL is None:
+            return None
+        return self._FIIL
+
+    @FIIL.setter
+    def FIIL(self, val: Optional[FanzineIssueInfo]) -> None:            # FanzineSeriesList
+        self._FIIL=val
+
+    # .....................
+    @property
     def FISL(self) -> Optional[FanzineIssueSpecList]:            # FanzineSeriesList
         if self._FISL is None:
             return None
@@ -1614,6 +1720,16 @@ class FanzineSeriesList:
     @FISL.setter
     def FISL(self, val: Optional[FanzineIssueSpecList]) -> None:            # FanzineSeriesList
         self._FISL=val
+        # Next, if there is no existing list of FIIs, we create one from the FISL
+        if self._FIIL is None or len(self._FIIL) == 0:
+            self._FIIL=[]
+            for el in val:
+                fii=FanzineIssueInfo()
+                fii.FIS=el
+                fii.SeriesName=self.SeriesName
+                fii.Editor=self.Editor
+                fii.DirURL=self.SeriesURL
+                self._FIIL.append(fii)
 
     # .....................
     @property
@@ -1644,10 +1760,10 @@ class FanzineSeriesList:
         return len(self._FISL)
 
     # .....................
-    def DebugStr(self) -> str:  # Convert the FSS into a debugging form            # FanzineSeriesList
+    def __repr__(self) -> str:  # Convert the FSS into a debugging form            # FanzineSeriesList
         isl="-"
         if self.LenFISL() > 0:
-            isl=self._FISL.DebugStr()
+            isl=repr(self._FISL)
 
         sn="-"
         if self._SeriesName is not None:
@@ -1683,17 +1799,20 @@ class FanzineSeriesList:
             out=self.SeriesName
 
         if self._Editor is not None and len(self._Editor) > 0:
-            out=out+"   ("+self._Editor+")"
+            out+="   ("+self._Editor+")"
 
         if self._Notes is not None and len(self._Notes) > 0:
             for n in self._Notes:
-                out=out+"   {"+n+"}"
+                out+="   {"+n+"}"
 
         if self.LenFISL() > 0:
-            out=out+"  "+str(self._FISL)
+            out+="  FISL: "+str(self._FISL)
 
-        if self._Eligible:
-            out=out+"   Eligible!"
+        if self._FIIL is not None and len(self._FIIL) > 0:
+            out+="  FIIL: "
+            for i in self._FIIL:
+                if not i.IsEmpty():
+                    out+=str(i)+", "
         return out
 
 
