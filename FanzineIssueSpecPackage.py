@@ -1658,7 +1658,6 @@ class FanzineIssueInfo:
 class FanzineSeriesList:
 
     def __init__(self)  -> None:
-        self._FISL: Optional[FanzineIssueSpecList]=None     # A list of FanzineIssueSpecs
         self._FIIL: Optional[List[FanzineIssueInfo]]=[]
         self._SeriesName: Optional[str]=None
         self._Editor: Optional[str]=None
@@ -1702,34 +1701,21 @@ class FanzineSeriesList:
     # .....................
     @property
     def FIIL(self) -> Optional[List[FanzineIssueInfo]]:            # FanzineSeriesList
-        if self._FIIL is None:
-            return None
         return self._FIIL
 
     @FIIL.setter
-    def FIIL(self, val: Optional[FanzineIssueInfo]) -> None:            # FanzineSeriesList
-        self._FIIL=val
-
-    # .....................
-    @property
-    def FISL(self) -> Optional[FanzineIssueSpecList]:            # FanzineSeriesList
-        if self._FISL is None:
-            return None
-        return self._FISL
-
-    @FISL.setter
-    def FISL(self, val: Optional[FanzineIssueSpecList]) -> None:            # FanzineSeriesList
-        self._FISL=val
-        # Next, if there is no existing list of FIIs, we create one from the FISL
-        if self._FIIL is None or len(self._FIIL) == 0:
-            self._FIIL=[]
-            for el in val:
-                fii=FanzineIssueInfo()
-                fii.FIS=el
-                fii.SeriesName=self.SeriesName
-                fii.Editor=self.Editor
-                fii.DirURL=self.SeriesURL
-                self._FIIL.append(fii)
+    def FIIL(self, val: Optional[FanzineIssueSpecList]) -> None:            # FanzineSeriesList
+        # If there is no existing list of FIIs, we create one from the FISL
+        if self._FIIL is not None and len(self._FIIL) > 0:
+            raise(Exception("FIIL setter: FIIL is non-empty"))
+        self._FIIL=[]
+        for el in val:
+            fii=FanzineIssueInfo()
+            fii.FIS=el
+            fii.SeriesName=self.SeriesName
+            fii.Editor=self.Editor
+            fii.DirURL=self.SeriesURL
+            self._FIIL.append(fii)
 
     # .....................
     @property
@@ -1754,16 +1740,10 @@ class FanzineSeriesList:
         self._SeriesURL=val
 
     # .....................
-    def LenFISL(self) -> int:            # FanzineSeriesList
-        if self._FISL is None:
-            return 0
-        return len(self._FISL)
-
-    # .....................
     def __repr__(self) -> str:  # Convert the FSS into a debugging form            # FanzineSeriesList
-        isl="-"
-        if self.LenFISL() > 0:
-            isl=repr(self._FISL)
+        iil="-"
+        if len(self._FIIL) > 0:
+            iil=repr(self._FIIL)
 
         sn="-"
         if self._SeriesName is not None:
@@ -1790,7 +1770,7 @@ class FanzineSeriesList:
         if self._SeriesURL is not None:
             u=self._SeriesURL
 
-        return "FSS(SN:"+sn+", ISL:"+isl+", Ed:"+ed+", NT:"+nt+", El:"+el+" URL="+u+")"
+        return "FSS(SN:"+sn+", IIL:"+iil+", Ed:"+ed+", NT:"+nt+", El:"+el+" URL="+u+")"
 
     # .....................
     def __str__(self) -> str:  # Pretty print the FSS            # FanzineSeriesList
@@ -1804,9 +1784,6 @@ class FanzineSeriesList:
         if self._Notes is not None and len(self._Notes) > 0:
             for n in self._Notes:
                 out+="   {"+n+"}"
-
-        if self.LenFISL() > 0:
-            out+="  FISL: "+str(self._FISL)
 
         if self._FIIL is not None and len(self._FIIL) > 0:
             out+="  FIIL: "
