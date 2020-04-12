@@ -255,7 +255,7 @@ class FanzineDate:
 
 
     # .......................
-    # Convert the FanzineIssueSpec into a debugging form
+    # Convert the FanzineDate into a debugging form
     def __repr__(self) -> str:               # FanzineDate
         #if self.UninterpretableText is not None:
         #    return"("+self.UninterpretableText+")"
@@ -417,7 +417,7 @@ class FanzineDate:
 
         # Look for <month> <yy> or <yyyy> where month is a recognizable month name and the <y>s form a fannish year
         # Note that the mtext and ytext found here may be analyzed several different ways
-        m=re.compile("^([\s\w\-',]+)\s+(\d\d|\d\d\d\d)$").match(dateText)  # Month + 2- or 4-digit year
+        m=re.compile("^([\s\w\-',]+).?\s+(\d\d|\d\d\d\d)$").match(dateText)  # Month +[,] + 2- or 4-digit year
         if m is not None and m.groups() is not None and len(m.groups()) == 2:
             mtext=m.groups()[0].replace(","," ").replace("  ", " ")     # Turn a comma-space combination into a single space
             ytext=m.groups()[1]
@@ -440,6 +440,33 @@ class FanzineDate:
                     d=InterpretRelativeWords(modifier)
                     if m is not None and d is not None:
                         return cls(Year=y, Month=m, Day=(d, modifier))
+
+        # Annoyingly, the standard date parser doesn't like "." designating an abbreviated month name.  Deal with mmm. dd, yyyy
+        m=re.compile("^([\s\w\-',]+).?\s+(\d)+,?\s+(\d\d|\d\d\d\d)$").match(dateText)  # Month +[,] + 2- or 4-digit year
+        if m is not None and m.groups() is not None and len(m.groups()) == 3:
+            mtext=m.groups()[0].replace(","," ").replace("  ", " ")     # Turn a comma-space combination into a single space
+            dtext=m.groups()[1]
+            ytext=m.groups()[2]
+            y=ValidFannishYear(ytext)
+            if y is not None and mtext is not None:
+                m=InterpretMonth(mtext)
+                if m is not None:
+                    d=Int(dtext)
+                    return cls(Year=ytext, Month=m, Day=d)
+
+        # Look for <dd> <month> [,] <yyyy> where month is a recognizable month name and the <y>s form a fannish year
+        # Note that the mtext and ytext found here may be analyzed several different ways
+        m=re.compile("^([\d]{1,2})\s+([\s\w\-',]+).?\s+(\d\d|\d\d\d\d)$").match(dateText)  # Month +[,] + 2- or 4-digit year
+        if m is not None and m.groups() is not None and len(m.groups()) == 3:
+            dtext=m.groups()[0]
+            mtext=m.groups()[1].replace(",", " ").replace("  ", " ")  # Turn a comma-space combination into a single space
+            ytext=m.groups()[2]
+            y=ValidFannishYear(ytext)
+            if y is not None and mtext is not None:
+                m=InterpretMonth(mtext)
+                if m is not None:
+                    d=Int(dtext)
+                    return cls(Year=ytext, Month=m, Day=d)
 
         # There are some weird day/month formats (E.g., "St. Urho's Day 2013")
         # Look for a pattern of: <strange day/month> <year>
@@ -506,7 +533,84 @@ class FanzineDate:
         return cls()
 
 
-#$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+#$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+#$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+class FanzineDateRange:
+    def __init__(self):
+        self._startdate: Optional[FanzineDate]=None
+        self._enddate: Optional[FanzineDate]=None
+
+    #...................
+    def Match(self, s: str, strict: bool=False, complete: bool=True) -> FanzineDateRange:               # FanzineDateRange
+        # If we have a single "-", then the format is probably of the form:
+        #   #1: <month+day>-<month+day> year  or
+        #   #2: <month> <day>-<day> <year>
+        #   #3: <day>-<day> <month>[,] <year>
+        s=s.replace("–", "-")   # Convert en-dash to hyphen
+        s=s.replace("--", "-")  # Likewise double-hyphens
+        if s.count("-") == 1:
+
+            # Try format #1: <monthday>-<monthday> year  or
+            # s2 should contain a full date, including year
+            s1, s2=s.split("-")
+            d2=FanzineDate().Match(s2)
+            if not d2.IsEmpty():
+                # Add s2's year to the end of s1
+                s1+=" "+str(d2.Year)
+                d1=FanzineDate().Match(s1)
+                if not d1.IsEmpty():
+                    self._startdate=d1
+                    self._enddate=d2
+                    return self
+
+            # Try format #2: <month> <day>-<day>[,] <year>
+            # Split on blanks, then recombine the middle parts
+            slist=[s for s in re.split('[ \-,]+',s) if len(s) > 0]  # Split on spans of space, hyphen and comma; ignore empty splits
+            if len(slist) == 4:
+                m=slist[0]
+                y=slist[3]
+                d1=FanzineDate().Match(m+" "+slist[1]+" "+y)
+                d2=FanzineDate().Match(m+" "+slist[2]+" "+y)
+                if not d1.IsEmpty() and not d2.IsEmpty():
+                    self._startdate=d1
+                    self._enddate=d2
+                    return self
+
+            # Try 3: <day>-<day> <month>[,] <year>
+            s=s.replace("  ", " ").replace("  ", " ")   # Collapse strings of spaces
+            s0=s.replace(" -", "-").replace("- ", "-")  # Remove spaces around "-"
+            slist=s0.split()
+            if len(slist) > 2:
+                if "-" in slist[0]:
+                    s1, s2=slist[0].split("-")
+                    d1=FanzineDate().Match(s1+" "+slist[1]+" "+slist[2])
+                    if not d1.IsEmpty():
+                        d2=FanzineDate().Match(s2+" "+slist[1]+" "+slist[2])
+                        if not d2.IsEmpty():
+                            self._startdate=d1
+                            self._enddate=d2
+                            return self
+
+        # Try just an ordinary single date
+        d=FanzineDate.Match(s)
+        if not d.IsEmpty():
+            self._startdate=d
+            self._enddate=d
+            return self
+
+        # Oh, well.
+        return self
+
+    #...................
+    def IsEmpty(self) -> bool:
+        return self._startdate is None or self._startdate.IsEmpty() or self._enddate is None or self._enddate.IsEmpty()
+
+
+
+
+#$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+#$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+
 class FanzineSerial:
 
     def __init__(self, Vol: Union[None, int, str]=None, Num: Union[None, int, str, float]=None, NumSuffix: Optional[str]="", Whole: Union[None, int, str, float]=None, WSuffix: Optional[str]="") -> None:
@@ -2175,6 +2279,10 @@ def InterpretMonth(monthData: Optional[str, int]) -> Optional[int]:
     monthData=RemoveHTMLDebris(monthData)
     if len(monthData) == 0:
         return None
+
+    # If it ends in a "." it may be abbreviated. Remove trailing "."
+    if monthData[-1:] == ".":
+        monthData=monthData[:-1]
 
     return MonthNameToInt(monthData)
 
