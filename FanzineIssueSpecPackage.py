@@ -442,7 +442,7 @@ class FanzineDate:
                         return cls(Year=y, Month=m, Day=(d, modifier))
 
         # Annoyingly, the standard date parser doesn't like "." designating an abbreviated month name.  Deal with mmm. dd, yyyy
-        m=re.compile("^([\s\w\-',]+).?\s+(\d)+,?\s+(\d\d|\d\d\d\d)$").match(dateText)  # Month +[,] + 2- or 4-digit year
+        m=re.compile("^([\s\w\-',]+).?\s+(\d+),?\s+(\d\d|\d\d\d\d)$").match(dateText)  # Month +[,] + 2- or 4-digit year
         if m is not None and m.groups() is not None and len(m.groups()) == 3:
             mtext=m.groups()[0].replace(","," ").replace("  ", " ")     # Turn a comma-space combination into a single space
             dtext=m.groups()[1]
@@ -540,25 +540,37 @@ class FanzineDateRange:
         self._startdate: Optional[FanzineDate]=None
         self._enddate: Optional[FanzineDate]=None
 
+    def __str__(self) -> str:
+        d1=self._startdate
+        d2=self._enddate
+        if d1.Year == d2.Year:
+            if d1.Month == d2.Month:
+                return MonthName(d1.Month)+" "+str(d1.Day)+"-"+str(d2.Day)+", "+str(d1.Year)
+            return MonthName(d1.Month)+" "+str(d1.Day)+"-"+MonthName(d2.Month)+" "+str(d2.Day)+", "+str(d1.Year)
+        return str(d1)+"-"+str(d2)
+
     #...................
     def Match(self, s: str, strict: bool=False, complete: bool=True) -> FanzineDateRange:               # FanzineDateRange
         # If we have a single "-", then the format is probably of the form:
         #   #1: <month+day>-<month+day> year  or
         #   #2: <month> <day>-<day> <year>
         #   #3: <day>-<day> <month>[,] <year>
+        #   #4: <month+day> <year1> - <month+day> <year2>
         s=s.replace("–", "-")   # Convert en-dash to hyphen
         s=s.replace("--", "-")  # Likewise double-hyphens
-        if s.count("-") == 1:
+        s=s.replace("  ", " ").replace("  ", " ")  # Collapse strings of spaces
+        s=s.replace(" -", "-").replace("- ", "-")  # Remove spaces around "-"
+        if s.count("-") == 1:   # There's got to be exactly one hyphen for it to be an interpretable date range
 
             # Try format #1: <monthday>-<monthday> year  or
             # s2 should contain a full date, including year
             s1, s2=s.split("-")
             d2=FanzineDate().Match(s2)
-            if not d2.IsEmpty():
+            if not d2.IsEmpty() and not d2.Day is None and not d2.Month is None:
                 # Add s2's year to the end of s1
                 s1+=" "+str(d2.Year)
                 d1=FanzineDate().Match(s1)
-                if not d1.IsEmpty():
+                if not d1.IsEmpty() and not d1.Day is None and not d1.Month is None:
                     self._startdate=d1
                     self._enddate=d2
                     return self
@@ -568,18 +580,17 @@ class FanzineDateRange:
             slist=[s for s in re.split('[ \-,]+',s) if len(s) > 0]  # Split on spans of space, hyphen and comma; ignore empty splits
             if len(slist) == 4:
                 m=slist[0]
-                y=slist[3]
-                d1=FanzineDate().Match(m+" "+slist[1]+" "+y)
-                d2=FanzineDate().Match(m+" "+slist[2]+" "+y)
-                if not d1.IsEmpty() and not d2.IsEmpty():
-                    self._startdate=d1
-                    self._enddate=d2
-                    return self
+                if not IsInt(m):    # m must be a text month -- it can't be a number
+                    y=slist[3]
+                    d1=FanzineDate().Match(m+" "+slist[1]+" "+y)
+                    d2=FanzineDate().Match(m+" "+slist[2]+" "+y)
+                    if not d1.IsEmpty() and not d2.IsEmpty():
+                        self._startdate=d1
+                        self._enddate=d2
+                        return self
 
             # Try 3: <day>-<day> <month>[,] <year>
-            s=s.replace("  ", " ").replace("  ", " ")   # Collapse strings of spaces
-            s0=s.replace(" -", "-").replace("- ", "-")  # Remove spaces around "-"
-            slist=s0.split()
+            slist=s.split()
             if len(slist) > 2:
                 if "-" in slist[0]:
                     s1, s2=slist[0].split("-")
@@ -590,6 +601,16 @@ class FanzineDateRange:
                             self._startdate=d1
                             self._enddate=d2
                             return self
+
+            # Well, then what about #4?
+            slist=s.split("-")
+            d1=FanzineDate().Match(slist[0])
+            if not d1.IsEmpty():
+                d2=FanzineDate().Match(slist[1])
+                if not d2.IsEmpty():
+                    self._startdate=d1
+                    self._enddate=d2
+                    return self
 
         # Try just an ordinary single date
         d=FanzineDate.Match(s)
