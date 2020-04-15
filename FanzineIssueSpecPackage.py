@@ -545,7 +545,10 @@ class FanzineDateRange:
         d2=self._enddate
         if d1.Year == d2.Year:
             if d1.Month == d2.Month:
-                return MonthName(d1.Month)+" "+str(d1.Day)+"-"+str(d2.Day)+", "+str(d1.Year)
+                if d1.Day == d2.Day:
+                    return MonthName(d1.Month)+" "+str(d1.Day)+", "+str(d1.Year)
+                else:
+                    return MonthName(d1.Month)+" "+str(d1.Day)+"-"+str(d2.Day)+", "+str(d1.Year)
             return MonthName(d1.Month)+" "+str(d1.Day)+"-"+MonthName(d2.Month)+" "+str(d2.Day)+", "+str(d1.Year)
         return str(d1)+"-"+str(d2)
 
