@@ -540,6 +540,9 @@ class FanzineDateRange:
         self._startdate: Optional[FanzineDate]=None
         self._enddate: Optional[FanzineDate]=None
 
+    def __eq__(self, other:FanzineDateRange) -> bool:
+        return self._startdate == other._startdate and self._enddate == other._enddate
+
     def __str__(self) -> str:
         d1=self._startdate
         d2=self._enddate
