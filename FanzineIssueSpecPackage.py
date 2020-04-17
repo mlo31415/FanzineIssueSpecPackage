@@ -88,6 +88,19 @@ class FanzineDate:
     def __ne__(self, other: FanzineDate) -> bool:               # FanzineDate
         return not self.__eq__(other)
 
+    def __sub__(self, other):
+        y1=self.Year if self.Year is not None else 1
+        m1=self.Month if self.Month is not None else 1
+        d1=self.Day if self.Day is not None else 1
+        y2=other.Year if other.Year is not None else 1
+        m2=other.Month if other.Month is not None else 1
+        d2=other.Day if other.Day is not None else 1
+        try:
+            return (datetime.date(y1, m1, d1)-datetime.date(y2, m2, d2)).days
+        except:
+            Log("*** We have a problem subtracting two dates: "+str(self)+ " - "+str(other))
+            return 0
+
     # -----------------------------
     # Define < operator for sorting
     def __lt__(self, other: FanzineDate) -> bool:               # FanzineDate
@@ -645,6 +658,10 @@ class FanzineDateRange:
     def IsEmpty(self) -> bool:
         return self._startdate is None or self._startdate.IsEmpty() or self._enddate is None or self._enddate.IsEmpty()
 
+    # ...................
+    # Return the duration of the range in days
+    def Duration(self) -> int:
+        return self._enddate-self._startdate
 
 
 
