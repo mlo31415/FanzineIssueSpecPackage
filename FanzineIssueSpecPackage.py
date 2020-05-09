@@ -26,6 +26,7 @@ from typing import Union, Tuple, Optional, List
 from contextlib import suppress
 import datetime
 from dateutil import parser
+import json
 
 import inspect
 
@@ -67,6 +68,29 @@ class FanzineDate:
 
         self._MonthDayText=MonthDayText                 # Overrides display of both month and day, but has no other effect
         self._LongDates=False
+
+    def ToJson(self) -> str:
+        d={"version": 1,
+           "_Year": self._Year,
+           "_Month": self._Month,
+           "_MonthText": self._MonthText,
+           "_Day": self._Day,
+           "_DayText": self._DayText,
+           "_MonthDayText": self._MonthDayText,
+           "_LongDates": self._LongDates}
+        return json.dumps(d)
+
+    def FromJson(self, val: str) -> FanzineDate:
+        d=json.loads(val)
+        if d["version"] == 1:
+            self._Year=d["_Year"]
+            self._Month=d["_Month"]
+            self._MonthText=d["_MonthText"]
+            self._Day=d["_Day"]
+            self._DayText=d["_DayText"]
+            self._MonthDayText=d["_MonthDayText"]
+            self._LongDates=d["_LongDates"]
+        return self
 
     # -----------------------------
     def __eq__(self, other: FanzineDate) -> bool:               # FanzineDate
@@ -553,6 +577,19 @@ class FanzineDateRange:
         self._startdate: Optional[FanzineDate]=None
         self._enddate: Optional[FanzineDate]=None
 
+    def ToJson(self) -> str:
+        d={"version": 1,
+           "_startdate": self._startdate.ToJson(),
+           "_enddate": self._enddate.ToJson()}
+        return json.dumps(d)
+
+    def FromJson(self, val: str) -> FanzineDateRange:
+        d=json.loads(val)
+        if d["version"] == 1:
+            self._startdate=FanzineDate().FromJson(d["_startdate"])
+            self._enddate=FanzineDate().FromJson(d["_enddate"])
+        return self
+
     # -----------------------------
     def __eq__(self, other:FanzineDateRange) -> bool:
         return self._startdate == other._startdate and self._enddate == other._enddate
@@ -583,6 +620,8 @@ class FanzineDateRange:
 
     #...................
     def Match(self, s: str, strict: bool=False, complete: bool=True) -> FanzineDateRange:               # FanzineDateRange
+        if s is None:
+            return self
         # If we have a single "-", then the format is probably of the form:
         #   #1: <month+day>-<month+day> year  or
         #   #2: <month> <day>-<day> <year>
