@@ -70,7 +70,7 @@ class FanzineDate:
         self._LongDates=False
 
     def ToJson(self) -> str:
-        d={"version": 1,
+        d={"ver": 1,
            "_Year": self._Year,
            "_Month": self._Month,
            "_MonthText": self._MonthText,
@@ -82,7 +82,7 @@ class FanzineDate:
 
     def FromJson(self, val: str) -> FanzineDate:
         d=json.loads(val)
-        if d["version"] == 1:
+        if d["ver"] == 1:
             self._Year=d["_Year"]
             self._Month=d["_Month"]
             self._MonthText=d["_MonthText"]
@@ -578,14 +578,14 @@ class FanzineDateRange:
         self._enddate: Optional[FanzineDate]=None
 
     def ToJson(self) -> str:
-        d={"version": 1,
+        d={"ver": 1,
            "_startdate": self._startdate.ToJson(),
            "_enddate": self._enddate.ToJson()}
         return json.dumps(d)
 
     def FromJson(self, val: str) -> FanzineDateRange:
         d=json.loads(val)
-        if d["version"] == 1:
+        if d["ver"] == 1:
             self._startdate=FanzineDate().FromJson(d["_startdate"])
             self._enddate=FanzineDate().FromJson(d["_enddate"])
         return self
