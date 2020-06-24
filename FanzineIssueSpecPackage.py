@@ -69,6 +69,9 @@ class FanzineDate:
         self._MonthDayText=MonthDayText                 # Overrides display of both month and day, but has no other effect
         self._LongDates=False
 
+    def __hash__(self) -> int:
+        return hash(self.Year)+hash(self.Month)+hash(self.MonthText)+hash(self.Day)+hash(self.DayText)+hash(self.MonthDayText)
+
     def ToJson(self) -> str:
         d={"ver": 1,
            "_Year": self._Year,
@@ -591,6 +594,10 @@ class FanzineDateRange:
         return self
 
     # -----------------------------
+    def __hash__(self):
+        return hash(self._startdate)+hash(self._enddate)
+
+    # -----------------------------
     def __eq__(self, other:FanzineDateRange) -> bool:
         return self._startdate == other._startdate and self._enddate == other._enddate
 
@@ -606,6 +613,12 @@ class FanzineDateRange:
     def __str__(self) -> str:
         d1=self._startdate
         d2=self._enddate
+        if d1 is None and d2 is None:
+            return ""
+        if d1 is None and d2 is not None:
+            return str(d2)
+        if d1 is not None and d2 is None:
+            return str(d1)
         if d1.Year == d2.Year:
             if d1.Month == d2.Month:
                 if d1.Month is None:
