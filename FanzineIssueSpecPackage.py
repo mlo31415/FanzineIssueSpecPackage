@@ -37,6 +37,193 @@ from HelpersPackage import InterpretNumber, InterpretRoman
 from HelpersPackage import CaseInsensitiveCompare
 from HelpersPackage import CanonicizeColumnHeaders
 
+
+class FanzineSeriesInfo:
+
+    def __init__(self, SeriesName: Optional[str] = None, DisplayName: Optional[str] = None,
+                 URL: Optional[str] = None, Issuecount: Optional[int]=None, 
+                 Pagecount: Optional[int] = None, Editor: Optional[str] = None, Country: str = "") -> None:
+        _SeriesName: Optional[str]=None  # Name of the fanzine series of which this is an issue
+        _DisplayName: Optional[str]=None  # Name to use for this issue. Includes issue serial and or date
+        _URL: Optional[str]=None  # URL of series directory
+        _Pagecount: Optional[str]=None  # Page count for all the issues fanac has for this series
+        _Issuecount: Optional[str]=None  # Count of issues fanac has for this series
+        _Editor: Optional[str]=None  # The editor for this series (if there was one for essentially all issues)
+        _Country: Optional[str]=None  # The country for this issue (gotten from the series's country
+
+        # Use the properties to set the values for all of the instance variables. We do this so that any special setter processing is done with the init values.
+        self.SeriesName=SeriesName
+        self.DisplayName=DisplayName
+        self.URL=URL
+        self.Pagecount=Pagecount
+        self.Issuecount=Issuecount
+        self.Editor=Editor
+        self.Country=Country
+        pass
+
+    # .....................
+    def __str__(self) -> str:  # FanzineSeriesInfo
+        out=""
+        if self.DisplayName is not None:
+            return self.DisplayName
+        elif self.SeriesName is not None:
+            out=self.SeriesName
+
+        return out.strip()
+
+    # .....................
+    def __repr__(self) -> str:  # FanzineSeriesInfo
+        out=""
+        if self.DisplayName is not None:
+            out="'"+self.DisplayName+"'"
+        elif self.SeriesName is not None:
+            out=self.SeriesName
+
+        if self.Editor is not None:
+            out+="  ed:"+self.Editor
+        if self.Issuecount is not None:
+            out+="  "+str(self.Issuecount)+" issues"
+        if self.Pagecount is not None:
+            out+="  "+str(self.Pagecount)+" pp"
+        if self.Country is not None and len(self.Country) > 0:
+            out+="   ("+self.Country+")"
+        return out.strip()
+
+    # .....................
+    # Note that page and issue count are not included in equality comparisons.
+    # This allows for accumulation of those numbers while retaining series identity
+    def __eq__(self, other: FanzineSeriesInfo) -> bool:  # FanzineSeriesInfo
+        if self._SeriesName is not None:
+            if other._SeriesName is None:
+                return False
+            if self._SeriesName != other._SeriesName:
+                return False
+        if self._Editor is not None:
+            if other._Editor is None:
+                return False
+            if self._Editor != other._Editor:
+                return False
+        if self._Country is not None:
+            if other._Country is None:
+                return False
+            if self._Country != other._Country:
+                return False
+        if self._URL is not None:
+            if other._URL is None:
+                return False
+            if self._URL != other._URL:
+                return False
+        # if self._Pagecount is not None:
+        #     if other._Pagecount is None:
+        #         return False
+        #     if self._Pagecount != other._Pagecount:
+        #         return False
+        # if self._Issuecount is not None:
+        #     if other._Issuecount is None:
+        #         return False
+        #     if self._Issuecount != other._Issuecount:
+        #         return False
+        return True
+
+    # .....................
+    def __add__(self, b: FanzineSeriesInfo):  # FanzineSeriesInfo
+        ret=FanzineSeriesInfo(SeriesName=self.SeriesName, Editor=self.Editor, DisplayName=self.DisplayName, Country=self.Country, URL=self.URL)
+        ret.Issuecount=self.Issuecount+b.Issuecount
+        ret.Pagecount=self.Pagecount+b.Pagecount
+        return ret
+
+    # .....................
+    def IsEmpty(self) -> bool:  # FanzineSeriesInfo
+        if self.SeriesName is not None:
+            return False
+        if self._DisplayName is not None:
+            return False
+        if self.URL is not None:
+            return False
+        # if self.Pagecount is not None:
+        #     return False
+        # if self.Issuecount is not None:
+        #     return False
+        if self.Editor is not None:
+            return False
+        if self.Country is not None:
+            return False
+        
+        return True
+
+    # .....................
+    @property
+    def SeriesName(self) -> Optional[str]:  # FanzineSeriesInfo
+        return self._SeriesName
+
+    @SeriesName.setter
+    def SeriesName(self, val: Optional[str]) -> None:  # FanzineSeriesInfo
+        if val is not None:
+            val=val.strip()
+        self._SeriesName=val
+
+    # .....................
+    @property
+    def DisplayName(self) -> Optional[str]:  # FanzineSeriesInfo
+        if self._DisplayName is not None:
+            return self._DisplayName
+        if self._SeriesName is not None:
+            return self._SeriesName
+        return self._SeriesName
+
+    @DisplayName.setter
+    def DisplayName(self, val: Optional[str]) -> None:  # FanzineSeriesInfo
+        if val is not None:
+            val=val.strip()
+        self._DisplayName=val
+
+    # .....................
+    @property
+    def URL(self) -> Optional[str]:  # FanzineSeriesInfo
+        return self._URL
+
+    @URL.setter
+    def URL(self, val: Optional[str]) -> None:  # FanzineSeriesInfo
+        self._URL=val
+
+    # .....................
+    @property
+    def Pagecount(self) -> Optional[int]:  # FanzineSeriesInfo
+        return self._Pagecount
+
+    @Pagecount.setter
+    def Pagecount(self, val: Optional[int]) -> None:  # FanzineSeriesInfo
+        self._Pagecount=val
+        
+    # .....................
+    @property
+    def Issuecount(self) -> Optional[int]:  # FanzineSeriesInfo
+        return self._Issuecount
+
+    @Issuecount.setter
+    def Issuecount(self, val: Optional[int]) -> None:  # FanzineSeriesInfo
+        self._Issuecount=val
+
+    # .....................
+    @property
+    def Country(self) -> Optional[str]:  # FanzineSeriesInfo
+        return self._Country
+
+    @Country.setter
+    def Country(self, val: Optional[str]) -> None:  # FanzineSeriesInfo
+        self._Country=val
+        
+    # .....................
+    @property
+    def Editor(self) -> Optional[str]:  # FanzineSeriesInfo
+        return self._Editor
+
+    @Editor.setter
+    def Editor(self, val: Optional[str]) -> None:  # FanzineSeriesInfo
+        self._Editor=val
+
+#---------------------------------------------------------------------------------------
+
 class FanzineDate:
     def __init__(self,
                  Year: Union[int, str, None]=None,
