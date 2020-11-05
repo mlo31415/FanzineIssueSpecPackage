@@ -1841,7 +1841,7 @@ class FanzineIssueInfo:
 
     def __init__(self, SeriesName: Optional[str]=None, IssueName: Optional[str]=None, DisplayName: Optional[str]=None,
                  DirURL: Optional[str]=None, URL: Optional[str]=None,
-                 FIS: Optional[FanzineIssueSpec]=None, Pagecount: Optional[int]=None, Editor: Optional[str]=None) -> None:
+                 FIS: Optional[FanzineIssueSpec]=None, Pagecount: Optional[int]=None, Editor: Optional[str]=None, Country: str="") -> None:
         _SeriesName: Optional[str]=None     # Name of the fanzine series of which this is an issue
         _IssueName: Optional[str]=None      # Name of this issue (does not include issue #/date info)
         _DisplayName: Optional[str]=None    # Name to use for this issue. Includes issue serial and or date
@@ -1850,15 +1850,19 @@ class FanzineIssueInfo:
         _FIS: Optional[FanzineIssueSpec]=None  # FIS for this issue
         _Pagecount: Optional[str]=None  # Page count for this issue
         _Editor: Optional[str]=None     # The editor for this issue.  If None, use the editor of the series
+        _Country: Optional[str]=None    # The country for this issue (gotten from the series's country
 
+        # Use the properties to set the values for all of the instance variables. We do this so that any special setter processing is done with the init values.
         self.SeriesName=SeriesName
         self.IssueName=IssueName
-        self._DisplayName=DisplayName
+        self.DisplayName=DisplayName
         self.DirURL=DirURL
         self.URL=URL
         self.FIS=FIS
         self.Pagecount=Pagecount
         self.Editor=Editor
+        self.Country=Country
+        pass
 
     # .....................
     def __str__(self) -> str:                       # FanzineIssueInfo
@@ -2046,6 +2050,14 @@ class FanzineIssueInfo:
     def Editor(self, val: Optional[str]) -> None:                       # FanzineIssueInfo
         self._Editor=val
 
+    # .....................
+    @property
+    def Country(self) -> Optional[str]:                       # FanzineIssueInfo
+        return self._Country
+
+    @Country.setter
+    def Country(self, val: Optional[str]) -> None:                       # FanzineIssueInfo
+        self._Country=val
 
 
 ######################################################################################################################
