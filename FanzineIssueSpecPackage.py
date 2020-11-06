@@ -89,6 +89,12 @@ class FanzineSeriesInfo:
             out+="   ("+self.Country+")"
         return out.strip()
 
+    # -----------------------------
+    # Note that this ignored quite a lot is creating the hash value
+    # Be careful!
+    def __hash__(self):
+        return hash(self._SeriesName)+hash(self._Editor)+hash(self._Country.lower())
+
     # .....................
     # Note that page and issue count are not included in equality comparisons.
     # This allows for accumulation of those numbers while retaining series identity
@@ -106,23 +112,13 @@ class FanzineSeriesInfo:
         if self._Country is not None:
             if other._Country is None:
                 return False
-            if self._Country != other._Country:
+            if self._Country.lower() != other._Country.lower():
                 return False
         if self._URL is not None:
             if other._URL is None:
                 return False
             if self._URL != other._URL:
                 return False
-        # if self._Pagecount is not None:
-        #     if other._Pagecount is None:
-        #         return False
-        #     if self._Pagecount != other._Pagecount:
-        #         return False
-        # if self._Issuecount is not None:
-        #     if other._Issuecount is None:
-        #         return False
-        #     if self._Issuecount != other._Issuecount:
-        #         return False
         return True
 
     # .....................
