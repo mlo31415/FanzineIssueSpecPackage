@@ -114,16 +114,17 @@ class FanzineSeriesInfo:
                 return False
             if self._Country.lower() != other._Country.lower():
                 return False
-        if self._URL is not None:
-            if other._URL is None:
-                return False
-            if self._URL != other._URL:
-                return False
+        # if self._URL is not None:
+        #     if other._URL is None:
+        #         return False
+        #     if self._URL != other._URL:
+        #         return False
         return True
 
     # .....................
     def __add__(self, b: FanzineSeriesInfo):  # FanzineSeriesInfo
         ret=FanzineSeriesInfo(SeriesName=self.SeriesName, Editor=self.Editor, DisplayName=self.DisplayName, Country=self.Country, URL=self.URL)
+        #Log("FanzineSeriesInfo.add:  self.URL="+self.URL+"     b.URL="+b.URL)
         ret.Issuecount=self.Issuecount+b.Issuecount
         ret.Pagecount=self.Pagecount+b.Pagecount
         return ret
