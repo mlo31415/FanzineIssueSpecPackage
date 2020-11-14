@@ -114,11 +114,11 @@ class FanzineCounts:
 class FanzineSeriesInfo:
 
     def __init__(self, SeriesName: Optional[str] = None, DisplayName: Optional[str] = None,
-                 URL: Optional[str] = None, Issuecount: Optional[int]=None, 
+                 DirURL: Optional[str] = None, Issuecount: Optional[int]=None,
                  Pagecount: Optional[int] = None, Editor: Optional[str] = None, Country: str = "") -> None:
         _SeriesName: Optional[str]=None  # Name of the fanzine series of which this is an issue
         _DisplayName: Optional[str]=None  # Name to use for this issue. Includes issue serial and or date
-        _URL: Optional[str]=None  # URL of series directory
+        _DirURL: Optional[str]=None  # URL of series directory
         _Pagecount: Optional[str]=None  # Page count for all the issues fanac has for this series
         _Issuecount: Optional[str]=None  # Count of issues fanac has for this series
         _Editor: Optional[str]=None  # The editor for this series (if there was one for essentially all issues)
@@ -127,7 +127,7 @@ class FanzineSeriesInfo:
         # Use the properties to set the values for all of the instance variables. We do this so that any special setter processing is done with the init values.
         self.SeriesName=SeriesName
         self.DisplayName=DisplayName
-        self.URL=URL
+        self.DirURL=DirURL
         self.Pagecount=Pagecount
         self.Issuecount=Issuecount
         self.Editor=Editor
@@ -212,7 +212,7 @@ class FanzineSeriesInfo:
             return False
         if self._DisplayName is not None:
             return False
-        if self.URL is not None:
+        if self.DirURL is not None:
             return False
         # if self.Pagecount is not None:
         #     return False
@@ -253,11 +253,11 @@ class FanzineSeriesInfo:
 
     # .....................
     @property
-    def URL(self) -> Optional[str]:  # FanzineSeriesInfo
+    def DirURL(self) -> Optional[str]:  # FanzineSeriesInfo
         return self._URL
 
-    @URL.setter
-    def URL(self, val: Optional[str]) -> None:  # FanzineSeriesInfo
+    @DirURL.setter
+    def DirURL(self, val: Optional[str]) -> None:  # FanzineSeriesInfo
         self._URL=val
 
     # .....................
