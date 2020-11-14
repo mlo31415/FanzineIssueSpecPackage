@@ -195,11 +195,15 @@ class FanzineSeriesInfo:
         return True
 
     # .....................
-    def __add__(self, b: FanzineSeriesInfo):  # FanzineSeriesInfo
-        ret=FanzineSeriesInfo(SeriesName=self.SeriesName, Editor=self.Editor, DisplayName=self.DisplayName, Country=self.Country, URL=self.URL)
+    def __add__(self, b: [FanzineSeriesInfo, int]):  # FanzineSeriesInfo
+        ret=FanzineSeriesInfo(SeriesName=self.SeriesName, Editor=self.Editor, DisplayName=self.DisplayName, Country=self.Country, DirURL=self.DirURL)
         #Log("FanzineSeriesInfo.add:  self.URL="+self.URL+"     b.URL="+b.URL)
-        ret.Issuecount=self.Issuecount+b.Issuecount
-        ret.Pagecount=self.Pagecount+b.Pagecount
+        if type(b) is FanzineSeriesInfo:
+            ret.Issuecount=self.Issuecount+b.Issuecount
+            ret.Pagecount=self.Pagecount+b.Pagecount
+        else:
+            ret.Issuecount=self._Issuecount+1
+            ret.Pagecount=self.Pagecount+b
         return ret
 
     # .....................
