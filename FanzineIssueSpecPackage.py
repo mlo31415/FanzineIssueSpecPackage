@@ -1914,13 +1914,13 @@ class FanzineIssueSpecList:
 class FanzineIssueInfo:
 
     def __init__(self, SeriesName: Optional[str]=None, IssueName: Optional[str]=None, DisplayName: Optional[str]=None,
-                 DirURL: Optional[str]=None, URL: Optional[str]=None,
+                 DirURL: Optional[str]=None, PageName: Optional[str]=None,
                  FIS: Optional[FanzineIssueSpec]=None, Pagecount: Optional[int]=None, Editor: Optional[str]=None, Country: str="") -> None:
         _SeriesName: Optional[str]=None     # Name of the fanzine series of which this is an issue
         _IssueName: Optional[str]=None      # Name of this issue (does not include issue #/date info)
         _DisplayName: Optional[str]=None    # Name to use for this issue. Includes issue serial and or date
         _DirURL: Optional[str]=None  # URL of fanzine directory
-        _URL: Optional[str]=None  # URL of specific issue in directory
+        _PageName: Optional[str]=None  # URL of specific issue in directory
         _FIS: Optional[FanzineIssueSpec]=None  # FIS for this issue
         _Pagecount: Optional[str]=None  # Page count for this issue
         _Editor: Optional[str]=None     # The editor for this issue.  If None, use the editor of the series
@@ -1931,7 +1931,7 @@ class FanzineIssueInfo:
         self.IssueName=IssueName
         self.DisplayName=DisplayName
         self.DirURL=DirURL
-        self.URL=URL
+        self.PageName=PageName
         self.FIS=FIS
         self.Pagecount=Pagecount
         self.Editor=Editor
@@ -2034,7 +2034,7 @@ class FanzineIssueInfo:
             return False
         if self.DirURL is not None:
             return False
-        if self.URL is not None:
+        if self.PageName is not None:
             return False
         if self.Pagecount is not None:
             return False
@@ -2090,12 +2090,12 @@ class FanzineIssueInfo:
 
     # .....................
     @property
-    def URL(self) -> Optional[str]:                       # FanzineIssueInfo
-        return self._URL
+    def PageName(self) -> Optional[str]:                       # FanzineIssueInfo
+        return self._PageName
 
-    @URL.setter
-    def URL(self, val: Optional[str]) -> None:                       # FanzineIssueInfo
-        self._URL=val
+    @PageName.setter
+    def PageName(self, val: Optional[str]) -> None:                       # FanzineIssueInfo
+        self._PageName=val
 
     # .....................
     @property
