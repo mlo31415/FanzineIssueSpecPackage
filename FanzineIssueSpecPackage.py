@@ -22,7 +22,7 @@ from __future__ import annotations
 
 import math
 import re
-from typing import Union, Tuple, Optional, List
+from typing import Union, Tuple, Optional, List, Any
 from contextlib import suppress
 import datetime
 from dateutil import parser
@@ -38,6 +38,79 @@ from HelpersPackage import CaseInsensitiveCompare
 from HelpersPackage import CanonicizeColumnHeaders
 
 
+class FanzineCounts:
+    def __init__(self, Object: Optional[Any]=None, Issuecount: int=0, Pagecount: int=0):
+        _Object: Optional[Any]=None  # A FanzineIssueInto or a FanzineSeriesInfo or str (for country)
+        _Issuecount: int=0  # Count of issues fanac has for this object
+        _Pagecount: int=0  # Page count for all the issues fanac has for this pbject
+        self.Object=Object
+        if Issuecount == 0 and Pagecount > 0:   # If it is initialized with a pagseoun only, add an isseu count of 1
+            Issuecount=1
+        self.Issuecount=Issuecount
+        self.Pagecount=Pagecount
+
+
+    # .....................
+    def __str__(self) -> str:  # FanzineCounts
+        out=""
+        if self.Object is not None:
+            out="{"+str(self.Object)+"}  "
+        return out+str(self.Issuecount)+" issues" + "  "+str(self.Pagecount)+" pp"
+
+
+    def __eq__(self, other: FanzineCounts) -> bool:  # FanzineCounts
+        if self._Object is not None:
+            if other._Object is None:
+                return False
+            if self._Object != other._Object:
+                return False
+        return True
+
+    # .....................
+    def __add__(self, b: Any):  # FanzineCounts
+        ret=FanzineCounts(Object=self.Object)
+        if type(b) is FanzineCounts:
+            ret.Issuecount=self.Issuecount+b.Issuecount
+            ret.Pagecount=self.Pagecount+b.Pagecount
+        elif type(b) is int:    # The int is taken to be a pagecount, and the issue count is automatically incremented
+            ret.Issuecount=self.Issuecount+1
+            ret.Pagecount=self.Pagecount+b
+        else:
+            assert()
+
+        return ret
+
+    # .....................
+    @property
+    def Object(self) -> Optional[str]:  # FanzineCounts
+        return self._Object
+
+    @Object.setter
+    def Object(self, val: Optional[str]) -> None:  # FanzineCounts
+        if val is not None:
+            val=val.strip()
+        self._Object=val
+
+    # .....................
+    @property
+    def Pagecount(self) -> Optional[int]:  # FanzineCounts
+        return self._Pagecount
+
+    @Pagecount.setter
+    def Pagecount(self, val: Optional[int]) -> None:  # FanzineCounts
+        self._Pagecount=val
+
+    # .....................
+    @property
+    def Issuecount(self) -> Optional[int]:  # FanzineCounts
+        return self._Issuecount
+
+    @Issuecount.setter
+    def Issuecount(self, val: Optional[int]) -> None:  # FanzineCounts
+        self._Issuecount=val
+
+
+############################################################################################
 class FanzineSeriesInfo:
 
     def __init__(self, SeriesName: Optional[str] = None, DisplayName: Optional[str] = None,
