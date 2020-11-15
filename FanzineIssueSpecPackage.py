@@ -2006,10 +2006,10 @@ class FanzineIssueInfo:
                 return False
             if self._DirURL != other._DirURL:
                 return False
-        if self._URL is not None:
-            if other._URL is None:
+        if self._PageName is not None:
+            if other._PageName is None:
                 return False
-            if self._URL != other._URL:
+            if self._PageName != other._PageName:
                 return False
         if self._Pagecount is not None:
             if other._Pagecount is None:
