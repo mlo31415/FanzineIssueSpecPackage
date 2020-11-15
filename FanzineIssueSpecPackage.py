@@ -67,7 +67,7 @@ class FanzineCounts:
         return True
 
     # .....................
-    def __add__(self, b: Any):  # FanzineCounts
+    def __add__(self, b: Any) -> FanzineCounts:  # FanzineCounts
         ret=FanzineCounts(Object=self.Object)
         if type(b) is FanzineCounts:
             ret.Issuecount=self.Issuecount+b.Issuecount
