@@ -1914,8 +1914,8 @@ class FanzineIssueSpecList:
 class FanzineIssueInfo:
 
     def __init__(self, SeriesName: Optional[str]=None, IssueName: Optional[str]=None, DisplayName: Optional[str]=None,
-                 DirURL: Optional[str]=None, PageName: Optional[str]=None,
-                 FIS: Optional[FanzineIssueSpec]=None, Pagecount: Optional[int]=None, Editor: Optional[str]=None, Country: str="") -> None:
+                 DirURL: Optional[str]=None, PageName: Optional[str]=None, FIS: Optional[FanzineIssueSpec]=None,
+                 Pagecount: Optional[int]=None, Editor: Optional[str]=None, Country: str="", Taglist: Optional[List[str]]=None) -> None:
         _SeriesName: Optional[str]=None     # Name of the fanzine series of which this is an issue
         _IssueName: Optional[str]=None      # Name of this issue (does not include issue #/date info)
         _DisplayName: Optional[str]=None    # Name to use for this issue. Includes issue serial and or date
@@ -1925,6 +1925,7 @@ class FanzineIssueInfo:
         _Pagecount: Optional[str]=None  # Page count for this issue
         _Editor: Optional[str]=None     # The editor for this issue.  If None, use the editor of the series
         _Country: Optional[str]=None    # The country for this issue (gotten from the series's country
+        _Taglist: Optional[List[str]]=None  # A list of tags for this fanzines (e.g., "newszine")
 
         # Use the properties to set the values for all of the instance variables. We do this so that any special setter processing is done with the init values.
         self.SeriesName=SeriesName
@@ -1936,6 +1937,7 @@ class FanzineIssueInfo:
         self.Pagecount=Pagecount
         self.Editor=Editor
         self.Country=Country
+        self.Taglist=Taglist
         pass
 
     # .....................
@@ -2126,12 +2128,21 @@ class FanzineIssueInfo:
 
     # .....................
     @property
-    def Country(self) -> Optional[str]:                       # FanzineIssueInfo
+    def Country(self) -> Optional[str]:  # FanzineIssueInfo
         return self._Country
 
     @Country.setter
-    def Country(self, val: Optional[str]) -> None:                       # FanzineIssueInfo
+    def Country(self, val: Optional[str]) -> None:  # FanzineIssueInfo
         self._Country=val
+
+    # .....................
+    @property
+    def Taglist(self) -> Optional[List[str]]:                  # FanzineIssueInfo
+        return self._Taglist
+
+    @Taglist.setter
+    def Taglist(self, val: Optional[List[str]]) -> None:              # FanzineIssueInfo
+        self._Taglist=val
 
 
 ######################################################################################################################
