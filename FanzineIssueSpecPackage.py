@@ -244,8 +244,6 @@ class FanzineSeriesInfo:
     # .....................
     @property
     def DisplayName(self) -> str:  # FanzineSeriesInfo
-        if self._Editor is not None:
-            return self.SeriesName+" ("+self._Editor+")"
         if self._DisplayName is not None:
             return self._DisplayName
         return self.SeriesName
