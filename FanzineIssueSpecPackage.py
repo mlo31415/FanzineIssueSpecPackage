@@ -246,7 +246,6 @@ class FanzineSeriesInfo:
     def DisplayName(self) -> str:  # FanzineSeriesInfo
         if self._Editor is not None:
             return self.SeriesName+" ("+self._Editor+")"
-        return self.SeriesName      #TODO: Temporary!!! need to remove!!
         if self._DisplayName is not None:
             return self._DisplayName
         return self.SeriesName
