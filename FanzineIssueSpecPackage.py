@@ -39,32 +39,36 @@ from HelpersPackage import CanonicizeColumnHeaders
 
 
 class FanzineCounts:
-    def __init__(self, Object: Optional[Any]=None, Issuecount: int=0, Pagecount: int=0):
-        _Object: Optional[Any]=None  # A FanzineIssueInto or a FanzineSeriesInfo or str (for country)
-        _Issuecount: int=0  # Count of issues fanac has for this object
-        _Pagecount: int=0  # Page count for all the issues fanac has for this pbject
+    def __init__(self, Object: Optional[Any]=None, Issuecount: int=0, Pagecount: int=0, Titlecount: int=0):
+#        _Object: Optional[Any]=None  # A FanzineIssueInto or a FanzineSeriesInfo or str (for country)
+        _Titlecount: int=0  # Count of distinct titles.
+        _Issuecount: int=0  # Count of issues in all the titles
+        _Pagecount: int=0   # Cumulative page count for all the issues
         self.Object=Object
         if Issuecount == 0 and Pagecount > 0:   # If it is initialized with a pagseoun only, add an isseu count of 1
             Issuecount=1
         self.Issuecount=Issuecount
         self.Pagecount=Pagecount
+        self.Titlecount=Titlecount
 
 
     # .....................
     def __str__(self) -> str:  # FanzineCounts
         out=""
-        if self.Object is not None:
-            out="{"+str(self.Object)+"}  "
-        return out+str(self.Issuecount)+" issues" + "  "+str(self.Pagecount)+" pp"
+        # if self.Object is not None:
+        #     out="{"+str(self.Object)+"}  "
+        if self.Titlecount > 0:
+            out=str(self.Titlecount)+" titles  "
+        return out+str(self.Issuecount)+" issues  "+str(self.Pagecount)+" pp"
 
 
-    def __eq__(self, other: FanzineCounts) -> bool:  # FanzineCounts
-        if self._Object is not None:
-            if other._Object is None:
-                return False
-            if self._Object != other._Object:
-                return False
-        return True
+    # def __eq__(self, other: FanzineCounts) -> bool:  # FanzineCounts
+    #     if self._Object is not None:
+    #         if other._Object is None:
+    #             return False
+    #         if self._Object != other._Object:
+    #             return False
+    #     return True
 
     # .....................
     def __add__(self, b: Any) -> FanzineCounts:  # FanzineCounts
@@ -72,42 +76,53 @@ class FanzineCounts:
         if type(b) is FanzineCounts:
             ret.Issuecount=self.Issuecount+b.Issuecount
             ret.Pagecount=self.Pagecount+b.Pagecount
+            ret.Titlecount=self.Titlecount      # Titlecount needs to be incremented (or not) independently
         elif type(b) is int:    # The int is taken to be a pagecount, and the issue count is automatically incremented
             ret.Issuecount=self.Issuecount+1
             ret.Pagecount=self.Pagecount+b
+            ret.Titlecount=self.Titlecount      # Titlecount needs to be incremented (or not) independently
         else:
             assert()
 
         return ret
 
     # .....................
-    @property
-    def Object(self) -> Optional[str]:  # FanzineCounts
-        return self._Object
-
-    @Object.setter
-    def Object(self, val: Optional[str]) -> None:  # FanzineCounts
-        if val is not None:
-            val=val.strip()
-        self._Object=val
+    # @property
+    # def Object(self) -> Optional[str]:  # FanzineCounts
+    #     return self._Object
+    #
+    # @Object.setter
+    # def Object(self, val: Optional[str]) -> None:  # FanzineCounts
+    #     if val is not None:
+    #         val=val.strip()
+    #     self._Object=val
 
     # .....................
     @property
-    def Pagecount(self) -> Optional[int]:  # FanzineCounts
+    def Pagecount(self) -> int:  # FanzineCounts
         return self._Pagecount
 
     @Pagecount.setter
-    def Pagecount(self, val: Optional[int]) -> None:  # FanzineCounts
+    def Pagecount(self, val: int) -> None:  # FanzineCounts
         self._Pagecount=val
 
     # .....................
     @property
-    def Issuecount(self) -> Optional[int]:  # FanzineCounts
+    def Issuecount(self) -> int:  # FanzineCounts
         return self._Issuecount
 
     @Issuecount.setter
-    def Issuecount(self, val: Optional[int]) -> None:  # FanzineCounts
+    def Issuecount(self, val: int) -> None:  # FanzineCounts
         self._Issuecount=val
+
+    # .....................
+    @property
+    def Titlecount(self) -> int:  # FanzineCounts
+        return self._Titlecount
+
+    @Titlecount.setter
+    def Titlecount(self, val: int) -> None:  # FanzineCounts
+        self._Titlecount=val
 
 
 ############################################################################################
@@ -120,7 +135,7 @@ class FanzineSeriesInfo:
         _DisplayName: Optional[str]=None  # Name to use for this issue. Includes issue serial and or date
         _DirURL: Optional[str]=None  # URL of series directory
         _Pagecount: int=0  # Page count for all the issues fanac has for this series
-        _Issuecount: Optional[str]=None  # Count of issues fanac has for this series
+        _Issuecount: Optional[int]=None  # Count of issues fanac has for this series
         _Editor: Optional[str]=None  # The editor for this series (if there was one for essentially all issues)
         _Country: Optional[str]=None  # The country for this issue (gotten from the series's country
 
@@ -267,7 +282,6 @@ class FanzineSeriesInfo:
     @property
     def Pagecount(self) -> Optional[int]:  # FanzineSeriesInfo
         return self._Pagecount
-
     @Pagecount.setter
     def Pagecount(self, val: Optional[int]) -> None:  # FanzineSeriesInfo
         self._Pagecount=val
@@ -278,16 +292,20 @@ class FanzineSeriesInfo:
         if self._Issuecount is None:
             return 0
         return self._Issuecount
-
     @Issuecount.setter
     def Issuecount(self, val: Optional[int]) -> None:  # FanzineSeriesInfo
         self._Issuecount=val
 
     # .....................
+    # Neeed for compatibility, but always zero
+    @property
+    def Titlecount(self) -> int:  # FanzineSeriesInfo
+        return 0
+
+    # .....................
     @property
     def Country(self) -> Optional[str]:  # FanzineSeriesInfo
         return self._Country
-
     @Country.setter
     def Country(self, val: Optional[str]) -> None:  # FanzineSeriesInfo
         self._Country=val
