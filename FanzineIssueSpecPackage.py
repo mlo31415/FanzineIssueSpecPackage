@@ -369,14 +369,13 @@ class FanzineDate:
 
     def FromJson(self, val: str) -> FanzineDate:
         d=json.loads(val)
-        if d["ver"] == 1:
-            self._Year=d["_Year"]
-            self._Month=d["_Month"]
-            self._MonthText=d["_MonthText"]
-            self._Day=d["_Day"]
-            self._DayText=d["_DayText"]
-            self._MonthDayText=d["_MonthDayText"]
-            self._LongDates=d["_LongDates"]
+        self._Year=d["_Year"]
+        self._Month=d["_Month"]
+        self._MonthText=d["_MonthText"]
+        self._Day=d["_Day"]
+        self._DayText=d["_DayText"]
+        self._MonthDayText=d["_MonthDayText"]
+        self._LongDates=d["_LongDates"]
         return self
 
     # -----------------------------
@@ -496,7 +495,9 @@ class FanzineDate:
         if self._Month is not None:
             return MonthName(self._Month)
         return ""
-    # There is no MonthText setter -- to set it use the init or the Month setter
+    @MonthText.setter
+    def MonthText(self, mt: str):
+        self._MonthText=mt
 
     # .....................
     @property
@@ -702,10 +703,12 @@ class FanzineDate:
     @classmethod
     def Match(cls, s: str, strict: bool=False, complete: bool=True) -> FanzineDate:               # FanzineDate
 
+        self=cls()
+
         # Whitespace is not a date...
         dateText=s.strip()
         if len(dateText) == 0:
-            return cls()
+            return self
 
         # There are some dates which follow no useful pattern.  Check for them
         d=InterpretRandomDatestring(dateText)
@@ -717,7 +720,8 @@ class FanzineDate:
         if m is not None and m.groups() is not None and len(m.groups()) == 1:
             y=ValidFannishYear(m.groups()[0])
             if y is not None:
-                return cls(Year=y)
+                self.Year=y
+                return self
 
         # Look for mm/dd/yy and mm/dd/yyyy
         m=re.compile("^(\d{1,2})/(\d{1,2})/(\d{2}|\d{4})$").match(dateText)
@@ -731,13 +735,19 @@ class FanzineDate:
                 m=int(g1t)
                 d=int(g2t)
                 if ValidateDay(d, m, y):
-                    return cls(Year=y, Month=m, Day=d)
+                    self.Year=y
+                    self.Month=m
+                    self.Day=d
+                    return self
 
                 # Maybe European date format?
                 d=int(g1t)
                 m=int(g2t)
                 if ValidateDay(d, m, y):
-                    return cls(Year=y, Month=m, Day=d)
+                    self.Year=y
+                    self.Month=m
+                    self.Day=d
+                    return self
 
         # Look for <month> <yy> or <yyyy> where month is a recognizable month name and the <y>s form a fannish year
         # Note that the mtext and ytext found here may be analyzed several different ways
@@ -750,7 +760,10 @@ class FanzineDate:
                 if InterpretMonth(mtext) is not None:
                     md=InterpretMonthDay(mtext)
                     if md is not None:
-                        return cls(Year=ytext, Month=md[0], Day=md[1])
+                        self.Year=ytext
+                        self.Month=md[0]
+                        self.Day=md[1]
+                        return self
 
             # There are some words which are relative terms "late september", "Mid february" etc.
             # Give them a try.
@@ -763,7 +776,10 @@ class FanzineDate:
                     m=MonthNameToInt(mtext)
                     d=InterpretRelativeWords(modifier)
                     if m is not None and d is not None:
-                        return cls(Year=y, Month=m, Day=(d, modifier))
+                        self.Year=y
+                        self.Month=m
+                        self.Day=(d, modifier)
+                        return self
 
         # Annoyingly, the standard date parser doesn't like "." designating an abbreviated month name.  Deal with mmm. dd, yyyy
         m=re.compile("^([\s\w\-',]+).?\s+(\d+),?\s+(\d\d|\d\d\d\d)$").match(dateText)  # Month +[,] + 2- or 4-digit year
@@ -775,8 +791,10 @@ class FanzineDate:
             if y is not None and mtext is not None:
                 m=InterpretMonth(mtext)
                 if m is not None:
-                    d=Int(dtext)
-                    return cls(Year=ytext, Month=m, Day=d)
+                    self.Year=ytext
+                    self.Month=m
+                    self.Day=Int(dtext)
+                    return self
 
         # Look for <dd> <month> [,] <yyyy> where month is a recognizable month name and the <y>s form a fannish year
         # Note that the mtext and ytext found here may be analyzed several different ways
@@ -789,8 +807,10 @@ class FanzineDate:
             if y is not None and mtext is not None:
                 m=InterpretMonth(mtext)
                 if m is not None:
-                    d=Int(dtext)
-                    return cls(Year=ytext, Month=m, Day=d)
+                    self.Year=ytext
+                    self.Month=m
+                    self.Day=Int(dtext)
+                    return self
 
         # There are some weird day/month formats (E.g., "St. Urho's Day 2013")
         # Look for a pattern of: <strange day/month> <year>
@@ -802,7 +822,11 @@ class FanzineDate:
             if y is not None and mtext is not None:
                 rslt=InterpretNamedDay(mtext)  # mtext was extracted by whichever pattern recognized the year and set y to non-None
                 if rslt is not None:
-                    return cls(Year=y, Month=rslt[0], Day=rslt[1], MonthDayText=mtext)
+                    self.Year=y
+                    self.Month=rslt[0]
+                    self.Day=rslt[1]
+                    self.MonDayText=mtext
+                    return self
 
         # There are a few annoying entries of the form "Winter 1951-52"  They all *appear* to mean something like January 1952
         # We'll try to handle this case
@@ -822,13 +846,19 @@ class FanzineDate:
             m=InterpretMonth(month1)
             y=int(year)
             if m is not None:
-                return cls(Year=y, Month=m, MonthText=month1+"-"+month2)
+                self.Year=y
+                self.Month=m
+                self.MonthText=month1+"-"+month2
+                return self
 
         # Next we'll look for yyyy-yy all alone
         p=re.compile("^\d\d\d\d\s*-\s*(\d\d)$")
         m=p.match(dateText)
         if m is not None and len(m.groups()) == 1:
-            return cls(Year=int(m.groups()[0]), Month=1)    # Use the second part of the year, and given that this is yyyy-yy, it probably is a vaguely winterish date
+            self.Year=int(m.groups()[0])
+            self.Month=1
+            return self
+            # Use the second part of the year, and given that this is yyyy-yy, it probably is a vaguely winterish date
 
         # Another form is the fannish "April 31, 1967" -- didn't want to miss that April mailing date!
         # We look for <month><number>,<year> with possible spaces between. Comma is optional.
@@ -842,7 +872,10 @@ class FanzineDate:
             d=InterpretDay(dtext)
             if y is not None and m is not None and d is not None:
                 bd, bm, by=BoundDay(d, m, y)
-                return cls(Year=by, Month=bm, Day=bd)
+                self.Year=by
+                self.Month=bm
+                self.Day=bd
+                return self
 
         # Try dateutil's parser on the string
         # If it works, we've got an answer. If not, we'll keep trying.
@@ -851,10 +884,13 @@ class FanzineDate:
             with suppress(Exception):
                 d=parser.parse(dateText, default=datetime.datetime(1, 1, 1))
                 if d != datetime.datetime(1, 1, 1):
-                    return cls(Year=d.year, Month=d.month, Day=d.day)
+                    self.Year=d.year
+                    self.Month=d.month
+                    self.Day=d.day
+                    return self
 
         # Nothing worked
-        return cls()
+        return self
 
 
 #$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
@@ -870,11 +906,10 @@ class FanzineDateRange:
            "_enddate": self._enddate.ToJson()}
         return json.dumps(d)
 
-    def FromJson(self, val: str) -> FanzineDateRange:
+    def FromJson(self, val: str) -> FanzineDateRange:               # FanzineDateRange
         d=json.loads(val)
-        if d["ver"] == 1:
-            self._startdate=FanzineDate().FromJson(d["_startdate"])
-            self._enddate=FanzineDate().FromJson(d["_enddate"])
+        self._startdate=FanzineDate().FromJson(d["_startdate"])
+        self._enddate=FanzineDate().FromJson(d["_enddate"])
         return self
 
     # -----------------------------
@@ -882,11 +917,11 @@ class FanzineDateRange:
         return hash(self._startdate)+hash(self._enddate)
 
     # -----------------------------
-    def __eq__(self, other:FanzineDateRange) -> bool:
+    def __eq__(self, other:FanzineDateRange) -> bool:               # FanzineDateRange
         return self._startdate == other._startdate and self._enddate == other._enddate
 
     # -----------------------------
-    def __lt__(self, other:FanzineDateRange) -> bool:
+    def __lt__(self, other:FanzineDateRange) -> bool:               # FanzineDateRange
         if self._startdate < other._startdate:
             return True
         if self._startdate == other._startdate:
@@ -894,7 +929,7 @@ class FanzineDateRange:
         return False
 
     # -----------------------------
-    def __str__(self) -> str:
+    def __str__(self) -> str:               # FanzineDateRange
         d1=self._startdate
         d2=self._enddate
         if d1 is None and d2 is None:
@@ -919,6 +954,12 @@ class FanzineDateRange:
     def Match(self, s: str, strict: bool=False, complete: bool=True) -> FanzineDateRange:               # FanzineDateRange
         if s is None:
             return self
+
+        # Whitespace is not a date...
+        dateText=s.strip()
+        if len(dateText) == 0:
+            return self
+
         # If we have a single "-", then the format is probably of the form:
         #   #1: <month+day>-<month+day> year  or
         #   #2: <month> <day>-<day> <year>
@@ -950,8 +991,8 @@ class FanzineDateRange:
                 m=slist[0]
                 if not IsInt(m):    # m must be a text month -- it can't be a number
                     y=slist[3]
-                    d1=FanzineDate().Match(m+" "+slist[1]+" "+y)
-                    d2=FanzineDate().Match(m+" "+slist[2]+" "+y)
+                    d1=FanzineDate().Match(m+" "+slist[1]+", "+y)
+                    d2=FanzineDate().Match(m+" "+slist[2]+", "+y)
                     if not d1.IsEmpty() and not d2.IsEmpty():
                         self._startdate=d1
                         self._enddate=d2
@@ -981,7 +1022,7 @@ class FanzineDateRange:
                     return self
 
         # Try just an ordinary single date
-        d=FanzineDate.Match(s)
+        d=FanzineDate().Match(s)
         if not d.IsEmpty():
             self._startdate=d
             self._enddate=d
