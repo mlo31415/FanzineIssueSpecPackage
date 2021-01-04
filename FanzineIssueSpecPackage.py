@@ -2789,7 +2789,7 @@ def MonthNameToInt(text: str) -> Optional[int]:
     text=text.replace(" ", "").lower()
 
     # First look to see if the input is two month names separated by a non-alphabetic character (e.g., "September-November"
-    m=re.compile("^([a-zA-Z]+)[-/]([a-zA-Z]+)$").match(text)
+    m=re.compile("^([a-z]+)[-/]([a-z]+)$").match(text)
     if m is not None and len(m.groups()) == 2 and len(m.groups()[0]) > 0:
         m1=MonthNameToInt(m.groups()[0])
         m2=MonthNameToInt(m.groups()[1])
