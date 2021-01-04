@@ -1038,6 +1038,8 @@ class FanzineDateRange:
     # ...................
     # Return the duration of the range in days
     def Duration(self) -> int:
+        if self._enddate is None or self._startdate is None:
+            return 0
         return self._enddate-self._startdate
 
 
