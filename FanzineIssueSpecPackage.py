@@ -1158,8 +1158,7 @@ class FanzineSerial:
         self._NumSuffix=other._NumSuffix
         self._Whole=other._Whole
         self._WSuffix=other._WSuffix
-        #self._UninterpretableText=other._UninterpretableText
-        #self._TrailingGarbage=other._TrailingGarbage
+
 
     # -----------------------------
     def SetIntProperty(self, val: Union[None, int, str]) -> Optional[int]:
