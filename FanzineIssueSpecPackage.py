@@ -1042,6 +1042,15 @@ class FanzineDateRange:
             return 0
         return self._enddate-self._startdate
 
+    def IsOdd(self) -> bool:
+        if self._enddate is None or self._startdate is None:
+            return True
+        if self.Duration() > 5:
+            return True
+        if self._startdate.IsEmpty() or self._enddate.IsEmpty():
+            return True
+        return False
+
 
 
 #$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
