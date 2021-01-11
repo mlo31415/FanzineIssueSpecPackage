@@ -2424,6 +2424,7 @@ def InterpretNamedDay(dayString: str) -> Optional[Tuple[int, int]]:
         "chinese new year": (2, 15),
         "lunar new year": (2, 15),
         "leap day": (2, 29),
+        "Late February or early March": (3, None),
         "ides of march": (3, 15),
         "st urho's day": (3, 16),
         "st. urho's day": (3, 16),
@@ -2458,6 +2459,7 @@ def InterpretNamedDay(dayString: str) -> Optional[Tuple[int, int]]:
         "remembrance day": (11, 11),
         "rememberance day": (11, 11),
         "thanksgiving": (11, 24),
+        ''"around the end"'': (12, None),
         "november (december)": (12, None),
         "before christmas december": (12, 15),
         "saturnalia": (12, 21),
@@ -2469,6 +2471,7 @@ def InterpretNamedDay(dayString: str) -> Optional[Tuple[int, int]]:
         "boxing day": (12, 26),
         "hogmanay": (12, 31),
         "auld lang syne": (12, 31),
+        ''"over year end"'': (12, 31)
     }
     with suppress(Exception):
         return namedDayConverstionTable[dayString.lower().replace(",", "")]
