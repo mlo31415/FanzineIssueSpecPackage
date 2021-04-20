@@ -710,6 +710,10 @@ class FanzineDate:
         if len(dateText) == 0:
             return self
 
+        # Turn any long dashes and double hyphens into single hyphens
+        dateText=dateText.replace('—', '-')
+        dateText=dateText.replace('--', '-')
+
         # There are some dates which follow no useful pattern.  Check for them
         d=InterpretRandomDatestring(dateText)
         if d is not None:
@@ -966,6 +970,7 @@ class FanzineDateRange:
         #   #3: <day>-<day> <month>[,] <year>
         #   #4: <month+day> <year1> - <month+day> <year2>
         s=s.replace("–", "-")   # Convert en-dash to hyphen
+        s=s.replace("—", "-")  # Convert em-dash to hyphen
         s=s.replace("--", "-")  # Likewise double-hyphens
         s=s.replace("  ", " ").replace("  ", " ")  # Collapse strings of spaces
         s=s.replace(" -", "-").replace("- ", "-")  # Remove spaces around "-"
@@ -2601,8 +2606,10 @@ def InterpretYear(yearText: Optional[int, str]) -> Optional[int, str]:
     except:
         # OK, that failed. Could it be because it's something like '1953-54'?
         with suppress(Exception):
-            if '-' in yearText:
+            if '-' in yearText or '–' in yearText:
                 years=yearText.split("-")
+                if len(years) == 1:
+                    years=years[0].split("–")   # Try the longer dash
                 if len(years) == 2:
                     y1=YearAs4Digits(int(years[0]))
                     y2=YearAs4Digits(int(years[1]))
