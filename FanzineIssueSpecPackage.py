@@ -723,7 +723,7 @@ class FanzineDate:
         m=re.compile("^(\d\d\d\d)$").match(dateText)  # Month + 2- or 4-digit year
         if m is not None and m.groups() is not None and len(m.groups()) == 1:
             y=ValidFannishYear(m.groups()[0])
-            if y is not None:
+            if y != "0":
                 self.Year=y
                 return self
 
