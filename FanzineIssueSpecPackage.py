@@ -2558,14 +2558,14 @@ def YearAs4Digits(year: Optional[int, str]) -> Optional[int]:
 
 
 # =================================================================================
-# Take a string which suppoedly designates a year and return either a valid fannish year or None
-def ValidFannishYear(ytext: str) -> Optional[str]:
+# Take a string which supposedly designates a year and return either a valid fannish year or None
+def ValidFannishYear(ytext: str) -> str:
     if ytext is None:
-        return None
+        return "0"  # error
     y=YearAs4Digits(ytext)
     if 1860 < y < 2100:     # numbers outside this range of years can't be a fannish date
         return str(y)
-    return None
+    return "0"  # error
 
 
 # =================================================================================
