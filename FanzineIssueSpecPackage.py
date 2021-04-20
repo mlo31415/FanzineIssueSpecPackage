@@ -2574,7 +2574,7 @@ def ValidateDay(d: int, m: int, year: int=None) -> bool:
     monthlength=MonthLength(m)
     # Handle leap years
     if year is not None and year%4 == 0 and year % 400 != 0:
-        if m is 2:
+        if m == 2:
             monthlength=29
     return d > 0 and d <= monthlength
 
