@@ -903,22 +903,30 @@ class FanzineDateRange:
     def __init__(self):
         self._startdate: Optional[FanzineDate]=None
         self._enddate: Optional[FanzineDate]=None
+        self._cancelled: bool=False
 
     def ToJson(self) -> str:
-        d={"ver": 1,
-           "_startdate": self._startdate.ToJson(),
-           "_enddate": self._enddate.ToJson()}
+        d={"ver": 2,
+            "_startdate": self._startdate.ToJson(),
+            "_enddate": self._enddate.ToJson(),
+            "_cancelled": self._cancelled}
+
         return json.dumps(d)
 
     def FromJson(self, val: str) -> FanzineDateRange:               # FanzineDateRange
         d=json.loads(val)
+        ver=d["ver"]
         self._startdate=FanzineDate().FromJson(d["_startdate"])
         self._enddate=FanzineDate().FromJson(d["_enddate"])
+        self._cancelled=False
+        if ver > 1:
+            self._cancelled=("true" == d["_cancelled"])
+
         return self
 
     # -----------------------------
     def __hash__(self):
-        return hash(self._startdate)+hash(self._enddate)
+        return hash(self._startdate)+hash(self._enddate)+hash(self._cancelled)
 
     # -----------------------------
     def __eq__(self, other:FanzineDateRange) -> bool:               # FanzineDateRange
@@ -952,7 +960,19 @@ class FanzineDateRange:
                     return MonthName(d1.Month)+" "+str(d1.Day)+", "+str(d1.Year)
                 return MonthName(d1.Month)+" "+str(d1.Day)+"-"+str(d2.Day)+", "+str(d1.Year)
             return MonthName(d1.Month)+" "+str(d1.Day)+"-"+MonthName(d2.Month)+" "+str(d2.Day)+", "+str(d1.Year)
-        return str(d1)+"-"+str(d2)
+        s=str(d1)+"-"+str(d2)
+        if self._cancelled:
+            s+=" (cancelled)"
+        return s
+
+    # .....................
+    @property
+    def Cancelled(self) -> bool:             # FanzineDateRange
+        return self._cancelled
+
+    @Cancelled.setter
+    def Cancelled(self, val: bool) -> None:             # FanzineDateRange
+        self._cancelled=val
 
     #...................
     def Match(self, s: str, strict: bool=False, complete: bool=True) -> FanzineDateRange:               # FanzineDateRange
