@@ -947,20 +947,25 @@ class FanzineDateRange:
         if d1 is None and d2 is None:
             return ""
         if d1 is None and d2 is not None:
-            return str(d2)
-        if d1 is not None and d2 is None:
-            return str(d1)
-        if d1.Year == d2.Year:
+            s=str(d2)
+        elif d1 is not None and d2 is None:
+            s=str(d1)
+        elif d1.Year == d2.Year:
             if d1.Month == d2.Month:
                 if d1.Month is None:
-                    return str(d1.Year)
-                if d1.Day == d2.Day:
+                    s=str(d1.Year)
+                elif d1.Day == d2.Day:
                     if d1.Day is None:
-                        return MonthName(d1.Month)+" "+str(d1.Year)
-                    return MonthName(d1.Month)+" "+str(d1.Day)+", "+str(d1.Year)
-                return MonthName(d1.Month)+" "+str(d1.Day)+"-"+str(d2.Day)+", "+str(d1.Year)
-            return MonthName(d1.Month)+" "+str(d1.Day)+"-"+MonthName(d2.Month)+" "+str(d2.Day)+", "+str(d1.Year)
-        s=str(d1)+"-"+str(d2)
+                        s=MonthName(d1.Month)+" "+str(d1.Year)
+                    else:
+                        s=MonthName(d1.Month)+" "+str(d1.Day)+", "+str(d1.Year)
+                else:
+                    s=MonthName(d1.Month)+" "+str(d1.Day)+"-"+str(d2.Day)+", "+str(d1.Year)
+            else:
+                s=MonthName(d1.Month)+" "+str(d1.Day)+"-"+MonthName(d2.Month)+" "+str(d2.Day)+", "+str(d1.Year)
+        else:
+            s=str(d1)+"-"+str(d2)
+
         if self._cancelled:
             s+=" (cancelled)"
         return s
