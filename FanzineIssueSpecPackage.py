@@ -31,7 +31,7 @@ import json
 from Log import Log
 from HelpersPackage import ToNumeric, IsNumeric, IsInt, Int
 from HelpersPackage import RemoveHTMLDebris
-from HelpersPackage import InterpretNumber, InterpretRoman
+from HelpersPackage import InterpretNumber, InterpretRoman, InterpretInteger
 from HelpersPackage import CaseInsensitiveCompare
 from HelpersPackage import CanonicizeColumnHeaders
 
@@ -2912,7 +2912,7 @@ def ExtractSerialNumber(volText: str, numText: str, wholeText: str, volNumText: 
             numsuffix=ser.NumSuffix
 
     if volText is not None:
-        volInt=InterpretNumber(volText)
+        volInt=InterpretInteger(volText)
 
     # If there's no vol, anything under "Num", etc., must actually be a whole number
     if volText is None:
@@ -2923,7 +2923,7 @@ def ExtractSerialNumber(volText: str, numText: str, wholeText: str, volNumText: 
 
     # But if there *is* a volume specified, than any number not labelled "whole" must be a number within the volume
     if volText is not None and numText is not None:
-        numInt=InterpretNumber(numText)
+        numInt=InterpretInteger(numText)
 
     # OK, now figure out the vol, num and whole.
     # First, if a Vol is present, and an unambigious Num is absent, the an ambigious Num must be the Vol's num
