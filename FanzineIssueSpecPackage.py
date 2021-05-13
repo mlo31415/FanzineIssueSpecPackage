@@ -2017,7 +2017,7 @@ class FanzineIssueInfo:
                  DirURL: Optional[str]=None, PageName: Optional[str]=None, FIS: Optional[FanzineIssueSpec]=None,
                  Pagecount: Optional[int]=None, Editor: Optional[str]=None, Country: str="", Taglist: List[str]=None) -> None:
         _SeriesName: Optional[str]=None     # Name of the fanzine series of which this is an issue
-        _Series: FanzineSeriesInfo=None
+        _Series: Optional[FanzineSeriesInfo]=None
         _IssueName: Optional[str]=None      # Name of this issue (does not include issue #/date info)
         _DisplayName: Optional[str]=None    # Name to use for this issue. Includes issue serial and or date
         _DirURL: Optional[str]=None  # URL of fanzine directory
@@ -2464,6 +2464,7 @@ def InterpretNamedDay(dayString: str) -> Optional[Tuple[int, int]]:
         "st urho's day": (3, 16),
         "st. urho's day": (3, 16),
         "saint urho's day": (3, 16),
+        "vernal Equinox": (3, 20),
         "april fool's day": (4, 1),
         "good friday": (4, 8),
         "easter": (4, 10),
