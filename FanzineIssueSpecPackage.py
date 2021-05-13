@@ -1132,14 +1132,12 @@ class FanzineSerial:
     # is the Whole matches and at least one of the Vs and Ns is None.  (We would allow match of (W13, V3, N2) with (W13), etc.)
     def __eq__(self, other: FanzineSerial) -> bool:             # FanzineSerial
         # if the Whole numbers match, the two are the same. (Even if the Vol/Num differ.)
-        # TODO: Should we check WSuffix?
-        if self._Whole is not None and self._Whole == other._Whole:
+        if self._Whole is not None and self.__WEq__(other):
             return True
-        # If the wholes match and the Vol/Num match, they are the same
+        # If the wholes match and the Vol/Num match, the two are the same
         if self.__WEq__(other) and self.__VNEq__(other):
             return True
-        # if one of the Wholes is None and the Vol/Num match, the two are the same
-        # TODO: Should we check NumSuffix?
+        # if at least one of the Wholes is None and the Vol/Num match, the two are the same
         if (self._Whole is None or other._Whole is None) and self.__VNEq__(other):
             return True
         return False
