@@ -1941,7 +1941,7 @@ class FanzineIssueSpecList:
     # The one place we allow internal commas is in a date where the month/day can be separated from the year by a comma.
     @classmethod
     def Match(cls, s: str, strict: bool=False, complete: bool=False) -> FanzineIssueSpecList:      # FanzineIssueSpecList
-        fislist=[]      # Accumulate the list of FISs here
+        fislist: List[FanzineIssueSpec]=[]      # Accumulate the list of FISs here
 
         tokens=[t.strip() for t in s.split(",")]        # Split the input on commas
 
