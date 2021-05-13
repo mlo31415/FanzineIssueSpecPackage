@@ -2214,11 +2214,11 @@ class FanzineIssueInfo:
 
     # .....................
     @property
-    def FIS(self) -> Optional[FanzineIssueInfo]:                       # FanzineIssueInfo
+    def FIS(self) -> Optional[FanzineIssueSpec]:                       # FanzineIssueInfo
         return self._FIS
 
     @FIS.setter
-    def FIS(self, val: FanzineIssueInfo) -> None:                       # FanzineIssueInfo
+    def FIS(self, val: FanzineIssueSpec) -> None:                       # FanzineIssueInfo
         self._FIS=val
 
     # .....................
