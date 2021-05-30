@@ -2540,7 +2540,7 @@ def ValidateDay(d: int, m: int, year: int=None) -> bool:
     if year is not None and year%4 == 0 and year % 400 != 0:
         if m == 2:
             monthlength=29
-    return d > 0 and d <= monthlength
+    return 0 < d <= monthlength
 
 
 # =================================================================================
