@@ -663,7 +663,7 @@ class FanzineDate:
             return d
 
         # A 4-digit number all alone is a year
-        m=re.compile("^(\d\d\d\d)$").match(dateText)  # Month + 2- or 4-digit year
+        m=re.match("^(\d\d\d\d)$", dateText)  # Month + 2- or 4-digit year
         if m is not None and m.groups() is not None and len(m.groups()) == 1:
             y=ValidFannishYear(m.groups()[0])
             if y != "0":
@@ -671,7 +671,7 @@ class FanzineDate:
                 return self
 
         # Look for mm/dd/yy and mm/dd/yyyy
-        m=re.compile("^(\d{1,2})/(\d{1,2})/(\d{2}|\d{4})$").match(dateText)
+        m=re.match("^(\d{1,2})/(\d{1,2})/(\d{2}|\d{4})$", dateText)
         if m is not None and m.groups() is not None and len(m.groups()) == 3:
             g1t=m.groups()[0]
             g2t=m.groups()[1]
@@ -698,7 +698,7 @@ class FanzineDate:
 
         # Look for <month> <yy> or <yyyy> where month is a recognizable month name and the <y>s form a fannish year
         # Note that the mtext and ytext found here may be analyzed several different ways
-        m=re.compile("^([\s\w\-',]+).?\s+(\d\d|\d\d\d\d)$").match(dateText)  # Month +[,] + 2- or 4-digit year
+        m=re.match("^([\s\w\-',]+).?\s+(\d\d|\d\d\d\d)$", dateText)  # Month +[,] + 2- or 4-digit year
         if m is not None and m.groups() is not None and len(m.groups()) == 2:
             mtext=m.groups()[0].replace(","," ").replace("  ", " ")     # Turn a comma-space combination into a single space
             ytext=m.groups()[1]
@@ -729,7 +729,7 @@ class FanzineDate:
                         return self
 
         # Annoyingly, the standard date parser doesn't like "." designating an abbreviated month name.  Deal with mmm. dd, yyyy
-        m=re.compile("^([\s\w\-',]+).?\s+(\d+),?\s+(\d\d|\d\d\d\d)$").match(dateText)  # Month +[,] + 2- or 4-digit year
+        m=re.match("^([\s\w\-',]+).?\s+(\d+),?\s+(\d\d|\d\d\d\d)$", dateText)  # Month +[,] + 2- or 4-digit year
         if m is not None and m.groups() is not None and len(m.groups()) == 3:
             mtext=m.groups()[0].replace(","," ").replace("  ", " ")     # Turn a comma-space combination into a single space
             dtext=m.groups()[1]
@@ -745,7 +745,7 @@ class FanzineDate:
 
         # Look for <dd> <month> [,] <yyyy> where month is a recognizable month name and the <y>s form a fannish year
         # Note that the mtext and ytext found here may be analyzed several different ways
-        m=re.compile("^([\d]{1,2})\s+([\s\w\-',]+).?\s+(\d\d|\d\d\d\d)$").match(dateText)  # Month +[,] + 2- or 4-digit year
+        m=re.match("^([\d]{1,2})\s+([\s\w\-',]+).?\s+(\d\d|\d\d\d\d)$", dateText)  # Month +[,] + 2- or 4-digit year
         if m is not None and m.groups() is not None and len(m.groups()) == 3:
             dtext=m.groups()[0]
             mtext=m.groups()[1].replace(",", " ").replace("  ", " ")  # Turn a comma-space combination into a single space
@@ -761,7 +761,7 @@ class FanzineDate:
 
         # There are some weird day/month formats (E.g., "St. Urho's Day 2013")
         # Look for a pattern of: <strange day/month> <year>
-        m=re.compile("^(.+?)[,\s]+(\d\d|\d\d\d\d)$").match(dateText)  # random text + space + 2- or 4-digit year
+        m=re.match("^(.+?)[,\s]+(\d\d|\d\d\d\d)$", dateText)  # random text + space + 2- or 4-digit year
         if m is not None and m.groups() is not None and len(m.groups()) == 2:
             mtext=m.groups()[0].replace(","," ").replace("  ", " ")     # Turn a comma-space combination into a single space
             ytext=m.groups()[1]
@@ -777,15 +777,14 @@ class FanzineDate:
 
         # There are a few annoying entries of the form "Winter 1951-52"  They all *appear* to mean something like January 1952
         # We'll try to handle this case
-        p=re.compile("^Winter[,\s]+\d\d\d\d\s*-\s*(\d\d)$")
-        m=p.match(dateText)
+        m=re.match("^Winter[,\s]+\d\d\d\d\s*-\s*(\d\d)$", dateText)
         if m is not None and len(m.groups()) == 1:
             return cls(Year=int(m.groups()[0]), Month=1, MonthText="Winter")  # Use the second part (the 4-digit year)
 
         # There there are the equally annoying entries Month-Month year (e.g., 'June - July 2001') and Month/Month year.
         # These will be taken to mean the first month
         # We'll look for the pattern <text> '-' <text> <year> with (maybe) spaces between the tokens
-        m=re.compile("^(\w+)\s*[-/]\s*(\w+)\s,?\s*(\d\d\d\d)$").match(dateText)
+        m=re.match("^(\w+)\s*[-/]\s*(\w+)\s,?\s*(\d\d\d\d)$", dateText)
         if m is not None and len(m.groups()) == 3:
             month1=m.groups()[0]
             month2=m.groups()[1]
@@ -799,8 +798,7 @@ class FanzineDate:
                 return self
 
         # Next we'll look for yyyy-yy all alone
-        p=re.compile("^\d\d\d\d\s*-\s*(\d\d)$")
-        m=p.match(dateText)
+        m=re.match("^\d\d\d\d\s*-\s*(\d\d)$", dateText)
         if m is not None and len(m.groups()) == 1:
             self.Year=int(m.groups()[0])
             self.Month=1
@@ -1373,11 +1371,10 @@ class FanzineSerial:
                 ns=m.groups()[2]
             return cls(Vol=int(m.groups()[0]), Num=int(m.groups()[1]), NumSuffix=ns)
 
-        p=re.compile("V[oO][lL]\s*(\d+)\s*#(\d+)(\w?)$")
         #
         #  Vol (or VOL) + optional space + nnn + optional comma + optional space
         # + #nnn + optional single alphabetic character suffix
-        m=p.match(s)
+        m=re.match("V[oO][lL]\s*(\d+)\s*#(\d+)(\w?)$", s)
         if m is not None and len(m.groups()) in [2, 3]:
             ns=None
             if len(m.groups()) == 3:
@@ -1385,47 +1382,47 @@ class FanzineSerial:
             return cls(Vol=int(m.groups()[0]), Num=int(m.groups()[1]), NumSuffix=ns)
 
         # Now look for nnn nnn/nnn (fractions!)
-        p=re.compile("^(\d+)\s+(\d+)/(\d+)$")  # nnn + mandatory whitespace + nnn + slash + nnn * optional whitespace
-        m=p.match(s)
+        # nnn + mandatory whitespace + nnn + slash + nnn * optional whitespace
+        m=re.match("^(\d+)\s+(\d+)/(\d+)$", s)
         if m is not None and len(m.groups()) == 3:
             return cls(Whole=int(m.groups()[0])+int(m.groups()[1])/int(m.groups()[2]))
 
         # Now look for nnn/nnn (which is understood as vol/num
-        p=re.compile("^(\d+)/(\d+)$")  # Leading stuff + nnn + slash + nnn * optional whitespace
-        m=p.match(s)
+        # Leading stuff + nnn + slash + nnn * optional whitespace
+        m=re.match("^(\d+)/(\d+)$", s)
         if m is not None and len(m.groups()) == 2:
             return cls(Vol=int(m.groups()[0]), Num=int(m.groups()[1]))
 
         # Now look for xxx/nnn, where xxx is in Roman numerals
-        p=re.compile("^([IVXLC]+)/(\d+)$")  # Leading whitespace + roman numeral characters + slash + nnn + whitespace
-        m=p.match(s)
+        # Leading whitespace + roman numeral characters + slash + nnn + whitespace
+        m=re.match("^([IVXLC]+)/(\d+)$", s)
         if m is not None and len(m.groups()) == 2:
             #TODO: the regex detects more than just Roman numerals.  We need to bail out of this branch if that happens and not return
             return cls(Vol=InterpretRoman(m.groups()[0]), Num=int(m.groups()[1]))
 
         # Next look for nnn-nnn (which is a range of issue numbers; only the start is returned)
-        p=re.compile("^(\d+)-(\d+)$")  # Leading stuff + nnn + dash + nnn
-        m=p.match(s)
+        # Leading stuff + nnn + dash + nnn
+        m=re.match("^(\d+)-(\d+)$", s)
         if m is not None and len(m.groups()) == 2:
             return cls(Whole=int(m.groups()[0]))
 
         # Next look for #nnn
-        p=re.compile("^#(\d+)$")  # Leading stuff + nnn
-        m=p.match(s)
+        # Leading stuff + nnn
+        m=re.match("^#(\d+)$", s)
         if m is not None and len(m.groups()) == 1:
             return cls(Whole=int(m.groups()[0]))
 
         # Now look for a trailing decimal number
-        p=re.compile("^.*?(\d+\.\d+)$")  # Leading characters + single non-digit + nnn + dot + nnn + whitespace
+        # Leading characters + single non-digit + nnn + dot + nnn + whitespace
         # the ? makes * a non-greedy quantifier
-        m=p.match(s)
+        m=re.match("^.*?(\d+\.\d+)$", s)
         if m is not None and len(m.groups()) == 1:
             return cls(Num=float(m.groups()[0]))
 
         if not strict and not complete:
             # Now look for a single trailing number
-            p=re.compile("^.*?([0-9]+)([a-zA-Z]?)\s*$")  # Leading stuff + nnn + optional single alphabetic character suffix + whitespace
-            m=p.match(s)
+            # Leading stuff + nnn + optional single alphabetic character suffix + whitespace
+            m=re.match("^.*?([0-9]+)([a-zA-Z]?)\s*$", s)
             if m is not None and len(m.groups()) in [1, 2]:
                 ws=None
                 if len(m.groups()) == 2:
@@ -1433,8 +1430,8 @@ class FanzineSerial:
                 return cls(Whole=int(m.groups()[0]), WSuffix=ws)
 
             # Now look for trailing Roman numerals
-            p=re.compile("^.*?\s+([IVXLC]+)\s*$")  # Leading stuff + mandatory whitespace + roman numeral characters + optional trailing whitespace
-            m=p.match(s)
+            # Leading stuff + mandatory whitespace + roman numeral characters + optional trailing whitespace
+            m=re.match("^.*?\s+([IVXLC]+)\s*$", s)
             if m is not None and len(m.groups()) == 1:
                 return cls(Num=InterpretRoman(m.groups()[0]))
 
@@ -2615,28 +2612,28 @@ def InterpretDay(dayData: Optional[int, str]) -> Optional[int]:
 
 # =================================================================================
 # Validate data according to its type
-def ValidateData(val: str, type: str) -> int:
+def ValidateData(val: str, valtype: str) -> int:
     if val is None or len(val) == 0:
         return True
 
-    type=CanonicizeColumnHeaders(type)
-    if type == "Date":
+    valtype=CanonicizeColumnHeaders(valtype)
+    if valtype == "Date":
         return InterpretRandomDatestring(val) is not None
-    if type == "Day":
+    if valtype == "Day":
         return InterpretDay(val)
-    if type == "Month":
+    if valtype == "Month":
         return InterpretMonth(val) is not None
-    if type == "Number":
+    if valtype == "Number":
         return IsInt(val)
-    if type == "Pages":
+    if valtype == "Pages":
         return IsInt(val)
-    if type == "Volume":
+    if valtype == "Volume":
         return IsInt(val)
-    if type == "Vol+Num":
+    if valtype == "Vol+Num":
         return False        # TODO: Fix this
-    if type == "Whole":
+    if valtype == "Whole":
         return IsInt(val)
-    if type == "Year":
+    if valtype == "Year":
         return len(val) == 4 and  IsInt(val) and Int(val) > 1860 and Int(val) < 2050      # These numbers are chosen to represent the range of potentially valid fannish years.
 
     # For all other types we return True as we can't judge validity.
@@ -2665,7 +2662,7 @@ def BoundDay(d: Optional[int], m: Optional[int], y: Optional[int]) -> Tuple[Opti
         return None, None, None
 
     # Deal with the normal case
-    if d >= 1 and d <= MonthLength(m):
+    if 1 <= d <= MonthLength(m):
         return d, m, y
 
     # Deal with negative days
@@ -2774,7 +2771,7 @@ def MonthNameToInt(text: str) -> Optional[int]:
     text=text.replace(" ", "").lower()
 
     # First look to see if the input is two month names separated by a non-alphabetic character (e.g., "September-November"
-    m=re.compile("^([a-z]+)[-/]([a-z]+)$").match(text)
+    m=re.match("^([a-z]+)[-/]([a-z]+)$", text)
     if m is not None and len(m.groups()) == 2 and len(m.groups()[0]) > 0:
         m1=MonthNameToInt(m.groups()[0])
         m2=MonthNameToInt(m.groups()[1])
