@@ -36,7 +36,7 @@ from HelpersPackage import InterpretNumber, InterpretRoman, InterpretInteger
 from HelpersPackage import CaseInsensitiveCompare
 from HelpersPackage import CanonicizeColumnHeaders
 
-
+@dataclass
 class FanzineCounts:
     Titlecount: int=0  # Count of distinct titles.
     Issuecount: int=0  # Count of issues in all the titles
