@@ -488,40 +488,6 @@ class FanzineDate:
         d=self._Day if self._Day is not None else 1
         return datetime.date(y, m, d)
 
-
-    # # .....................
-    # @property
-    # def UninterpretableText(self) -> str:
-    #     return self._UninterpretableText
-    #
-    # @UninterpretableText.setter
-    # def UninterpretableText(self, val: Optional[str]):
-    #     if val is None:
-    #         self._UninterpretableText=None
-    #         return
-    #     val=val.strip()
-    #     if len(val) == 0:
-    #         self._UninterpretableText=None
-    #         return
-    #     self._UninterpretableText=val
-    #
-    # # .....................
-    # @property
-    # def TrailingGarbage(self) -> str:
-    #     return self._TrailingGarbage
-    #
-    # @TrailingGarbage.setter
-    # def TrailingGarbage(self, val: Optional[str]):
-    #     if val is None:
-    #         self._TrailingGarbage=None
-    #         return
-    #     val=val.strip()
-    #     if len(val) == 0:
-    #         self._TrailingGarbage=None
-    #         return
-    #     self._TrailingGarbage=val
-
-
     # .......................
     # Convert the FanzineDate into a debugging form
     def __repr__(self) -> str:               # FanzineDate
