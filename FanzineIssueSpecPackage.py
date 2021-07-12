@@ -911,6 +911,14 @@ class FanzineDateRange:
             s+=" (cancelled)"
         return s
 
+    @property
+    def StartDate(self) -> FanzineDate:
+        return self._startdate
+
+    @property
+    def EndDate(self) -> FanzineDate:
+        return self._enddate
+
     # .....................
     @property
     def Cancelled(self) -> bool:             # FanzineDateRange
