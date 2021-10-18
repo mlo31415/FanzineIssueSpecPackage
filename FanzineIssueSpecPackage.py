@@ -2850,7 +2850,6 @@ def ExtractSerialNumber(volText: str, numText: str, wholeText: str, volNumText: 
     # If the wholeInt is missing and maybeWholeInt hasn't been used up, make it the wholeInt
     if wholeInt is None and maybeWholeInt is not None:
         wholeInt=maybeWholeInt
-        maybeWholeInt=None  #TODO: What is this?
 
     # Next, look at the title -- titles often have a serial designation at their end.
 
