@@ -23,7 +23,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 import math
 import re
-from typing import Union, Tuple, Optional, List, Any
+from typing import Union, Optional, Any
 from contextlib import suppress
 import datetime
 from dateutil import parser
@@ -267,9 +267,9 @@ class FanzineSeriesInfo:
 class FanzineDate:
     def __init__(self,
                  Year: Union[int, str, None]=None,
-                 Month: Union[int, str, Tuple[int, str], None]=None,
+                 Month: Union[int, str, tuple[int, str], None]=None,
                  MonthText: Optional[str]=None,
-                 Day: Union[int, str, Tuple[int, str], None]=None,
+                 Day: Union[int, str, tuple[int, str], None]=None,
                  DayText: Optional[str]=None,
                  MonthDayText: Optional[str] =None) -> None:
         self.Year=Year
@@ -419,11 +419,11 @@ class FanzineDate:
         return self._Month
 
     @Month.setter
-    def Month(self, val: Union[int, str, Tuple[int, str]]) -> None:               # FanzineDate
+    def Month(self, val: Union[int, str, tuple[int, str]]) -> None:               # FanzineDate
         if isinstance(val, str):
             self._Month=InterpretMonth(val)     # If you supply only the MonthText, the Month number is computed
             self._MonthText=val if (val is not None and len(val) > 0) else None
-        elif isinstance(val, Tuple):    # Use the Tuple to set both Month and MonthText
+        elif isinstance(val, tuple):    # Use the Tuple to set both Month and MonthText
             self._Month=val[0]
             self._MonthText=val[1] if (val[1] is not None and len(val) > 0) else None
         else:
@@ -448,11 +448,11 @@ class FanzineDate:
         return self._Day
 
     @Day.setter
-    def Day(self, val: Union[int, str, Tuple[int, str]]) -> None:               # FanzineDate
+    def Day(self, val: Union[int, str, tuple[int, str]]) -> None:               # FanzineDate
         if isinstance(val, str):    # If you supply only the DayText, the Day number is computed
             self._Day=ToNumeric(val) if (val is not None and len(val) > 0) else None
             self._DayText=val if (val is not None and len(val) > 0) else None
-        elif isinstance(val, Tuple):    # Use the Tuple to set both Day and DayText
+        elif isinstance(val, tuple):    # Use the Tuple to set both Day and DayText
             self._Day=val[0]
             self._DayText=val[1] if (val[1] is not None  and len(val) > 0) else None
         else:
