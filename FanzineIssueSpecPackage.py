@@ -2532,11 +2532,8 @@ def InterpretYear(yearText: Optional[int, str]) -> Optional[int, str]:
     if len(yearText) == 0:
         return None
 
-    # Drop trailing question mark(s)
-    if yearText[-1] == "?":
-        yearText=yearText[:-1]
-    if yearText[-1] == "?":
-        yearText=yearText[:-1]
+    # Drop up to two trailing question mark(s)
+    yearText=yearText.removesuffix("?").removesuffix("?")
 
     # Convert to int
     try:
@@ -2666,8 +2663,8 @@ def BoundDay(d: Optional[int], m: Optional[int], y: Optional[int]) -> Tuple[Opti
 # (Day defaults to 1 if no day was supplied.)
 def InterpretMonthDay(s: str) -> Optional[Tuple[int, Optional[int]]]:
     s=s.strip() # Get rid of leading and traling blanks as they can't possibly be of interest
-    if s[-1] == ",":    # Get rid of trailing comma
-        s=s[:-1]
+    s=s.removesuffix(",")    # Get rid of trailing comma
+
     s=s.replace("    ", " ").replace("   ", " ").replace("  ", " ") # Turn runs of up to 24 spaces into a single space
 
     # We now handle three cases:
@@ -2711,8 +2708,7 @@ def InterpretMonth(monthData: Optional[str, int]) -> Optional[int]:
         return None
 
     # If it ends in a "." it may be abbreviated. Remove trailing "."
-    if monthData[-1:] == ".":
-        monthData=monthData[:-1]
+    monthData=monthData.removesuffix(".")
 
     return MonthNameToInt(monthData)
 
