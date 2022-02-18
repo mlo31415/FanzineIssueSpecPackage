@@ -27,6 +27,7 @@ from typing import Union, Optional, Any
 from contextlib import suppress
 import datetime
 from dateutil import parser
+from Locale import Locale
 import json
 
 from Log import Log
@@ -80,7 +81,7 @@ class FanzineSeriesInfo:
         _Pagecount: int=0  # Page count for all the issues fanac has for this series
         _Issuecount: Optional[int]=None  # Count of issues fanac has for this series
         _Editor: Optional[str]=None  # The editor for this series (if there was one for essentially all issues)
-        _Country: Optional[str]=None  # The country for this issue (gotten from the series's country
+        _Country: Locale  # The country for this issue (gotten from the series's country
 
         # Use the properties to set the values for all of the instance variables. We do this so that any special setter processing is done with the init values.
         self.SeriesName=SeriesName
@@ -89,7 +90,7 @@ class FanzineSeriesInfo:
         self.Pagecount=Pagecount
         self.Issuecount=Issuecount
         self.Editor=Editor
-        self.Country=Country
+        self._Country=Country
         pass
 
     # .....................
@@ -116,15 +117,15 @@ class FanzineSeriesInfo:
             out+="  "+str(self.Issuecount)+" issues"
         if self.Pagecount is not None:
             out+="  "+str(self.Pagecount)+" pp"
-        if self.Country is not None and len(self.Country) > 0:
-            out+="   ("+self.Country+")"
+        if len(str(self.Country)) > 0:
+            out+=f"   ({self.Country})"
         return out.strip()
 
     # -----------------------------
     # Note that this ignored quite a lot is creating the hash value
     # Be careful!
     def __hash__(self):
-        return hash(self._SeriesName)+hash(self._Editor)+hash(self._Country.lower())
+        return hash(self._SeriesName)+hash(self._Editor)+hash(self._Country)
 
     # .....................
     # Note that page and issue count are not included in equality comparisons.
@@ -143,10 +144,7 @@ class FanzineSeriesInfo:
                 return False
             if self._Editor != other._Editor:
                 return False
-        if self._Country is not None:
-            if other._Country is None:
-                return False
-            if self._Country.lower() != other._Country.lower():
+        if self._Country != other._Country:
                 return False
         # if self._URL is not None:
         #     if other._URL is None:
@@ -181,7 +179,7 @@ class FanzineSeriesInfo:
         #     return False
         if self.Editor is not None:
             return False
-        if self.Country is not None:
+        if str(self.Country) != "":
             return False
         
         return True
@@ -1250,7 +1248,7 @@ class FanzineSerial:
         # Return a tuple of Volume and Number
         # If there's no volume specified, Volume is None and Number is the whole number
         # If we can't make sense of it, return (None, None), so if the 2nd member of the tuple is None, conversion failed.
-    def DecodeIssueDesignation(self, s: str) -> Tuple[ Optional[int], Optional[int] ]:             # FanzineSerial
+    def DecodeIssueDesignation(self, s: str) -> tuple[ Optional[int], Optional[int] ]:             # FanzineSerial
         with suppress(Exception):
             return None, int(s)
 
@@ -1684,7 +1682,7 @@ class FanzineIssueSpec:
 
     # =====================================================================================
     # Look for a FIS in the input string.  Return a tuple of (success, <unmatched text>)
-    def Scan(self, s: str, strict: bool=False) -> Tuple[bool, str]:        # FanzineIssueSpec
+    def Scan(self, s: str, strict: bool=False) -> tuple[bool, str]:        # FanzineIssueSpec
         raise Exception
 
 
@@ -1708,7 +1706,7 @@ class FanzineIssueSpec:
 #TODO: a series does not have a consistent set throughout.
 
 class FanzineIssueSpecList:
-    def __init__(self, List: Optional[List[FanzineIssueSpec]]=None) -> None:      # FanzineIssueSpecList
+    def __init__(self, List: Optional[list[FanzineIssueSpec]]=None) -> None:      # FanzineIssueSpecList
         self._List=None
         self.List=List  # Use setter
         pass
@@ -1722,11 +1720,11 @@ class FanzineIssueSpecList:
 
     # ...............................
     # Basically, this is just a synonym for Extend
-    def Append(self, lst: Union[FanzineIssueSpecList, List[FanzineIssueSpec], FanzineIssueSpec, None]) -> FanzineIssueSpecList:      # FanzineIssueSpecList
+    def Append(self, lst: Union[FanzineIssueSpecList, list[FanzineIssueSpec], FanzineIssueSpec, None]) -> FanzineIssueSpecList:      # FanzineIssueSpecList
         return self.Extend(lst)
 
     # ...............................
-    def Extend(self, val: Union[FanzineIssueSpecList, List[FanzineIssueSpec], FanzineIssueSpec, None]) -> FanzineIssueSpecList:      # FanzineIssueSpecList
+    def Extend(self, val: Union[FanzineIssueSpecList, list[FanzineIssueSpec], FanzineIssueSpec, None]) -> FanzineIssueSpecList:      # FanzineIssueSpecList
         if self._List is None:
             self._List=[]
 
@@ -1826,7 +1824,7 @@ class FanzineIssueSpecList:
 
     # =====================================================================================
     # Pull a Serial off of the end of a string, returning a FISL and the remainder of the string
-    def GetTrailingSerial(self, s: str) -> Tuple[Optional[FanzineIssueSpecList], str]:       # FanzineIssueSpecList
+    def GetTrailingSerial(self, s: str) -> tuple[Optional[FanzineIssueSpecList], str]:       # FanzineIssueSpecList
         # Try to greedily (reverse-greedily?) interpret the trailing text as a FanzineIssueSpec.
         # We do this by interpreting more and more tokens starting from the end until we have something that is no longer recognizable as a FanzineIssueSpec
         # The just-previous set of tokens constitutes the full IssueSpec, and the remaining leading tokens are the series name.
@@ -1857,7 +1855,7 @@ class FanzineIssueSpecList:
     # The one place we allow internal commas is in a date where the month/day can be separated from the year by a comma.
     @classmethod
     def Match(cls, s: str, strict: bool=False, complete: bool=False) -> FanzineIssueSpecList:      # FanzineIssueSpecList
-        fislist: List[FanzineIssueSpec]=[]      # Accumulate the list of FISs here
+        fislist: list[FanzineIssueSpec]=[]      # Accumulate the list of FISs here
 
         tokens=[t.strip() for t in s.split(",")]        # Split the input on commas
 
@@ -1917,7 +1915,7 @@ class FanzineIssueSpecList:
 
     #------------------------------------------------------------------------------------
     # Look for a FISL in the input string.  Return a tuple of (success, <unmatched text>)
-    def Scan(self, s: str, strict: bool=False) -> Tuple[bool, str]:      # FanzineIssueSpecList
+    def Scan(self, s: str, strict: bool=False) -> tuple[bool, str]:      # FanzineIssueSpecList
         raise Exception
 
 
@@ -1931,7 +1929,7 @@ class FanzineIssueInfo:
 
     def __init__(self, SeriesName: Optional[str]=None, Series: Optional[FanzineSeriesInfo]=None, IssueName: Optional[str]=None, DisplayName: Optional[str]=None,
                  DirURL: Optional[str]=None, PageName: Optional[str]=None, FIS: Optional[FanzineIssueSpec]=None,
-                 Pagecount: Optional[int]=None, Editor: Optional[str]=None, Country: str="", Taglist: List[str]=None) -> None:
+                 Pagecount: Optional[int]=None, Editor: Optional[str]=None, Country: str="", Taglist: list[str]=None, Mailing: list[str]=None) -> None:
         _SeriesName: Optional[str]=None     # Name of the fanzine series of which this is an issue
         _Series: Optional[FanzineSeriesInfo]=None
         _IssueName: Optional[str]=None      # Name of this issue (does not include issue #/date info)
@@ -1941,8 +1939,9 @@ class FanzineIssueInfo:
         _FIS: Optional[FanzineIssueSpec]=None  # FIS for this issue
         _Pagecount: int=0  # Page count for this issue
         _Editor: Optional[str]=None     # The editor for this issue.  If None, use the editor of the series
-        _Country: Optional[str]=None    # The country for this issue (gotten from the series's country
-        _Taglist: Optional[List[str]]=None  # A list of tags for this fanzine (e.g., "newszine")
+        _Locale: Locale
+        _Taglist: Optional[list[str]]=None  # A list of tags for this fanzine (e.g., "newszine")
+        _Mailing: list[str]=[]  # A List of APA mailings this issue was a part of
 
         # Use the properties to set the values for all of the instance variables. We do this so that any special setter processing is done with the init values.
         self.SeriesName=SeriesName
@@ -1954,8 +1953,9 @@ class FanzineIssueInfo:
         self.FIS=FIS
         self.Pagecount=Pagecount
         self.Editor=Editor
-        self.Country=Country
+        self._Locale=Locale(Country)
         self.Taglist=Taglist
+        self.Mailing=Mailing
         pass
 
     # .....................
@@ -2043,32 +2043,16 @@ class FanzineIssueInfo:
                 return False
         return True
 
-
     # .....................
     def IsEmpty(self) -> bool:                       # FanzineIssueInfo
-        if self.SeriesName is not None:
+        if self.SeriesName or self.IssueName or self._DisplayName or self.DirURL or self.PageName or self.Pagecount or self.Editor or self.Taglist or self.Mailing:
             return False
-        if self.IssueName is not None:
-            return False
-        if self._DisplayName is not None:
-            return False
-        if self.DirURL is not None:
-            return False
-        if self.PageName is not None:
-            return False
-        if self.Pagecount is not None:
-            return False
-        if self.Editor is not None:
-            return False
-        
         return self.FIS.IsEmpty()
-        
 
     # .....................
     @property
     def SeriesName(self) -> Optional[str]:                       # FanzineIssueInfo
         return self._SeriesName
-
     @SeriesName.setter
     def SeriesName(self, val: Optional[str]) -> None:                       # FanzineIssueInfo
         if val is not None:
@@ -2081,7 +2065,6 @@ class FanzineIssueInfo:
         if self._Series is None:
             self._Series=FanzineSeriesInfo()
         return self._Series
-
     @Series.setter
     def Series(self, val: Optional[FanzineSeriesInfo]) -> None:                       # FanzineIssueInfo
         self._Series=val
@@ -2090,7 +2073,6 @@ class FanzineIssueInfo:
     @property
     def IssueName(self) -> Optional[str]:                       # FanzineIssueInfo
         return self._IssueName
-
     @IssueName.setter
     def IssueName(self, val: Optional[str]) -> None:                       # FanzineIssueInfo
         self._IssueName=val
@@ -2103,7 +2085,6 @@ class FanzineIssueInfo:
         if self.FIS is not None and self._SeriesName is not None:
             return self._SeriesName+" "+str(self.FIS)
         return self._SeriesName
-
     @DisplayName.setter
     def DisplayName(self, val: Optional[str]) -> None:                       # FanzineIssueInfo
         if val is not None:
@@ -2114,7 +2095,6 @@ class FanzineIssueInfo:
     @property
     def DirURL(self) -> Optional[str]:                       # FanzineIssueInfo
         return self._DirURL
-
     @DirURL.setter
     def DirURL(self, val: Optional[str]) -> None:                       # FanzineIssueInfo
         self._DirURL=val
@@ -2123,7 +2103,6 @@ class FanzineIssueInfo:
     @property
     def PageName(self) -> Optional[str]:                       # FanzineIssueInfo
         return self._PageName
-
     @PageName.setter
     def PageName(self, val: Optional[str]) -> None:                       # FanzineIssueInfo
         self._PageName=val
@@ -2132,16 +2111,22 @@ class FanzineIssueInfo:
     @property
     def FIS(self) -> Optional[FanzineIssueSpec]:                       # FanzineIssueInfo
         return self._FIS
-
     @FIS.setter
     def FIS(self, val: FanzineIssueSpec) -> None:                       # FanzineIssueInfo
         self._FIS=val
 
     # .....................
     @property
+    def Locale(self) -> Locale:                       # FanzineIssueInfo
+        return self._Locale
+    # @Locale.setter
+    # def Locale(self, val: FanzineIssueSpec) -> None:                       # FanzineIssueInfo
+    #     self._Locale=val
+
+    # .....................
+    @property
     def Pagecount(self) -> int:                       # FanzineIssueInfo
         return self._Pagecount if self._Pagecount > 0 else 1
-
     @Pagecount.setter
     def Pagecount(self, val: int) -> None:                       # FanzineIssueInfo
         self._Pagecount=val
@@ -2157,23 +2142,25 @@ class FanzineIssueInfo:
 
     # .....................
     @property
-    def Country(self) -> Optional[str]:  # FanzineIssueInfo
-        return self._Country
-
-    @Country.setter
-    def Country(self, val: Optional[str]) -> None:  # FanzineIssueInfo
-        self._Country=val
-
-    # .....................
-    @property
-    def Taglist(self) -> List[str]:                  # FanzineIssueInfo
+    def Taglist(self) -> list[str]:  # FanzineIssueInfo
         return self._Taglist
 
     @Taglist.setter
-    def Taglist(self, val: List[str]) -> None:              # FanzineIssueInfo
+    def Taglist(self, val: list[str]) -> None:  # FanzineIssueInfo
         if val is None:
             val=[]
         self._Taglist=val
+
+    # .....................
+    @property
+    def Mailing(self) -> list[str]:  # FanzineIssueInfo
+        return self._Mailing
+
+    @Mailing.setter
+    def Mailing(self, val: list[str]) -> None:  # FanzineIssueInfo
+        if val is None:
+            val=[]
+        self._Mailing=val
 
 
 ######################################################################################################################
@@ -2186,7 +2173,7 @@ class FanzineIssueInfo:
 class FanzineSeriesList:
 
     def __init__(self)  -> None:
-        self._FIIL: Optional[List[FanzineIssueInfo]]=[]
+        self._FIIL: Optional[list[FanzineIssueInfo]]=[]
         self._SeriesName: Optional[str]=None
         self._Editor: Optional[str]=None
         self._Eligible: Optional[bool]=None     # Is this eligible for the Hugos in a year in question?
@@ -2228,7 +2215,7 @@ class FanzineSeriesList:
 
     # .....................
     @property
-    def FIIL(self) -> Optional[List[FanzineIssueInfo]]:            # FanzineSeriesList
+    def FIIL(self) -> Optional[list[FanzineIssueInfo]]:            # FanzineSeriesList
         #TODO: If we're returning an FIIL independent of the FSL, shouldn't we fill in the values which would be gotten by reference to the FSL?
         return self._FIIL
 
@@ -2360,7 +2347,7 @@ def YearName(year: Optional[int, str]) -> str:
 #  Handle dates like "Thanksgiving"
 # Returns a month/day tuple which will often be exactly correct and rarely off by enough to matter
 # Note that we don't (currently) attempt to handle moveable feasts by taking the year in account
-def InterpretNamedDay(dayString: str) -> Optional[Tuple[int, int]]:
+def InterpretNamedDay(dayString: str) -> Optional[tuple[int, int]]:
     namedDayConverstionTable={
         "unknown": (None, None),
         "unknown ?": (None, None),
@@ -2623,7 +2610,7 @@ def MonthLength(m: int) -> int:
 # =================================================================================
 # Make sure day is within month
 # We take a month and day and return a month and day
-def BoundDay(d: Optional[int], m: Optional[int], y: Optional[int]) -> Tuple[Optional[int], Optional[int], Optional[int]]:
+def BoundDay(d: Optional[int], m: Optional[int], y: Optional[int]) -> tuple[Optional[int], Optional[int], Optional[int]]:
     if d is None:
         return None, None, None
     if m is None:    # Should never happen!
@@ -2661,7 +2648,7 @@ def BoundDay(d: Optional[int], m: Optional[int], y: Optional[int]) -> Tuple[Opti
 # Deal with things of the form "June 20," and "20 June" and just "June"
 # Return a tuple of (month, day)
 # (Day defaults to 1 if no day was supplied.)
-def InterpretMonthDay(s: str) -> Optional[Tuple[int, Optional[int]]]:
+def InterpretMonthDay(s: str) -> Optional[tuple[int, Optional[int]]]:
     s=s.strip() # Get rid of leading and traling blanks as they can't possibly be of interest
     s=s.removesuffix(",")    # Get rid of trailing comma
 
