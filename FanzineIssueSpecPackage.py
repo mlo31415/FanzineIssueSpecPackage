@@ -988,17 +988,17 @@ class FanzineDateRange:
         return self
 
     #...................
-    def IsEmpty(self) -> bool:
+    def IsEmpty(self) -> bool:             # FanzineDateRange
         return self._startdate is None or self._startdate.IsEmpty() or self._enddate is None or self._enddate.IsEmpty()
 
     # ...................
     # Return the duration of the range in days
-    def Duration(self) -> int:
+    def Duration(self) -> int:             # FanzineDateRange
         if self._enddate is None or self._startdate is None:
             return 0
         return self._enddate-self._startdate
 
-    def IsOdd(self) -> bool:
+    def IsOdd(self) -> bool:             # FanzineDateRange
         if self._enddate is None or self._startdate is None:
             return True
         if self.Duration() > 5:
