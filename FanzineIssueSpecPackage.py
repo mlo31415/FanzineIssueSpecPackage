@@ -166,6 +166,18 @@ class FanzineSeriesInfo:
         return ret
 
     # .....................
+    def Deepcopy(self) -> FanzineSeriesInfo:      #FanzineSeriesInfo
+        new=FanzineSeriesInfo()
+        new.SeriesName=self.SeriesName
+        new.DisplayName=self.DisplayName
+        new.DirURL=self.DirURL
+        new.Pagecount=self.Pagecount
+        new.Issuecount=self.Issuecount
+        new.Editor=self.Editor
+        new._Country=self.Country
+        return new
+
+    # .....................
     def IsEmpty(self) -> bool:  # FanzineSeriesInfo
         if self.SeriesName is not None:
             return False
