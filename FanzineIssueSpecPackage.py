@@ -1970,6 +1970,7 @@ class FanzineIssueInfo:
         self.Taglist=Taglist
         self.Mailing=Mailing
         pass
+        Log(f"FanzineIssueInfo: Creating with {SeriesName=} and {IssueName=}")
 
     # .....................
     def __str__(self) -> str:                       # FanzineIssueInfo
