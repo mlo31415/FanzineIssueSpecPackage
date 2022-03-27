@@ -213,10 +213,9 @@ class FanzineSeriesInfo:
     # .....................
     @property
     def DisplayName(self) -> str:  # FanzineSeriesInfo
-        if self._DisplayName is not None:
+        if self._DisplayName is not None and self._DisplayName != "":
             return self._DisplayName
         return self.SeriesName
-
     @DisplayName.setter
     def DisplayName(self, val: Optional[str]) -> None:  # FanzineSeriesInfo
         if val is not None:
