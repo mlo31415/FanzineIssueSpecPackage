@@ -75,13 +75,13 @@ class FanzineSeriesInfo:
 
     def __init__(self, SeriesName: Optional[str] = None, DisplayName: Optional[str] = None,
                  DirURL: Optional[str] = None, Issuecount: Optional[int]=None,
-                 Pagecount: int = 0, Editor: Optional[str] = None, Country: str = "") -> None:
+                 Pagecount: int = 0, Editor: str = "", Country: str = "") -> None:
         _SeriesName: Optional[str]=None  # Name of the fanzine series of which this is an issue
         _DisplayName: Optional[str]=None  # Name to use for this issue. Includes issue serial and or date
         _DirURL: Optional[str]=None  # URL of series directory
         _Pagecount: int=0  # Page count for all the issues fanac has for this series
         _Issuecount: Optional[int]=None  # Count of issues fanac has for this series
-        _Editor: Optional[str]=None  # The editor for this series (if there was one for essentially all issues)
+        _Editor: str=""  # The editor for this series (if there was one for essentially all issues)
         _Country: Locale  # The country for this issue (gotten from the series's country
 
         # Use the properties to set the values for all of the instance variables. We do this so that any special setter processing is done with the init values.
@@ -112,7 +112,7 @@ class FanzineSeriesInfo:
         elif self.SeriesName is not None:
             out=self.SeriesName
 
-        if self.Editor is not None:
+        if self.Editor != "":
             out+="  ed:"+self.Editor
         if self.Issuecount is not None:
             out+="  "+str(self.Issuecount)+" issues"
@@ -140,11 +140,8 @@ class FanzineSeriesInfo:
                 return False
             if self._SeriesName != other._SeriesName:
                 return False
-        if self._Editor is not None:
-            if other._Editor is None:
-                return False
-            if self._Editor != other._Editor:
-                return False
+        if self._Editor != other._Editor:
+            return False
         if self._Country != other._Country:
                 return False
         # if self._URL is not None:
@@ -190,7 +187,7 @@ class FanzineSeriesInfo:
         #     return False
         # if self.Issuecount is not None:
         #     return False
-        if self.Editor is not None:
+        if self.Editor != "":
             return False
         if str(self.Country) != "":
             return False
@@ -265,11 +262,11 @@ class FanzineSeriesInfo:
         
     # .....................
     @property
-    def Editor(self) -> Optional[str]:  # FanzineSeriesInfo
+    def Editor(self) -> str:  # FanzineSeriesInfo
         return self._Editor
 
     @Editor.setter
-    def Editor(self, val: Optional[str]) -> None:  # FanzineSeriesInfo
+    def Editor(self, val: str) -> None:  # FanzineSeriesInfo
         self._Editor=val
 
 #---------------------------------------------------------------------------------------
@@ -1941,7 +1938,7 @@ class FanzineIssueInfo:
 
     def __init__(self, SeriesName: Optional[str]=None, Series: Optional[FanzineSeriesInfo]=None, IssueName: Optional[str]=None, DisplayName: Optional[str]=None,
                  DirURL: Optional[str]=None, PageName: Optional[str]=None, FIS: Optional[FanzineIssueSpec]=None,
-                 Pagecount: Optional[int]=None, Editor: Optional[str]=None, Country: str="", Taglist: list[str]=None, Mailing: list[str]=None) -> None:
+                 Pagecount: Optional[int]=None, Editor: str="", Country: str="", Taglist: list[str]=None, Mailing: list[str]=None) -> None:
         _SeriesName: Optional[str]=None     # Name of the fanzine series of which this is an issue
         _Series: Optional[FanzineSeriesInfo]=None
         _IssueName: Optional[str]=None      # Name of this issue (does not include issue #/date info)
@@ -1950,7 +1947,7 @@ class FanzineIssueInfo:
         _PageName: Optional[str]=None  # URL of specific issue in directory
         _FIS: Optional[FanzineIssueSpec]=None  # FIS for this issue
         _Pagecount: int=0  # Page count for this issue
-        _Editor: Optional[str]=None     # The editor for this issue.  If None, use the editor of the series
+        _Editor: str=""     # The editor for this issue.  If None, use the editor of the series
         _Locale: Locale
         _Taglist: Optional[list[str]]=None  # A list of tags for this fanzine (e.g., "newszine")
         _Mailing: list[str]=[]  # A List of APA mailings this issue was a part of
@@ -1985,11 +1982,6 @@ class FanzineIssueInfo:
         if self.FIS is not None and len(str(self.FIS)) > 0:
             out+=" "+str(self.FIS)
 
-        # if self.Editor is not None:
-        #     out+="  ed:"+self.Editor
-        # if self.Pagecount is not None:
-        #     out+="  "+str(self.Pagecount)+" pp"
-
         return out.strip()
 
     # .....................
@@ -2005,7 +1997,7 @@ class FanzineIssueInfo:
         if self.FIS is not None and len(str(self.FIS)) > 0:
             out+=" {"+str(self.FIS)+"}"
 
-        if self.Editor is not None:
+        if self.Editor != "":
             out+="  ed:"+self.Editor
         if self.Pagecount is not None:
             out+="  "+str(self.Pagecount)+" pp"
@@ -2019,11 +2011,8 @@ class FanzineIssueInfo:
                 return False
             if self._SeriesName != other._SeriesName:
                 return False
-        if self._Editor is not None:
-            if other._Editor is None:
-                return False
-            if self._Editor != other._Editor:
-                return False
+        if self._Editor != other._Editor:
+            return False
         if self._IssueName is not None:
             if other._IssueName is None:
                 return False
@@ -2058,7 +2047,7 @@ class FanzineIssueInfo:
 
     # .....................
     def IsEmpty(self) -> bool:                       # FanzineIssueInfo
-        if self.SeriesName or self.IssueName or self._DisplayName or self.DirURL or self.PageName or self.Pagecount or self.Editor or self.Taglist or self.Mailing:
+        if self.SeriesName or self.IssueName or self._DisplayName or self.DirURL or self.PageName or self.Pagecount or self.Editor != "" or self.Taglist or self.Mailing:
             return False
         return self.FIS.IsEmpty()
 
@@ -2146,11 +2135,11 @@ class FanzineIssueInfo:
 
     # .....................
     @property
-    def Editor(self) -> Optional[str]:                       # FanzineIssueInfo
+    def Editor(self) -> str:                       # FanzineIssueInfo
         return self._Editor
 
     @Editor.setter
-    def Editor(self, val: Optional[str]) -> None:                       # FanzineIssueInfo
+    def Editor(self, val: str) -> None:                       # FanzineIssueInfo
         self._Editor=val
 
     # .....................
@@ -2188,7 +2177,7 @@ class FanzineSeriesList:
     def __init__(self)  -> None:
         self._FIIL: Optional[list[FanzineIssueInfo]]=[]
         self._SeriesName: Optional[str]=None
-        self._Editor: Optional[str]=None
+        self._Editor: str=""
         self._Eligible: Optional[bool]=None     # Is this eligible for the Hugos in a year in question?
         self._Notes: Optional[str]=None
         self._SeriesURL: Optional[str]=None
@@ -2207,12 +2196,10 @@ class FanzineSeriesList:
     # .....................
     @property
     def Editor(self) -> str:            # FanzineSeriesList
-        if self._Editor is None:
-            return ""
         return self._Editor
 
     @Editor.setter
-    def Editor(self, val: Optional[str]) -> None:            # FanzineSeriesList
+    def Editor(self, val: str) -> None:            # FanzineSeriesList
         self._Editor=val
 
     # .....................
@@ -2274,7 +2261,7 @@ class FanzineSeriesList:
             sn=self._SeriesName
 
         ed="-"
-        if self._Editor is not None:
+        if self._Editor != "":
             ed=self._Editor
 
         nt=""
@@ -2302,8 +2289,8 @@ class FanzineSeriesList:
         if self.SeriesName is not None:
             out=self.SeriesName
 
-        if self._Editor is not None and len(self._Editor) > 0:
-            out+="   ("+self._Editor+")"
+        if self._Editor != "":
+            out+=f"   ({self._Editor})"
 
         if self._Notes is not None and len(self._Notes) > 0:
             for n in self._Notes:
