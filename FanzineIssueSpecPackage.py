@@ -115,7 +115,7 @@ class FanzineSeriesInfo:
             out+=f"  ed:{self.Editor}"
         if self.Issuecount > 0:
             out+=f"  {self.Issuecount} issues"
-        if self.Pagecount is not None:
+        if self.Pagecount > 0:
             out+=f"  {self.Pagecount} pp"
         if len(str(self.Country)) > 0:
             out+=f"   ({self.Country})"
