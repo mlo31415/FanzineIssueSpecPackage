@@ -30,6 +30,8 @@ from dateutil import parser
 from Locale import Locale
 import json
 
+from Locale import Locale
+
 from Log import Log
 from HelpersPackage import ToNumeric, IsNumeric, IsInt, Int
 from HelpersPackage import RemoveHTMLDebris
