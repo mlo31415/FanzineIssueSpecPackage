@@ -19,15 +19,14 @@
 #     (This would also be the right place to put other issue-specific information such as editor, pagecount, etc.)
 #     (It probably should be merged with the FanzineIssueData class of 1943FanzineList)
 from __future__ import annotations
+from typing import Union, Optional, Any
 
 from dataclasses import dataclass
 import math
 import re
-from typing import Union, Optional, Any
 from contextlib import suppress
 import datetime
 from dateutil import parser
-from Locale import Locale
 import json
 
 from Locale import Locale
