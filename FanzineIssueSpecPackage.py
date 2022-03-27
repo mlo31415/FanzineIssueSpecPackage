@@ -2142,7 +2142,7 @@ class FanzineSeriesList:
         self._Editor: str=""
         self._Eligible: Optional[bool]=None     # Is this eligible for the Hugos in a year in question?
         self._Notes: str=""
-        self._SeriesURL: Optional[str]=None
+        self._SeriesURL: str=""
 
     # .....................
     @property
@@ -2199,13 +2199,11 @@ class FanzineSeriesList:
     # .....................
     @property
     def SeriesURL(self) -> str:            # FanzineSeriesList
-        if self._SeriesURL is None:
-            return ""
         return self._SeriesURL
 
     @SeriesURL.setter
-    def SeriesURL(self, val: Optional[str]) -> None:            # FanzineSeriesList
-        self._SeriesURL=val
+    def SeriesURL(self, val: str) -> None:            # FanzineSeriesList
+        self._SeriesURL=val.strip()
 
     # .....................
     def __repr__(self) -> str:  # Convert the FSS into a debugging form            # FanzineSeriesList
@@ -2230,7 +2228,7 @@ class FanzineSeriesList:
             el="T" if self._Eligible else "F"+" "
 
         u="-"
-        if self._SeriesURL is not None:
+        if self._SeriesURL != "":
             u=self._SeriesURL
 
         return "FSS(SN:"+sn+", IIL:"+iil+", Ed:"+ed+", NT:"+nt+", El:"+el+" URL="+u+")"
