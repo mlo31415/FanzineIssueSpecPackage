@@ -51,7 +51,7 @@ class FanzineCounts:
         out=""
         if self.Titlecount > 0:
             out=str(self.Titlecount)+" titles  "
-        return out+str(self.Issuecount)+" issues  "+str(self.Pagecount)+" pp"
+        return f"{out}{self.Issuecount} issues  {self.Pagecount} pp"
 
     # .....................
     def __add__(self, b: Any) -> FanzineCounts:  # FanzineCounts
@@ -74,13 +74,13 @@ class FanzineCounts:
 class FanzineSeriesInfo:
 
     def __init__(self, SeriesName: Optional[str] = None, DisplayName: Optional[str] = None,
-                 DirURL: Optional[str] = None, Issuecount: Optional[int]=None,
+                 DirURL: Optional[str] = None, Issuecount: int=0,
                  Pagecount: int = 0, Editor: str = "", Country: str = "") -> None:
         _SeriesName: Optional[str]=None  # Name of the fanzine series of which this is an issue
         _DisplayName: Optional[str]=None  # Name to use for this issue. Includes issue serial and or date
         _DirURL: Optional[str]=None  # URL of series directory
         _Pagecount: int=0  # Page count for all the issues fanac has for this series
-        _Issuecount: Optional[int]=None  # Count of issues fanac has for this series
+        _Issuecount: int=0  # Count of issues fanac has for this series
         _Editor: str=""  # The editor for this series (if there was one for essentially all issues)
         _Country: Locale  # The country for this issue (gotten from the series's country
 
@@ -113,11 +113,11 @@ class FanzineSeriesInfo:
             out=self.SeriesName
 
         if self.Editor != "":
-            out+="  ed:"+self.Editor
-        if self.Issuecount is not None:
-            out+="  "+str(self.Issuecount)+" issues"
+            out+=f"  ed:{self.Editor}"
+        if self.Issuecount > 0:
+            out+=f"  {self.Issuecount} issues"
         if self.Pagecount is not None:
-            out+="  "+str(self.Pagecount)+" pp"
+            out+=f"  {self.Pagecount} pp"
         if len(str(self.Country)) > 0:
             out+=f"   ({self.Country})"
         return out.strip()
@@ -239,11 +239,9 @@ class FanzineSeriesInfo:
     # .....................
     @property
     def Issuecount(self) -> int:  # FanzineSeriesInfo
-        if self._Issuecount is None:
-            return 0
         return self._Issuecount
     @Issuecount.setter
-    def Issuecount(self, val: Optional[int]) -> None:  # FanzineSeriesInfo
+    def Issuecount(self, val: int) -> None:  # FanzineSeriesInfo
         self._Issuecount=val
 
     # .....................
