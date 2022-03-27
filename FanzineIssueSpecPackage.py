@@ -74,11 +74,11 @@ class FanzineCounts:
 class FanzineSeriesInfo:
 
     def __init__(self, SeriesName: Optional[str] = None, DisplayName: Optional[str] = None,
-                 DirURL: Optional[str] = None, Issuecount: int=0,
+                 DirURL: str = "", Issuecount: int=0,
                  Pagecount: int = 0, Editor: str = "", Country: str = "") -> None:
         _SeriesName: Optional[str]=None  # Name of the fanzine series of which this is an issue
         _DisplayName: Optional[str]=None  # Name to use for this issue. Includes issue serial and or date
-        _DirURL: Optional[str]=None  # URL of series directory
+        _DirURL: str=""  # URL of series directory
         _Pagecount: int=0  # Page count for all the issues fanac has for this series
         _Issuecount: int=0  # Count of issues fanac has for this series
         _Editor: str=""  # The editor for this series (if there was one for essentially all issues)
@@ -181,7 +181,7 @@ class FanzineSeriesInfo:
             return False
         if self._DisplayName is not None:
             return False
-        if self.DirURL is not None:
+        if self.DirURL != "":
             return False
         # if self.Pagecount is not None:
         #     return False
@@ -221,11 +221,11 @@ class FanzineSeriesInfo:
 
     # .....................
     @property
-    def DirURL(self) -> Optional[str]:  # FanzineSeriesInfo
+    def DirURL(self) -> str:  # FanzineSeriesInfo
         return self._URL
 
     @DirURL.setter
-    def DirURL(self, val: Optional[str]) -> None:  # FanzineSeriesInfo
+    def DirURL(self, val: str) -> None:  # FanzineSeriesInfo
         self._URL=val
 
     # .....................
@@ -1935,13 +1935,13 @@ class FanzineIssueSpecList:
 class FanzineIssueInfo:
 
     def __init__(self, SeriesName: Optional[str]=None, Series: Optional[FanzineSeriesInfo]=None, IssueName: Optional[str]=None, DisplayName: Optional[str]=None,
-                 DirURL: Optional[str]=None, PageName: Optional[str]=None, FIS: Optional[FanzineIssueSpec]=None,
+                 DirURL: str="", PageName: Optional[str]=None, FIS: Optional[FanzineIssueSpec]=None,
                  Pagecount: Optional[int]=None, Editor: str="", Country: str="", Taglist: list[str]=None, Mailing: list[str]=None) -> None:
         _SeriesName: Optional[str]=None     # Name of the fanzine series of which this is an issue
         _Series: Optional[FanzineSeriesInfo]=None
         _IssueName: Optional[str]=None      # Name of this issue (does not include issue #/date info)
         _DisplayName: Optional[str]=None    # Name to use for this issue. Includes issue serial and or date
-        _DirURL: Optional[str]=None  # URL of fanzine directory
+        _DirURL: str=""  # URL of fanzine directory
         _PageName: Optional[str]=None  # URL of specific issue in directory
         _FIS: Optional[FanzineIssueSpec]=None  # FIS for this issue
         _Pagecount: int=0  # Page count for this issue
@@ -2021,11 +2021,8 @@ class FanzineIssueInfo:
                 return False
             if self._DisplayName != other._DisplayName:
                 return False
-        if self._DirURL is not None:
-            if other._DirURL is None:
-                return False
-            if self._DirURL != other._DirURL:
-                return False
+        if self._DirURL != other._DirURL:
+            return False
         if self._PageName is not None:
             if other._PageName is None:
                 return False
@@ -2045,7 +2042,7 @@ class FanzineIssueInfo:
 
     # .....................
     def IsEmpty(self) -> bool:                       # FanzineIssueInfo
-        if self.SeriesName or self.IssueName or self._DisplayName or self.DirURL or self.PageName or self.Pagecount or self.Editor != "" or self.Taglist or self.Mailing:
+        if self.SeriesName or self.IssueName or self._DisplayName or self.DirURL != "" or self.PageName or self.Pagecount > 0 or self.Editor != "" or self.Taglist or self.Mailing:
             return False
         return self.FIS.IsEmpty()
 
@@ -2093,10 +2090,10 @@ class FanzineIssueInfo:
 
     # .....................
     @property
-    def DirURL(self) -> Optional[str]:                       # FanzineIssueInfo
+    def DirURL(self) -> str:                       # FanzineIssueInfo
         return self._DirURL
     @DirURL.setter
-    def DirURL(self, val: Optional[str]) -> None:                       # FanzineIssueInfo
+    def DirURL(self, val: str) -> None:                       # FanzineIssueInfo
         self._DirURL=val
 
     # .....................
