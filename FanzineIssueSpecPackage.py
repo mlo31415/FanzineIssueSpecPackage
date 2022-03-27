@@ -2141,7 +2141,7 @@ class FanzineSeriesList:
         self._SeriesName: str=""
         self._Editor: str=""
         self._Eligible: Optional[bool]=None     # Is this eligible for the Hugos in a year in question?
-        self._Notes: Optional[str]=None
+        self._Notes: str=""
         self._SeriesURL: Optional[str]=None
 
     # .....................
@@ -2190,13 +2190,11 @@ class FanzineSeriesList:
     # .....................
     @property
     def Notes(self) -> str:            # FanzineSeriesList
-        if self._Notes is None:
-            return ""
         return self._Notes
 
     @Notes.setter
-    def Notes(self, val: Optional[str]) -> None:            # FanzineSeriesList
-        self._Notes=val
+    def Notes(self, val: str) -> None:            # FanzineSeriesList
+        self._Notes=val.strip()
 
     # .....................
     @property
@@ -2217,24 +2215,19 @@ class FanzineSeriesList:
 
         sn="-"
         if self._SeriesName != "":
-            sn=self._SeriesName
+            sn=self._SeriesName+" "
 
         ed="-"
         if self._Editor != "":
-            ed=self._Editor
+            ed=self._Editor+" "
 
         nt=""
-        if self._Notes is not None:
-            for note in self._Notes:
-                if len(nt) > 0:
-                    nt+=" "
-                nt+=note
-            if len(nt) == 0:
-                nt="-"
+        if self._Notes != "":
+            nt+=self._Notes+" "
 
         el="-"
         if self._Eligible is not None:
-            el="T" if self._Eligible else "F"
+            el="T" if self._Eligible else "F"+" "
 
         u="-"
         if self._SeriesURL is not None:
@@ -2251,9 +2244,8 @@ class FanzineSeriesList:
         if self._Editor != "":
             out+=f"   ({self._Editor})"
 
-        if self._Notes is not None and len(self._Notes) > 0:
-            for n in self._Notes:
-                out+="   {"+n+"}"
+        if self._Notes != "":
+            out+=f"   ({self._Notes}) "
 
         if self._FIIL is not None and len(self._FIIL) > 0:
             out+="  FIIL: "
