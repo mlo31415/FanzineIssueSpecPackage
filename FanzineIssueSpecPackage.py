@@ -81,7 +81,7 @@ class FanzineSeriesInfo:
         _Pagecount: int=0  # Page count for all the issues fanac has for this series
         _Issuecount: int=0  # Count of issues fanac has for this series
         _Editor: str=""  # The editor for this series (if there was one for essentially all issues)
-        _Country: Locale  # The country for this issue (gotten from the series's country
+        _Country: str="" # The country for this issue (gotten from the series's country
 
         # Use the properties to set the values for all of the instance variables. We do this so that any special setter processing is done with the init values.
         self.SeriesName=SeriesName
@@ -90,7 +90,7 @@ class FanzineSeriesInfo:
         self.Pagecount=Pagecount
         self.Issuecount=Issuecount
         self.Editor=Editor
-        self._Country=Country
+        self.Country=Country
         pass
 
     # .....................
@@ -117,12 +117,12 @@ class FanzineSeriesInfo:
             out+=f"  {self.Issuecount} issues"
         if self.Pagecount > 0:
             out+=f"  {self.Pagecount} pp"
-        if len(str(self.Country)) > 0:
+        if self.Country != "":
             out+=f"   ({self.Country})"
         return out.strip()
 
     # -----------------------------
-    # Note that this ignored quite a lot is creating the hash value
+    # Note that this ignores quite a lot in creating the hash value
     # Be careful!
     def __hash__(self):
         return hash(self._SeriesName)+hash(self._Editor)+hash(self._Country)
@@ -139,7 +139,7 @@ class FanzineSeriesInfo:
         if self._Editor != other._Editor:
             return False
         if self._Country != other._Country:
-                return False
+            return False
 
         return True
 
@@ -151,6 +151,7 @@ class FanzineSeriesInfo:
             ret.Issuecount=self.Issuecount+b.Issuecount
             ret.Pagecount=self.Pagecount+b.Pagecount
         else:
+            assert type(b) is int
             ret.Issuecount=self.Issuecount+1
             ret.Pagecount=self.Pagecount+b
         return ret
@@ -164,7 +165,7 @@ class FanzineSeriesInfo:
         new.Pagecount=self.Pagecount
         new.Issuecount=self.Issuecount
         new.Editor=self.Editor
-        new._Country=self.Country
+        new.Country=self.Country
         return new
 
     # .....................
@@ -175,10 +176,6 @@ class FanzineSeriesInfo:
             return False
         if self.DirURL != "":
             return False
-        # if self.Pagecount is not None:
-        #     return False
-        # if self.Issuecount is not None:
-        #     return False
         if self.Editor != "":
             return False
         if str(self.Country) != "":
@@ -216,10 +213,10 @@ class FanzineSeriesInfo:
 
     # .....................
     @property
-    def Pagecount(self) -> Optional[int]:  # FanzineSeriesInfo
+    def Pagecount(self) -> int:  # FanzineSeriesInfo
         return self._Pagecount
     @Pagecount.setter
-    def Pagecount(self, val: Optional[int]) -> None:  # FanzineSeriesInfo
+    def Pagecount(self, val: int) -> None:  # FanzineSeriesInfo
         self._Pagecount=val
         
     # .....................
@@ -238,10 +235,10 @@ class FanzineSeriesInfo:
 
     # .....................
     @property
-    def Country(self) -> Optional[str]:  # FanzineSeriesInfo
+    def Country(self) -> str:  # FanzineSeriesInfo
         return self._Country
     @Country.setter
-    def Country(self, val: Optional[str]) -> None:  # FanzineSeriesInfo
+    def Country(self, val: str) -> None:  # FanzineSeriesInfo
         self._Country=val
         
     # .....................
@@ -1949,7 +1946,7 @@ class FanzineIssueInfo:
         self._Locale=Locale(Country)
         self.Taglist=Taglist
         self.Mailing=Mailing
-        pass
+
         Log(f"FanzineIssueInfo: Creating with {SeriesName=} and {IssueName=}")
 
     # .....................
