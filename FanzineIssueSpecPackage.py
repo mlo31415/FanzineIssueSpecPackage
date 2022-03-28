@@ -78,8 +78,7 @@ class FanzineSeriesInfo:
         _SeriesName: str=""  # Name of the fanzine series of which this is an issue
         _DisplayName: str=""  # Name to use for this issue. Includes issue serial and or date
         _DirURL: str=""  # URL of series directory
-        _Pagecount: int=0  # Page count for all the issues fanac has for this series
-        _Issuecount: int=0  # Count of issues fanac has for this series
+        _Counts: FanzineCounts  # Page and Issue count for all the issues fanac has for this series
         _Editor: str=""  # The editor for this series (if there was one for essentially all issues)
         _Country: str="" # The country for this issue (gotten from the series's country
 
@@ -87,8 +86,7 @@ class FanzineSeriesInfo:
         self.SeriesName=SeriesName
         self.DisplayName=DisplayName
         self.DirURL=DirURL
-        self.Pagecount=Pagecount
-        self.Issuecount=Issuecount
+        self.Counts=FanzineCounts(Issuecount=Issuecount, Pagecount=Pagecount)
         self.Editor=Editor
         self.Country=Country
         pass
@@ -187,7 +185,6 @@ class FanzineSeriesInfo:
     @property
     def SeriesName(self) -> str:  # FanzineSeriesInfo
         return self._SeriesName
-
     @SeriesName.setter
     def SeriesName(self, val: str) -> None:  # FanzineSeriesInfo
         self._SeriesName=val.strip()
@@ -206,32 +203,39 @@ class FanzineSeriesInfo:
     @property
     def DirURL(self) -> str:  # FanzineSeriesInfo
         return self._URL
-
     @DirURL.setter
     def DirURL(self, val: str) -> None:  # FanzineSeriesInfo
         self._URL=val
 
     # .....................
     @property
+    def Counts(self) -> FanzineCounts:  # FanzineSeriesInfo
+        return self._Counts
+    @Counts.setter
+    def Counts(self, val: FanzineCounts) -> None:  # FanzineSeriesInfo
+        self._Counts=val
+
+    # .....................
+    @property
     def Pagecount(self) -> int:  # FanzineSeriesInfo
-        return self._Pagecount
+        return self._Counts.Pagecount
     @Pagecount.setter
     def Pagecount(self, val: int) -> None:  # FanzineSeriesInfo
-        self._Pagecount=val
+        self._Counts.Pagecount=val
         
     # .....................
     @property
     def Issuecount(self) -> int:  # FanzineSeriesInfo
-        return self._Issuecount
+        return self._Counts.Issuecount
     @Issuecount.setter
     def Issuecount(self, val: int) -> None:  # FanzineSeriesInfo
-        self._Issuecount=val
+        self._Counts.Issuecount=val
 
     # .....................
     # Neeed for compatibility, but always zero
     @property
     def Titlecount(self) -> int:  # FanzineSeriesInfo
-        return 0
+        return self._Counts.Titlecount
 
     # .....................
     @property
@@ -245,7 +249,6 @@ class FanzineSeriesInfo:
     @property
     def Editor(self) -> str:  # FanzineSeriesInfo
         return self._Editor
-
     @Editor.setter
     def Editor(self, val: str) -> None:  # FanzineSeriesInfo
         self._Editor=val
