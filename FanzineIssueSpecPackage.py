@@ -65,7 +65,7 @@ class FanzineCounts:
             ret.Pagecount=self.Pagecount+b
             ret.Titlecount=self.Titlecount      # Titlecount needs to be incremented (or not) independently
         else:
-            assert()
+            assert(False)
 
         return ret
 
