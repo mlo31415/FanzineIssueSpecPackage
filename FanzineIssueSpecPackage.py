@@ -43,6 +43,8 @@ class FanzineCounts:
     Titlecount: int=0  # Count of distinct titles.
     Issuecount: int=0  # Count of issues in all the titles
     Pagecount: int=0   # Cumulative page count for all the issues
+    Pdfcount: int=0     # Count of issues which are PDFs
+    Pdfpagecount: int=0
     if Issuecount == 0 and Pagecount > 0:   # If it is initialized with a pagecount only, add an issue count of 1
         Issuecount=1
 
@@ -51,24 +53,43 @@ class FanzineCounts:
         out=""
         if self.Titlecount > 0:
             out=str(self.Titlecount)+" titles  "
-        return f"{out}{self.Issuecount} issues  {self.Pagecount} pp"
+        out+=f"{self.Issuecount} issues  "
+        if self.Pdfcount > 0:
+            out+=f"({self.Pdfcount} PDFs)  "
+        out+=f"{self.Pagecount} pp"
 
     # .....................
-    def __add__(self, b: Any) -> FanzineCounts:  # FanzineCounts
-        ret=FanzineCounts()
+    def __add__(self, b: [FanzineCounts | FanzineIssueInfo | int]) -> FanzineCounts:  # FanzineCounts
+        # Note that titlecount, pdfcount and pdfpagecount need to be incremented (or not) independently
         if type(b) is FanzineCounts:
-            ret.Issuecount=self.Issuecount+b.Issuecount
-            ret.Pagecount=self.Pagecount+b.Pagecount
-            ret.Titlecount=self.Titlecount      # Titlecount needs to be incremented (or not) independently
-        elif type(b) is int:    # The int is taken to be a pagecount, and the issue count is automatically incremented
-            ret.Issuecount=self.Issuecount+1
-            ret.Pagecount=self.Pagecount+b
-            ret.Titlecount=self.Titlecount      # Titlecount needs to be incremented (or not) independently
-        else:
-            assert(False)
+            return FanzineCounts(Issuecount=self.Issuecount+b.Issuecount, Pagecount=self.Pagecount+b.Pagecount, Titlecount=self.Titlecount, Pdfcount=self.Pdfcount, Pdfpagecount=self.Pdfpagecount)
+        elif type(b) is FanzineIssueInfo:
+            return FanzineCounts(Issuecount=self.Issuecount+1, Pagecount=self.Pagecount+b.Pagecount, Titlecount=self.Titlecount, Pdfcount=self.Pdfcount, Pdfpagecount=self.Pdfpagecount)
+        elif type(b) is int:
+            # The int is taken to be a pagecount, and the issue count is automatically incremented
+            return FanzineCounts(Issuecount=self.Issuecount+1, Pagecount=self.Pagecount+b, Titlecount=self.Titlecount, Pdfcount=self.Pdfcount, Pdfpagecount=self.Pdfpagecount)
 
-        return ret
+        assert False
 
+    #......................
+    # Needed for += for mutable objects
+    def __iadd__(self, b: [FanzineCounts | FanzineIssueInfo | int]) -> FanzineCounts:  # FanzineCounts
+        # Note that titlecount, pdfcount and pdfpagecount need to be incremented (or not) independently
+        if type(b) is FanzineCounts:
+            self.Issuecount+=b.Issuecount
+            self.Pagecount+=b.Pagecount
+            return self
+        elif type(b) is FanzineIssueInfo:
+            self.Issuecount+=1
+            self.Pagecount+=b.Pagecount
+            return self
+        elif type(b) is int:
+            # The int is taken to be a pagecount, and the issue count is automatically incremented
+            self.Issuecount+=1
+            self.Pagecount+=b
+            return self
+
+        assert False
 
 ############################################################################################
 class FanzineSeriesInfo:
@@ -142,17 +163,37 @@ class FanzineSeriesInfo:
         return True
 
     # .....................
-    def __add__(self, b: [FanzineSeriesInfo, int]):  # FanzineSeriesInfo
+    # When we add, we add to the counts
+    def __add__(self, b: [FanzineSeriesInfo, FanzineIssueInfo, int]):  # FanzineSeriesInfo
         ret=FanzineSeriesInfo(SeriesName=self.SeriesName, Editor=self.Editor, DisplayName=self.DisplayName, Country=self.Country, DirURL=self.DirURL)
         #Log("FanzineSeriesInfo.add:  self.URL="+self.URL+"     b.URL="+b.URL)
         if type(b) is FanzineSeriesInfo:
             ret.Issuecount=self.Issuecount+b.Issuecount
+            ret.Pagecount=self.Pagecount+b.Pagecount
+        elif type(b) is FanzineIssueInfo:
+            ret.Issuecount=self.Issuecount+1
             ret.Pagecount=self.Pagecount+b.Pagecount
         else:
             assert type(b) is int
             ret.Issuecount=self.Issuecount+1
             ret.Pagecount=self.Pagecount+b
         return ret
+
+    # .....................
+    # When we add, we add to the counts
+    # Note that this is an in-paces add to aupport += for mutable objects
+    def __iadd__(self, b: [FanzineSeriesInfo, FanzineIssueInfo, int]):  # FanzineSeriesInfo
+        if type(b) is FanzineSeriesInfo:
+            self.Issuecount+=b.Issuecount
+            self.Pagecount+=b.Pagecount
+        elif type(b) is FanzineIssueInfo:
+            self.Issuecount+=1
+            self.Pagecount+=b.Pagecount
+        else:
+            assert type(b) is int
+            self.Issuecount+=1
+            self.Pagecount+=b
+        return self
 
     # .....................
     def Deepcopy(self) -> FanzineSeriesInfo:      #FanzineSeriesInfo
