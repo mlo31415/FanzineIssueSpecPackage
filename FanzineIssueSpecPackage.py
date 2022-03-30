@@ -19,9 +19,8 @@
 #     (This would also be the right place to put other issue-specific information such as editor, pagecount, etc.)
 #     (It probably should be merged with the FanzineIssueData class of 1943FanzineList)
 from __future__ import annotations
-from typing import Union, Optional, Any
+from typing import Union, Optional
 
-from dataclasses import dataclass
 import math
 import re
 from contextlib import suppress
@@ -38,7 +37,7 @@ from HelpersPackage import InterpretNumber, InterpretRoman, InterpretInteger
 from HelpersPackage import CaseInsensitiveCompare
 from HelpersPackage import CanonicizeColumnHeaders
 
-class FanzineCounts():
+class FanzineCounts:
     def __init__(self, Init: Optional[FanzineCounts]=None, Titlecount: int=0, Issuecount: int=0, Pagecount: int=0, Pdfcount: int=0, Pdfpagecount: int=0):
 
         if Init is not None:
@@ -66,6 +65,7 @@ class FanzineCounts():
         if self.Pdfcount > 0:
             out+=f"({self.Pdfcount} PDFs)  "
         out+=f"{self.Pagecount} pp"
+        return out
 
     # .....................
     def __add__(self, b: [FanzineCounts | FanzineIssueInfo | int]) -> FanzineCounts:  # FanzineCounts
