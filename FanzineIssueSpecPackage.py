@@ -38,15 +38,24 @@ from HelpersPackage import InterpretNumber, InterpretRoman, InterpretInteger
 from HelpersPackage import CaseInsensitiveCompare
 from HelpersPackage import CanonicizeColumnHeaders
 
-@dataclass
-class FanzineCounts:
-    Titlecount: int=0  # Count of distinct titles.
-    Issuecount: int=0  # Count of issues in all the titles
-    Pagecount: int=0   # Cumulative page count for all the issues
-    Pdfcount: int=0     # Count of issues which are PDFs
-    Pdfpagecount: int=0
-    if Issuecount == 0 and Pagecount > 0:   # If it is initialized with a pagecount only, add an issue count of 1
-        Issuecount=1
+class FanzineCounts():
+    def __init__(self, Init: Optional[FanzineCounts]=None, Titlecount: int=0, Issuecount: int=0, Pagecount: int=0, Pdfcount: int=0, Pdfpagecount: int=0):
+
+        if Init is not None:
+            self.Titlecount=Init.Titlecount
+            self.Issuecount=Init.Issuecount
+            self.Pagecount=Init.Pagecount
+            self.Pdfcount=Init.Pdfcount
+            self.Pdfpagecount=Init.Pdfpagecount
+            return
+
+        self.Titlecount: int=Titlecount  # Count of distinct titles.
+        self.Issuecount: int=Issuecount  # Count of issues in all the titles
+        self.Pagecount: int=Pagecount   # Cumulative page count for all the issues
+        self.Pdfcount: int=Pdfcount     # Count of issues which are PDFs
+        self.Pdfpagecount: int=Pdfpagecount
+        if self.Issuecount == 0 and self.Pagecount > 0:   # If it is initialized with a pagecount only, add an issue count of 1
+            self.Issuecount=1
 
     # .....................
     def __str__(self) -> str:  # FanzineCounts
@@ -90,6 +99,7 @@ class FanzineCounts:
             return self
 
         assert False
+
 
 ############################################################################################
 class FanzineSeriesInfo:
