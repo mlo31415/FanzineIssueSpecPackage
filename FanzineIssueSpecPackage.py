@@ -1971,10 +1971,9 @@ class FanzineIssueSpecList:
 
 class FanzineIssueInfo:
 
-    def __init__(self, SeriesName: str="", Series: Optional[FanzineSeriesInfo]=None, IssueName: str="", DisplayName: str="",
+    def __init__(self, Series: Optional[FanzineSeriesInfo]=None, IssueName: str="", DisplayName: str="",
                  DirURL: str="", PageName: str="", FIS: Optional[FanzineIssueSpec]=None,
                  Pagecount: Optional[int]=None, Editor: str="", Country: str="", Taglist: list[str]=None, Mailing: list[str]=None) -> None:
-        _SeriesName: str=""     # Name of the fanzine series of which this is an issue
         _Series: Optional[FanzineSeriesInfo]=None
         _IssueName: str=""      # Name of this issue (does not include issue #/date info)
         _DisplayName: str=""    # Name to use for this issue. Includes issue serial and or date
@@ -1988,7 +1987,6 @@ class FanzineIssueInfo:
         _Mailing: list[str]=[]  # A List of APA mailings this issue was a part of
 
         # Use the properties to set the values for all of the instance variables. We do this so that any special setter processing is done with the init values.
-        self.SeriesName=SeriesName
         self.Series=Series
         self.IssueName=IssueName
         self.DisplayName=DisplayName
@@ -2001,7 +1999,7 @@ class FanzineIssueInfo:
         self.Taglist=Taglist
         self.Mailing=Mailing
 
-        Log(f"FanzineIssueInfo: Creating with {SeriesName=} and {IssueName=}")
+        Log(f"FanzineIssueInfo: Creating with {self.SeriesName=} and {IssueName=}")
 
     # .....................
     def __str__(self) -> str:                       # FanzineIssueInfo
@@ -2041,7 +2039,7 @@ class FanzineIssueInfo:
 
     # .....................
     def __eq__(self, other:FanzineIssueInfo) -> bool:                       # FanzineIssueInfo
-        if self._SeriesName != other._SeriesName:
+        if self.SeriesName != other.SeriesName:
             return False
         if self._Editor != other._Editor:
             return False
@@ -2064,17 +2062,19 @@ class FanzineIssueInfo:
 
     # .....................
     def IsEmpty(self) -> bool:                       # FanzineIssueInfo
-        if self.SeriesName != "" or self.IssueName != "" or self._DisplayName != "" or self.DirURL != "" or self.PageName != "" or self.Pagecount > 0 or self.Editor != "" or self.Taglist or self.Mailing:
+        if self.SeriesName != "" or self.IssueName != "" or self._DisplayName != "" or self.DirURL != "" or self.PageName != "" or self.Pagecount > 0 or self.Editor != "" or self.Taglist or self.Mailings:
             return False
         return self.FIS.IsEmpty()
 
     # .....................
     @property
-    def SeriesName(self) -> str:                       # FanzineIssueInfo
-        return self._SeriesName
+    def SeriesName(self) -> str:    # FanzineIssueInfo
+        if self._Series is None:
+            return ""
+        return self._Series.SeriesName
     @SeriesName.setter
     def SeriesName(self, val: str) -> None:                       # FanzineIssueInfo
-        self._SeriesName=val.strip()
+        assert False
 
     # .....................
     @property
@@ -2099,9 +2099,9 @@ class FanzineIssueInfo:
     def DisplayName(self) -> str:                       # FanzineIssueInfo
         if self._DisplayName != "":
             return self._DisplayName
-        if self.FIS is not None and self._SeriesName != "":
-            return self._SeriesName+" "+str(self.FIS)
-        return self._SeriesName
+        if self.FIS is not None and self.SeriesName != "":
+            return self.SeriesName+" "+str(self.FIS)
+        return self.SeriesName
     @DisplayName.setter
     def DisplayName(self, val: str) -> None:                       # FanzineIssueInfo
         self._DisplayName=val.strip()
