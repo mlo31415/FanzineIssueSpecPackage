@@ -36,6 +36,7 @@ from HelpersPackage import RemoveHTMLDebris
 from HelpersPackage import InterpretNumber, InterpretRoman, InterpretInteger
 from HelpersPackage import CaseInsensitiveCompare
 from HelpersPackage import CanonicizeColumnHeaders
+from HelpersPackage import ParmDict
 
 class FanzineCounts:
     def __init__(self, Init: Optional[FanzineCounts]=None, Titlecount: int=0, Issuecount: int=0, Pagecount: int=0, Pdfcount: int=0, Pdfpagecount: int=0):
@@ -105,13 +106,14 @@ class FanzineCounts:
 class FanzineSeriesInfo:
 
     def __init__(self, SeriesName: str = "", DisplayName: str = "", DirURL: str = "", Issuecount: int=0,
-                 Pagecount: int = 0, Editor: str = "", Country: str = "") -> None:
+                 Pagecount: int = 0, Editor: str = "", Country: str = "", Keywords: ParmDict=None) -> None:
         _SeriesName: str=""  # Name of the fanzine series of which this is an issue
         _DisplayName: str=""  # Name to use for this issue. Includes issue serial and or date
         _DirURL: str=""  # URL of series directory
         _Counts: FanzineCounts  # Page and Issue count for all the issues fanac has for this series
         _Editor: str=""  # The editor for this series (if there was one for essentially all issues)
         _Country: str="" # The country for this issue (gotten from the series's country
+        _Keywords: ParmDict=ParmDict()  # A list of keywords
 
         # Use the properties to set the values for all of the instance variables. We do this so that any special setter processing is done with the init values.
         self.SeriesName=SeriesName
@@ -120,6 +122,9 @@ class FanzineSeriesInfo:
         self.Counts=FanzineCounts(Issuecount=Issuecount, Pagecount=Pagecount)
         self.Editor=Editor
         self.Country=Country
+        if Keywords == None:
+            Keywords=ParmDict()
+        self._Keywords=Keywords
         pass
 
     # .....................
@@ -283,7 +288,7 @@ class FanzineSeriesInfo:
         self._Counts.Issuecount=val
 
     # .....................
-    # Neeed for compatibility, but always zero
+    # Needed for compatibility, but always zero
     @property
     def Titlecount(self) -> int:  # FanzineSeriesInfo
         return self._Counts.Titlecount
@@ -304,8 +309,16 @@ class FanzineSeriesInfo:
     def Editor(self, val: str) -> None:  # FanzineSeriesInfo
         self._Editor=val
 
-#---------------------------------------------------------------------------------------
+    # .....................
+    @property
+    def Keywords(self) -> ParmDict:     # FanzineSeriesInfo
+        return self._Keywords
+    # There is no setter
+    def SetKeyword(self, kwd: str, val: str=""):
+        self._Keywords[kwd]=val # If no value is suppled, we use ""
 
+
+#---------------------------------------------------------------------------------------
 class FanzineDate:
     def __init__(self,
                  Year: Union[int, str, None]=None,
@@ -2170,9 +2183,8 @@ class FanzineIssueInfo:
     @property
     def Mailing(self) -> list[str]:  # FanzineIssueInfo
         return self._Mailing
-
-    @Mailing.setter
-    def Mailing(self, val: list[str]) -> None:  # FanzineIssueInfo
+    @Mailings.setter
+    def Mailings(self, val: list[str]) -> None:  # FanzineIssueInfo
         if val is None:
             val=[]
         self._Mailing=val
