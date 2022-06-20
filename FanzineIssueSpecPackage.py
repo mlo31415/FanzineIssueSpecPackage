@@ -2010,7 +2010,7 @@ class FanzineIssueInfo:
         self.Editor=Editor
         self._Locale=Locale(Country)
         self.Taglist=Taglist
-        self.Mailing=Mailing
+        self.Mailings=Mailing
 
         Log(f"FanzineIssueInfo: Creating with {self.SeriesName=} and {IssueName=}")
 
@@ -2181,7 +2181,7 @@ class FanzineIssueInfo:
 
     # .....................
     @property
-    def Mailing(self) -> list[str]:  # FanzineIssueInfo
+    def Mailings(self) -> list[str]:  # FanzineIssueInfo
         return self._Mailing
     @Mailings.setter
     def Mailings(self, val: list[str]) -> None:  # FanzineIssueInfo
