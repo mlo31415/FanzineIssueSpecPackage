@@ -2248,7 +2248,7 @@ class FanzineSeriesList:
             raise(Exception("FIIL setter: FIIL is non-empty"))
         self._FIIL=[]
         for el in val:
-            self._FIIL.append(FanzineIssueInfo(FIS=el, SeriesName=self.SeriesName, Editor=self.Editor, DirURL=self.SeriesURL))
+            self._FIIL.append(FanzineIssueInfo(FIS=el, Editor=self.Editor, DirURL=self.SeriesURL))
 
     # .....................
     @property
