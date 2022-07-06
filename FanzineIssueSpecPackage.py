@@ -30,7 +30,7 @@ import json
 
 from Locale import Locale
 
-from Log import Log
+from Log import Log, LogError
 from HelpersPackage import ToNumeric, IsNumeric, IsInt, Int
 from HelpersPackage import RemoveHTMLDebris
 from HelpersPackage import InterpretNumber, InterpretRoman, InterpretInteger
@@ -2549,7 +2549,7 @@ def InterpretYear(yearText: Optional[int, str]) -> Optional[int, str]:
                     y2=YearAs4Digits(int(years[1]))
                     return max(y1, y2)
 
-    Log("   ***Year conversion failed: '"+yearText+"'", isError=True)
+    LogError("   ***Year conversion failed: '"+yearText+"'")
     return None
 
 
@@ -2573,7 +2573,7 @@ def InterpretDay(dayData: Optional[int, str]) -> Optional[int]:
     except:
         d=InterpretNamedDay(dayData)
         if d is None:
-            Log("   ***Day conversion failed: '"+dayData+"'", isError=True)
+            LogError("   ***Day conversion failed: '"+dayData+"'")
             day=None
         else:
             day=d[0]
@@ -2868,16 +2868,16 @@ def ExtractSerialNumber(volText: str, numText: str, wholeText: str, volNumText: 
                     numInt=ser.Num
 
                 if volInt != ser.Vol:
-                    Log("***Inconsistent serial designations: Volume='"+str(volInt)+"' which is not Vol='"+str(ser.Vol)+"'", isError=True)
+                    LogError("***Inconsistent serial designations: Volume='"+str(volInt)+"' which is not Vol='"+str(ser.Vol)+"'")
                 if numInt != ser.Num:
-                    Log("***Inconsistent serial designations: Number='"+str(numInt)+"' which is not Num='"+str(ser.Num)+"'", isError=True)
+                    LogError("***Inconsistent serial designations: Number='"+str(numInt)+"' which is not Num='"+str(ser.Num)+"'")
 
             elif ser.Num is not None:
                 if wholeInt is None:
                     wholeInt=ser.Num
 
                 if wholeInt != ser.Num:
-                    Log("***Inconsistent serial designations: Whole='"+str(wholeInt)+"'  which is not Num='"+str(ser.Num)+"'", isError=True)
+                    LogError("***Inconsistent serial designations: Whole='"+str(wholeInt)+"'  which is not Num='"+str(ser.Num)+"'")
 
             if ser.Whole is not None:
                 wholeInt=ser.Whole
