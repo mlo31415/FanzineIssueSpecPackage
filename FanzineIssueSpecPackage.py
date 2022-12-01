@@ -2170,6 +2170,14 @@ class FanzineIssueInfo:
 
     # .....................
     @property
+    def SeriesEditor(self) -> str:
+        if self._Series.Editor is not None:
+            return self._Series.Editor
+        return self.Editor
+
+
+    # .....................
+    @property
     def Taglist(self) -> list[str]:  # FanzineIssueInfo
         return self._Taglist
 
