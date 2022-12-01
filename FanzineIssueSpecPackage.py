@@ -2001,7 +2001,7 @@ class FanzineIssueInfo:
 
     def __init__(self, Series: Optional[FanzineSeriesInfo]=None, IssueName: str="", DisplayName: str="",
                  DirURL: str="", PageName: str="", FIS: Optional[FanzineIssueSpec]=None,
-                 Pagecount: Optional[int]=None, Editor: str="", Country: str="", Taglist: list[str]=None, Mailing: list[str]=None) -> None:
+                 Pagecount: Optional[int]=None, Editor: str="", Country: str="", Taglist: list[str]=None, Mailing: list[str]=None, Temp: any=None) -> None:
         _Series: Optional[FanzineSeriesInfo]=None
         _IssueName: str=""      # Name of this issue (does not include issue #/date info)
         _DisplayName: str=""    # Name to use for this issue. Includes issue serial and or date
@@ -2013,6 +2013,7 @@ class FanzineIssueInfo:
         _Locale: Locale
         _Taglist: Optional[list[str]]=None  # A list of tags for this fanzine (e.g., "newszine")
         _Mailing: list[str]=[]  # A List of APA mailings this issue was a part of
+        _Temp: any=None     # Used outside the class to hold random information
 
         # Use the properties to set the values for all of the instance variables. We do this so that any special setter processing is done with the init values.
         self.Series=Series
@@ -2026,8 +2027,7 @@ class FanzineIssueInfo:
         self._Locale=Locale(Country)
         self.Taglist=Taglist
         self.Mailings=Mailing
-
-        Log(f"FanzineIssueInfo: Creating with {self.SeriesName=} and {IssueName=}")
+        self.Temp=Temp
 
     # .....................
     def __str__(self) -> str:                       # FanzineIssueInfo
@@ -2162,6 +2162,14 @@ class FanzineIssueInfo:
 
     # .....................
     @property
+    def Temp(self) -> any:                       # FanzineIssueInfo
+        return self._Temp
+    @Temp.setter
+    def Temp(self, val: any) -> None:                       # FanzineIssueInfo
+        self._Temp=val
+
+    # .....................
+    @property
     def FIS(self) -> Optional[FanzineIssueSpec]:                       # FanzineIssueInfo
         return self._FIS
     @FIS.setter
@@ -2188,7 +2196,6 @@ class FanzineIssueInfo:
     @property
     def Editor(self) -> str:                       # FanzineIssueInfo
         return self._Editor
-
     @Editor.setter
     def Editor(self, val: str) -> None:                       # FanzineIssueInfo
         self._Editor=val
