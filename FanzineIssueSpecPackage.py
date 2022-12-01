@@ -1524,6 +1524,19 @@ class FanzineIssueSpec:
         #self._UninterpretableText=other._UninterpretableText
         #self._TrailingGarbage=other._TrailingGarbage
 
+    def DeepCopy(self, other: FanzineIssueSpec) -> None:
+        self.Vol=other.Vol
+        self.Num=other.Num
+        self.NumSuffix=other.NumSuffix
+        self.Whole=other.Whole
+        self.WSuffix=other.WSuffix
+        self.Year=other.Year
+        self.Month=other.Month
+        self.Day=other.Day
+        self.FS.Copy(other.FS)
+        self.FD.Copy(other.FD)
+
+
     # .....................
     @property
     def FD(self) -> Optional[FanzineDate]:         # FanzineIssueSpec
@@ -2074,6 +2087,16 @@ class FanzineIssueInfo:
             if self._FIS != other._FIS:
                 return False
         return True
+
+
+    def DeepCopy(self) -> FanzineIssueInfo:
+        fz=FanzineIssueInfo(Series=self.Series, IssueName=self.IssueName, DisplayName=self.DisplayName, DirURL=self.DirURL,
+                            PageName=self.PageName, FIS=self.FIS, Pagecount=self.Pagecount, Editor=self.Editor, Country="",
+                            Taglist=None, Mailing=self.Mailings, Temp=self.Temp)
+        # Do some touch-ups
+        fz._Locale=self.Locale
+        fz.Taglist=[x for x in self.Taglist]
+        return fz
 
     # .....................
     def IsEmpty(self) -> bool:                       # FanzineIssueInfo
