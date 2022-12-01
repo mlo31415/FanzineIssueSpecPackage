@@ -103,6 +103,8 @@ class FanzineCounts:
 
 
 ############################################################################################
+# A class holding information about a fanzine series
+# Note that for onesies or some types we sometimes create an artificial  fanzine series to go with a single issues
 class FanzineSeriesInfo:
 
     def __init__(self, SeriesName: str = "", DisplayName: str = "", DirURL: str = "", Issuecount: int=0,
