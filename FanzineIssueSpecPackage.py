@@ -663,6 +663,13 @@ class FanzineDate:
 
 
     # =============================================================================
+    def FormatDate(self, fmt: str) -> str:               # FanzineDate
+        if self.Date is None:
+            return ""
+        return self.Date.strftime(fmt)
+
+
+    # =============================================================================
     # Parse a free-format string to find a date.  This tries to interpret the *whole* string as a date -- it doesn't find a date embeded in other text.
     # strict=true means that dubious forms will be rejected
     # complete=True means that *all* the input string much be part of the date
@@ -2001,7 +2008,7 @@ class FanzineIssueInfo:
 
     def __init__(self, Series: Optional[FanzineSeriesInfo]=None, IssueName: str="", DisplayName: str="",
                  DirURL: str="", PageName: str="", FIS: Optional[FanzineIssueSpec]=None,
-                 Pagecount: Optional[int]=None, Editor: str="", Country: str="", Taglist: list[str]=None, Mailing: list[str]=None, Temp: any=None) -> None:
+                 Pagecount: Optional[int]=None, Editor: str="", Country: str="", Taglist: list[str]=None, Mailings: list[str]=None, Temp: any=None) -> None:
         _Series: Optional[FanzineSeriesInfo]=None
         _IssueName: str=""      # Name of this issue (does not include issue #/date info)
         _DisplayName: str=""    # Name to use for this issue. Includes issue serial and or date
@@ -2012,7 +2019,7 @@ class FanzineIssueInfo:
         _Editor: str=""     # The editor for this issue.  If None, use the editor of the series
         _Locale: Locale
         _Taglist: Optional[list[str]]=None  # A list of tags for this fanzine (e.g., "newszine")
-        _Mailing: list[str]=[]  # A List of APA mailings this issue was a part of
+        _Mailings: list[str]=[]  # A List of APA mailings this issue was a part of
         _Temp: any=None     # Used outside the class to hold random information
 
         # Use the properties to set the values for all of the instance variables. We do this so that any special setter processing is done with the init values.
@@ -2026,7 +2033,7 @@ class FanzineIssueInfo:
         self.Editor=Editor
         self._Locale=Locale(Country)
         self.Taglist=Taglist
-        self.Mailings=Mailing
+        self.Mailings=Mailings
         self.Temp=Temp
 
     # .....................
@@ -2092,7 +2099,7 @@ class FanzineIssueInfo:
     def DeepCopy(self) -> FanzineIssueInfo:
         fz=FanzineIssueInfo(Series=self.Series, IssueName=self.IssueName, DisplayName=self.DisplayName, DirURL=self.DirURL,
                             PageName=self.PageName, FIS=self.FIS, Pagecount=self.Pagecount, Editor=self.Editor, Country="",
-                            Taglist=None, Mailing=self.Mailings, Temp=self.Temp)
+                            Taglist=None, Mailings=self.Mailings, Temp=self.Temp)
         # Do some touch-ups
         fz._Locale=self.Locale
         fz.Taglist=[x for x in self.Taglist]
@@ -2222,12 +2229,12 @@ class FanzineIssueInfo:
     # .....................
     @property
     def Mailings(self) -> list[str]:  # FanzineIssueInfo
-        return self._Mailing
+        return self._Mailings
     @Mailings.setter
     def Mailings(self, val: list[str]) -> None:  # FanzineIssueInfo
         if val is None:
             val=[]
-        self._Mailing=val
+        self._Mailings=val
 
 
 ######################################################################################################################
