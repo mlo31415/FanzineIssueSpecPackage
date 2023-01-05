@@ -32,6 +32,7 @@ from Locale import Locale
 
 from Log import Log, LogError
 from HelpersPackage import ToNumeric, IsNumeric, IsInt, Int
+from HelpersPackage import Pluralize
 from HelpersPackage import RemoveHTMLDebris
 from HelpersPackage import InterpretNumber, InterpretRoman, InterpretInteger
 from HelpersPackage import CaseInsensitiveCompare
@@ -100,6 +101,19 @@ class FanzineCounts:
             return self
 
         assert False
+
+    # -------------------------------------------------------------------------
+    # Compute a counts annotation from a 2-tuple element -- used in calls to WriteTable
+    def Annotate(self) -> str:
+        s=""
+        i=self.Issuecount
+        p=self.Pagecount
+        if i > 0:
+            s+=Pluralize(i, "issue")+", "
+            s+=Pluralize(p, "page")
+        if s:
+            s="("+s+")"
+        return s
 
 
 ############################################################################################
