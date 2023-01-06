@@ -104,14 +104,14 @@ class FanzineCounts:
 
     # -------------------------------------------------------------------------
     # Compute a counts annotation from a 2-tuple element -- used in calls to WriteTable
-    def Annotate(self) -> str:
+    def Annotate(self, special: int=0) -> str:
         s=""
         i=self.Issuecount
         p=self.Pagecount
         if i > 0:
             s+=Pluralize(i, "issue")+", "
             s+=Pluralize(p, "page")
-        if s:
+        if s and special != 1:
             s="("+s+")"
         return s
 
