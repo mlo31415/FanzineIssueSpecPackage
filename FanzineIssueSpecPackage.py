@@ -825,7 +825,7 @@ class FanzineDate:
         if m is not None and len(m.groups()) == 1:
             return cls(Year=int(m.groups()[0]), Month=1, MonthText="Winter")  # Use the second part (the 4-digit year)
 
-        # There there are the equally annoying entries Month-Month year (e.g., 'June - July 2001') and Month/Month year.
+        # There are the equally annoying entries Month-Month year (e.g., 'June - July 2001') and Month/Month year.
         # These will be taken to mean the first month
         # We'll look for the pattern <text> '-' <text> <year> with (maybe) spaces between the tokens
         m=re.match("^(\w+)\s*[-/]\s*(\w+)\s,?\s*(\d\d\d\d)$", dateText)
@@ -889,12 +889,14 @@ class FanzineDateRange:
         self._startdate: Optional[FanzineDate]=None
         self._enddate: Optional[FanzineDate]=None
         self._cancelled: bool=False
+        self._useMarkupForCancelled: bool=False
 
     def ToJson(self) -> str:
-        d={"ver": 2,
+        d={"ver": 3,
             "_startdate": self._startdate.ToJson(),
             "_enddate": self._enddate.ToJson(),
-            "_cancelled": self._cancelled}
+            "_cancelled": self._cancelled,
+            "__useMarkupForCancelled": self._useMarkupForCancelled}
 
         return json.dumps(d)
 
@@ -906,6 +908,8 @@ class FanzineDateRange:
         self._cancelled=False
         if ver > 1:
             self._cancelled=("true" == d["_cancelled"])
+        if ver > 2:
+            self._useMarkupForCancelled=("true" == d["_useMarkupForCancelled"])
 
         return self
 
@@ -915,7 +919,7 @@ class FanzineDateRange:
 
     # -----------------------------
     def __eq__(self, other:FanzineDateRange) -> bool:               # FanzineDateRange
-        return self._startdate == other._startdate and self._enddate == other._enddate
+            return self._startdate == other._startdate and self._enddate == other._enddate
 
     # -----------------------------
     def __lt__(self, other:FanzineDateRange) -> bool:               # FanzineDateRange
@@ -952,7 +956,11 @@ class FanzineDateRange:
             s=str(d1)+"-"+str(d2)
 
         if self._cancelled:
-            s+=" (cancelled)"
+            if self._useMarkupForCancelled:
+                s=f"<s>{s}</s>"
+            else:
+                s+=" (cancelled)"
+
         return s
 
     @property
@@ -981,6 +989,13 @@ class FanzineDateRange:
         dateText=s.strip()
         if len(dateText) == 0:
             return self
+
+        # Strip bracketing <s></s>
+        m=re.match("\s*<s>(.*)<\/s>\s*$", s)
+        if m:
+            self._cancelled=True
+            self._useMarkupForCancelled=True
+            s=m.groups()[0]
 
         # If we have a single "-", then the format is probably of the form:
         #   #1: <month+day>-<month+day> year  or
