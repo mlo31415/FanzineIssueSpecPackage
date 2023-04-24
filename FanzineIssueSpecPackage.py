@@ -1522,6 +1522,37 @@ class FanzineIssueSpec:
         else:
             self._FD=FanzineDate(Year=Year, Month=Month, MonthText=MonthText, Day=Day, DayText=DayText)
 
+    # .......................
+    # Convert the FanzineIssueSpec into a debugging form
+    def __repr__(self) -> str:  # FanzineIssueSpec
+        s="IS("+repr(self._FS)+" "+repr(self._FD)
+        s=s+")"
+
+        return s
+
+    # .......................
+    # Convert the FanzineIssueSpec into a pretty string for display or printing
+    def __str__(self) -> str:  # FanzineIssueSpec
+        tg=""
+        if not self._FD.IsEmpty():
+            tg+=" "+str(self._FD)
+
+        if not self._FS.IsEmpty():
+            tg+="  "+str(self._FS)
+
+        return tg.strip()
+
+
+    # .......................
+    # Convert the FanzineIssueSpec into the shortest pretty string that identifies the issue
+    def IssueDesignation(self) -> str:
+        if not self._FS.IsEmpty():
+            return str(self._FS)
+        if not self._FD.IsEmpty():
+            return str(self._FD)
+        return ""
+
+
     # Two issue designations are deemed to be equal if they are identical or if the VN matches while at least on of the Wholes in None or
     # is the Whole matches and at least one of the Vs and Ns is None.  (We would allow match of (W13, V3, N2) with (W13), etc.)
 
@@ -1702,41 +1733,9 @@ class FanzineIssueSpec:
         return self._FD.Date
 
     #.......................
-    # Convert the FanzineIssueSpec into a debugging form
-    def __repr__(self) -> str:                          # FanzineIssueSpec
-        # if self.UninterpretableText is not None:
-        #     return "IS("+self.UninterpretableText+")"
-
-        s="IS("+repr(self._FS)+" "+repr(self._FD)
-        # if self.TrailingGarbage is not None:
-        #     s=s+", TG='"+self.TrailingGarbage+"'"
-        # if self.UninterpretableText is not None:
-        #     s=s+", UT='"+self.UninterpretableText+"'"
-        s=s+")"
-
-        return s
-
-    #.......................
     def IsEmpty(self) -> bool:                          # FanzineIssueSpec
         return self._FD.IsEmpty() and self._FS.IsEmpty()
 
-    #.......................
-    # Convert the FanzineIssueSpec into a pretty string for display or printing
-    def __str__(self) -> str:                           # FanzineIssueSpec
-        # if self.UninterpretableText is not None:
-        #     return self.UninterpretableText.strip()
-
-        tg=""
-        # if self.TrailingGarbage is not None:
-        #     tg=" "+self.TrailingGarbage
-
-        if not self._FD.IsEmpty():
-            tg+=" "+str(self._FD)
-
-        if not self._FS.IsEmpty():
-            tg+="  "+str(self._FS)
-
-        return tg.strip()
 
     # =====================================================================================
 #    def DecodeIssueDesignation(self, s: str) -> None:         # FanzineIssueSpec
