@@ -40,15 +40,7 @@ from HelpersPackage import CanonicizeColumnHeaders
 from HelpersPackage import ParmDict
 
 class FanzineCounts:
-    def __init__(self, Init: Optional[FanzineCounts]=None, Titlecount: int=0, Issuecount: int=0, Pagecount: int=0, Pdfcount: int=0, Pdfpagecount: int=0):
-
-        if Init is not None:
-            self.Titlecount=Init.Titlecount
-            self.Issuecount=Init.Issuecount
-            self.Pagecount=Init.Pagecount
-            self.Pdfcount=Init.Pdfcount
-            self.Pdfpagecount=Init.Pdfpagecount
-            return
+    def __init__(self, Titlecount: int=0, Issuecount: int=0, Pagecount: int=0, Pdfcount: int=0, Pdfpagecount: int=0):
 
         self.Titlecount: int=Titlecount  # Count of distinct titles.
         self.Issuecount: int=Issuecount  # Count of issues in all the titles
@@ -60,14 +52,16 @@ class FanzineCounts:
 
     # .....................
     def __str__(self) -> str:  # FanzineCounts
-        out=""
-        if self.Titlecount > 0:
-            out=str(self.Titlecount)+" titles  "
-        out+=f"{self.Issuecount} issues  "
-        if self.Pdfcount > 0:
-            out+=f"({self.Pdfcount} PDFs)  "
-        out+=f"{self.Pagecount} pp"
-        return out
+        s=""
+        t=self.Titlecount
+        i=self.Issuecount
+        p=self.Pagecount
+        if t > 0:
+            s+=Pluralize(t, "title")+", "
+        if i > 0:
+            s+=Pluralize(i, "issue")+", "
+            s+=Pluralize(p, "page")
+        return s
 
     # .....................
     def __add__(self, b: [FanzineCounts | FanzineIssueInfo | int]) -> FanzineCounts:  # FanzineCounts
@@ -105,12 +99,7 @@ class FanzineCounts:
     # -------------------------------------------------------------------------
     # Compute a counts annotation from a 2-tuple element -- used in calls to WriteTable
     def Annotate(self, special: int=0) -> str:
-        s=""
-        i=self.Issuecount
-        p=self.Pagecount
-        if i > 0:
-            s+=Pluralize(i, "issue")+", "
-            s+=Pluralize(p, "page")
+        s=self.__str__()
         if s and special != 1:
             s="("+s+")"
         return s
