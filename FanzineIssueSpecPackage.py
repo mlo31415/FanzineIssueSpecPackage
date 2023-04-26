@@ -111,13 +111,14 @@ class FanzineCounts:
 class FanzineSeriesInfo:
 
     def __init__(self, SeriesName: str = "", DisplayName: str = "", DirURL: str = "", Issuecount: int=0,
-                 Pagecount: int = 0, Editor: str = "", Country: str = "", Keywords: ParmDict=None) -> None:
+                 Pagecount: int = 0, Editor: str = "", Country: str = "", AlphabetizeIndividually: bool=False, Keywords: ParmDict=None) -> None:
         _SeriesName: str=""  # Name of the fanzine series of which this is an issue
         _DisplayName: str=""  # Name to use for this issue. Includes issue serial and or date
         _DirURL: str=""  # URL of series directory
         _Counts: FanzineCounts  # Page and Issue count for all the issues fanac has for this series
         _Editor: str=""  # The editor for this series (if there was one for essentially all issues)
         _Country: str="" # The country for this issue (gotten from the series's country
+        _AlphabetizeIndividually: bool=False
         _Keywords: ParmDict=ParmDict()  # A list of keywords
 
         # Use the properties to set the values for all of the instance variables. We do this so that any special setter processing is done with the init values.
@@ -127,6 +128,7 @@ class FanzineSeriesInfo:
         self.Counts=FanzineCounts(Issuecount=Issuecount, Pagecount=Pagecount)
         self.Editor=Editor
         self.Country=Country
+        self.AlphabetizeIndividually=AlphabetizeIndividually
         if Keywords == None:
             Keywords=ParmDict()
         self._Keywords=Keywords
@@ -225,6 +227,7 @@ class FanzineSeriesInfo:
         new.Issuecount=self.Issuecount
         new.Editor=self.Editor
         new.Country=self.Country
+        new.FanzineSeriesInfo=self.FanzineSeriesInfo
         return new
 
     # .....................
@@ -313,6 +316,16 @@ class FanzineSeriesInfo:
     @Editor.setter
     def Editor(self, val: str) -> None:  # FanzineSeriesInfo
         self._Editor=val
+
+    # .....................
+    @property
+    def AlphabetizeIndividually(self) -> bool:  # FanzineSeriesInfo
+        return self._AlphabetizeIndividually
+    @AlphabetizeIndividually.setter
+    def AlphabetizeIndividually(self, val: bool) -> None:  # FanzineSeriesInfo
+        if val is None:
+            val=[]
+        self._AlphabetizeIndividually=val
 
     # .....................
     @property
@@ -2024,13 +2037,13 @@ class FanzineIssueSpecList:
 class FanzineIssueInfo:
 
     def __init__(self, Series: Optional[FanzineSeriesInfo]=None, IssueName: str="", DisplayName: str="",
-                 DirURL: str="", PageName: str="", FIS: Optional[FanzineIssueSpec]=None,
-                 Pagecount: Optional[int]=None, Editor: str="", Country: str="", Taglist: list[str]=None, Mailings: list[str]=None, Temp: any=None) -> None:
+                 DirURL: str="", PageFilename: str="", FIS: Optional[FanzineIssueSpec]=None,
+                 Pagecount: Optional[int]=None, Editor: str="", Country: str="", Taglist: list[str]=None, Mailings: list[str]=None, Temp: any=None, AlphabetizeIndividually: bool=False) -> None:
         _Series: Optional[FanzineSeriesInfo]=None
         _IssueName: str=""      # Name of this issue (does not include issue #/date info)
         _DisplayName: str=""    # Name to use for this issue. Includes issue serial and or date
         _DirURL: str=""  # URL of fanzine directory
-        _PageName: str=""  # URL of specific issue in directory
+        _PageFilename: str=""  # URL of specific issue in directory
         _FIS: Optional[FanzineIssueSpec]=None  # FIS for this issue
         _Pagecount: int=0  # Page count for this issue
         _Editor: str=""     # The editor for this issue.  If None, use the editor of the series
@@ -2038,19 +2051,21 @@ class FanzineIssueInfo:
         _Taglist: Optional[list[str]]=None  # A list of tags for this fanzine (e.g., "newszine")
         _Mailings: list[str]=[]  # A List of APA mailings this issue was a part of
         _Temp: any=None     # Used outside the class to hold random information
+        _AlphabetizeIndividually: bool=False
 
         # Use the properties to set the values for all of the instance variables. We do this so that any special setter processing is done with the init values.
         self.Series=Series
         self.IssueName=IssueName
         self.DisplayName=DisplayName
         self.DirURL=DirURL
-        self.PageName=PageName
+        self.PageFilename=PageFilename
         self.FIS=FIS
         self.Pagecount=Pagecount
         self.Editor=Editor
         self._Locale=Locale(Country)
         self.Taglist=Taglist
         self.Mailings=Mailings
+        self.AlphabetizeIndividually=AlphabetizeIndividually
         self.Temp=Temp
 
     # .....................
@@ -2101,7 +2116,7 @@ class FanzineIssueInfo:
             return False
         if self._DirURL != other._DirURL:
             return False
-        if self._PageName != other._PageName:
+        if self._PageFilename != other._PageFilename:
             return False
         if self._Pagecount != other._Pagecount:
             return False
@@ -2115,7 +2130,7 @@ class FanzineIssueInfo:
 
     def DeepCopy(self) -> FanzineIssueInfo:
         fz=FanzineIssueInfo(Series=self.Series, IssueName=self.IssueName, DisplayName=self.DisplayName, DirURL=self.DirURL,
-                            PageName=self.PageName, FIS=self.FIS, Pagecount=self.Pagecount, Editor=self.Editor, Country="",
+                            PageFilename=self.PageFilename, FIS=self.FIS, Pagecount=self.Pagecount, Editor=self.Editor, Country="",
                             Taglist=None, Mailings=self.Mailings, Temp=self.Temp)
         # Do some touch-ups
         fz._Locale=self.Locale
@@ -2124,7 +2139,7 @@ class FanzineIssueInfo:
 
     # .....................
     def IsEmpty(self) -> bool:                       # FanzineIssueInfo
-        if self.SeriesName != "" or self.IssueName != "" or self._DisplayName != "" or self.DirURL != "" or self.PageName != "" or self.Pagecount > 0 or self.Editor != "" or self.Taglist or self.Mailings:
+        if self.SeriesName != "" or self.IssueName != "" or self._DisplayName != "" or self.DirURL != "" or self.PageFilename != "" or self.Pagecount > 0 or self.Editor != "" or self.Taglist or self.Mailings:
             return False
         return self.FIS.IsEmpty()
 
@@ -2178,11 +2193,16 @@ class FanzineIssueInfo:
 
     # .....................
     @property
-    def PageName(self) -> str:                       # FanzineIssueInfo
-        return self._PageName
-    @PageName.setter
-    def PageName(self, val: str) -> None:                       # FanzineIssueInfo
-        self._PageName=val.strip()
+    def PageFilename(self) -> str:                       # FanzineIssueInfo
+        return self._PageFilename
+    @PageFilename.setter
+    def PageFilename(self, val: str) -> None:                       # FanzineIssueInfo
+        self._PageFilename=val.strip()
+
+    # .....................
+    @property
+    def URL(self) -> str:                       # FanzineIssueInfo
+        return self.DirURL+"/"+self.PageFilename
 
     # .....................
     @property
@@ -2253,6 +2273,15 @@ class FanzineIssueInfo:
             val=[]
         self._Mailings=val
 
+    # .....................
+    @property
+    def AlphabetizeIndividually(self) -> bool:  # FanzineIssueInfo
+        return self._AlphabetizeIndividually
+    @AlphabetizeIndividually.setter
+    def AlphabetizeIndividually(self, val: bool) -> None:  # FanzineIssueInfo
+        if val is None:
+            val=[]
+        self._AlphabetizeIndividually=val
 
 ######################################################################################################################
 ######################################################################################################################
