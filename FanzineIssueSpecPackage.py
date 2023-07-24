@@ -2037,7 +2037,7 @@ class FanzineIssueSpecList:
 class FanzineIssueInfo:
 
     def __init__(self, Series: Optional[FanzineSeriesInfo]=None, IssueName: str="", DisplayName: str="",
-                 DirURL: str="", PageFilename: str="", FIS: Optional[FanzineIssueSpec]=None,
+                 DirURL: str="", PageFilename: str="", FIS: Optional[FanzineIssueSpec]=None, Position: int=-1,
                  Pagecount: Optional[int]=None, Editor: str="", Country: str="", Taglist: list[str]=None, Mailings: list[str]=None, Temp: any=None, AlphabetizeIndividually: bool=False) -> None:
         _Series: Optional[FanzineSeriesInfo]=None
         _IssueName: str=""      # Name of this issue (does not include issue #/date info)
@@ -2045,6 +2045,7 @@ class FanzineIssueInfo:
         _DirURL: str=""  # URL of fanzine directory
         _PageFilename: str=""  # URL of specific issue in directory
         _FIS: Optional[FanzineIssueSpec]=None  # FIS for this issue
+        _Position: int=-1        # The index in the source fanzine index table
         _Pagecount: int=0  # Page count for this issue
         _Editor: str=""     # The editor for this issue.  If None, use the editor of the series
         _Locale: Locale
@@ -2060,6 +2061,7 @@ class FanzineIssueInfo:
         self.DirURL=DirURL
         self.PageFilename=PageFilename
         self.FIS=FIS
+        self._Position=Position
         self.Pagecount=Pagecount
         self.Editor=Editor
         self._Locale=Locale(Country)
@@ -2219,6 +2221,14 @@ class FanzineIssueInfo:
     @FIS.setter
     def FIS(self, val: FanzineIssueSpec) -> None:                       # FanzineIssueInfo
         self._FIS=val
+
+    # .....................
+    @property
+    def Position(self) -> Optional[int]:                       # FanzineIssueInfo
+        return self._Position
+    @Position.setter
+    def Position(self, val: int) -> None:                       # FanzineIssueInfo
+        self._Position=val
 
     # .....................
     @property
