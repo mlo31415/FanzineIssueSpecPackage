@@ -40,8 +40,14 @@ from HelpersPackage import CanonicizeColumnHeaders
 from HelpersPackage import ParmDict
 
 class FanzineCounts:
-    def __init__(self, Titlecount: int=0, Issuecount: int=0, Pagecount: int=0, Pdfcount: int=0, Pdfpagecount: int=0):
+    def __init__(self, Titlecount: int=0, Issuecount: int=0, Pagecount: int=0, Pdfcount: int=0, Pdfpagecount: int=0, Title: str=None, Titlelist: set[str]=None):
 
+        if Titlelist is None:
+            self.Titlelist: set=set()       # A set to hold title names.  This is needed to count titles when fanzines are not ordered in title order
+        else:
+            self.Titlelist=Titlelist
+        if Title:
+            self.Titlelist.add(Title)
         self.Titlecount: int=Titlecount  # Count of distinct titles.
         self.Issuecount: int=Issuecount  # Count of issues in all the titles
         self.Pagecount: int=Pagecount   # Cumulative page count for all the issues
@@ -54,6 +60,8 @@ class FanzineCounts:
     def __str__(self) -> str:  # FanzineCounts
         s=""
         t=self.Titlecount
+        if t == 0 and len(self.Titlelist) > 0:
+            t=len(self.Titlelist)
         i=self.Issuecount
         p=self.Pagecount
         if t > 0:
@@ -64,21 +72,23 @@ class FanzineCounts:
         return s
 
     # .....................
-    def __add__(self, b: [FanzineCounts | FanzineIssueInfo | int]) -> FanzineCounts:  # FanzineCounts
+    def __add__(self, b: [FanzineCounts | FanzineIssueInfo | int | str]) -> FanzineCounts:  # FanzineCounts
         # Note that titlecount, pdfcount and pdfpagecount need to be incremented (or not) independently
         if type(b) is FanzineCounts:
-            return FanzineCounts(Issuecount=self.Issuecount+b.Issuecount, Pagecount=self.Pagecount+b.Pagecount, Titlecount=self.Titlecount, Pdfcount=self.Pdfcount, Pdfpagecount=self.Pdfpagecount)
+            return FanzineCounts(Issuecount=self.Issuecount+b.Issuecount, Pagecount=self.Pagecount+b.Pagecount, Titlecount=self.Titlecount, Pdfcount=self.Pdfcount, Pdfpagecount=self.Pdfpagecount, Titlelist=self.Titlelist)
         elif type(b) is FanzineIssueInfo:
-            return FanzineCounts(Issuecount=self.Issuecount+1, Pagecount=self.Pagecount+b.Pagecount, Titlecount=self.Titlecount, Pdfcount=self.Pdfcount, Pdfpagecount=self.Pdfpagecount)
+            return FanzineCounts(Issuecount=self.Issuecount+1, Pagecount=self.Pagecount+b.Pagecount, Titlecount=self.Titlecount, Pdfcount=self.Pdfcount, Pdfpagecount=self.Pdfpagecount, Titlelist=self.Titlelist)
         elif type(b) is int:
             # The int is taken to be a pagecount, and the issue count is automatically incremented
-            return FanzineCounts(Issuecount=self.Issuecount+1, Pagecount=self.Pagecount+b, Titlecount=self.Titlecount, Pdfcount=self.Pdfcount, Pdfpagecount=self.Pdfpagecount)
+            return FanzineCounts(Issuecount=self.Issuecount+1, Pagecount=self.Pagecount+b, Titlecount=self.Titlecount, Pdfcount=self.Pdfcount, Pdfpagecount=self.Pdfpagecount, Titlelist=self.Titlelist)
+        elif type(b) is str:
+            return FanzineCounts(Issuecount=self.Issuecount, Pagecount=self.Pagecount, Titlecount=self.Titlecount, Pdfcount=self.Pdfcount, Pdfpagecount=self.Pdfpagecount, Titlelist=self.Titlelist)
 
         assert False
 
     #......................
     # Needed for += for mutable objects
-    def __iadd__(self, b: [FanzineCounts | FanzineIssueInfo | int]) -> FanzineCounts:  # FanzineCounts
+    def __iadd__(self, b: [FanzineCounts | FanzineIssueInfo | int | str]) -> FanzineCounts:  # FanzineCounts
         # Note that titlecount, pdfcount and pdfpagecount need to be incremented (or not) independently
         if type(b) is FanzineCounts:
             self.Issuecount+=b.Issuecount
@@ -92,6 +102,9 @@ class FanzineCounts:
             # The int is taken to be a pagecount, and the issue count is automatically incremented
             self.Issuecount+=1
             self.Pagecount+=b
+            return self
+        elif type(b) is str:
+            self.Titlelist.add(b)
             return self
 
         assert False
