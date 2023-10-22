@@ -65,10 +65,10 @@ class FanzineCounts:
         i=self.Issuecount
         p=self.Pagecount
         if t > 0:
-            s+=Pluralize(t, "title")+", "
+            s+=Pluralize(t, "title", Spacechar="&nbsp;")+", "
         if i > 0:
-            s+=Pluralize(i, "issue")+", "
-            s+=Pluralize(p, "page")
+            s+=Pluralize(i, "issue", Spacechar="&nbsp;")+", "
+            s+=Pluralize(p, "page", Spacechar="&nbsp;")
         return s
 
     # .....................
