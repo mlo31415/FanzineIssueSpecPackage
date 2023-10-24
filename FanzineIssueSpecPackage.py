@@ -2517,7 +2517,11 @@ def YearName(year: Optional[int, str]) -> str:
 # Returns a month/day tuple which will often be exactly correct and rarely off by enough to matter
 # Note that we don't (currently) attempt to handle moveable feasts by taking the year in account
 def InterpretNamedDay(dayString: str) -> Optional[tuple[int, int]]:
-    namedDayConverstionTable={
+    namedDayConversionTable={
+        # "early": (1, 1),
+        # "mid": (7, 1),
+        # "late": (12, 31),
+        # "around the end of": (12, 31),
         "unknown": (None, None),
         "unknown ?": (None, None),
         "new year's day": (1, 1),
@@ -2585,7 +2589,7 @@ def InterpretNamedDay(dayString: str) -> Optional[tuple[int, int]]:
         ''"over year end"'': (12, 31)
     }
     with suppress(Exception):
-        return namedDayConverstionTable[dayString.lower().replace(",", "")]
+        return namedDayConversionTable[dayString.lower().replace(",", "")]
 
     return None
 
