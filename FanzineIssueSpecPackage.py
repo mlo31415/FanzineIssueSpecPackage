@@ -357,7 +357,13 @@ class FanzineDate:
                  MonthText: Optional[str]=None,
                  Day: Union[int, str, tuple[int, str], None]=None,
                  DayText: Optional[str]=None,
-                 MonthDayText: Optional[str] =None) -> None:
+                 MonthDayText: Optional[str] =None,
+                 DateTime: Optional[datetime] = None) -> None:
+
+        if DateTime is not None:
+            self.DateTime=DateTime
+            return
+
         self.Year=Year
 
         self._Month=None
@@ -381,6 +387,7 @@ class FanzineDate:
 
         self._MonthDayText=MonthDayText                 # Overrides display of both month and day, but has no other effect
         self._LongDates=False
+
 
     def __hash__(self) -> int:
         return hash(self.Year)+hash(self.Month)+hash(self.MonthText)+hash(self.Day)+hash(self.DayText)+hash(self.MonthDayText)
@@ -481,11 +488,21 @@ class FanzineDate:
         self._LongDates=True        # Set _LongDates to True.  The next use of __str__() will set it back to False
         return self                 # This was str(FD) will yield short dates and str(FD.LongDates) will yield long dates
 
+    #......................
+    @property
+    def DateTime(self):
+        return self.DateTime
+    @DateTime.setter
+    def DateTime(self, val: datetime):
+        #assert type(val) is datetime
+        self.Year=val.year
+        self.Month=val.month
+        self.Day=val.day
+
     # .....................
     @property
     def Year(self) -> int:               # FanzineDate
         return self._Year
-
     @Year.setter
     def Year(self, val: Union[int, str]) -> None:               # FanzineDate
         if isinstance(val, str):
@@ -503,7 +520,6 @@ class FanzineDate:
     @property
     def Month(self) -> int:               # FanzineDate
         return self._Month
-
     @Month.setter
     def Month(self, val: Union[int, str, tuple[int, str]]) -> None:               # FanzineDate
         if isinstance(val, str):
@@ -532,7 +548,6 @@ class FanzineDate:
     @property
     def Day(self) -> int:               # FanzineDate
         return self._Day
-
     @Day.setter
     def Day(self, val: Union[int, str, tuple[int, str]]) -> None:               # FanzineDate
         if isinstance(val, str):    # If you supply only the DayText, the Day number is computed
@@ -559,7 +574,6 @@ class FanzineDate:
     @property
     def MonthDayText(self):
         return self._MonthDayText
-
     @MonthDayText.setter
     def MonthDayText(self,val):
         self._MonthDayText=val
@@ -990,7 +1004,6 @@ class FanzineDateRange:
     @property
     def Cancelled(self) -> bool:             # FanzineDateRange
         return self._cancelled
-
     @Cancelled.setter
     def Cancelled(self, val: bool) -> None:             # FanzineDateRange
         self._cancelled=val
