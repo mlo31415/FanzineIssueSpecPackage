@@ -1008,6 +1008,34 @@ class FanzineDateRange:
     def Cancelled(self, val: bool) -> None:             # FanzineDateRange
         self._cancelled=val
 
+
+    @property
+    def DisplayDaterangeText(self) -> str:
+        saved=self._useMarkupForCancelled
+        self._useMarkupForCancelled=False
+        s=self.__str__()
+        self._useMarkupForCancelled=saved
+        return s
+
+
+    @property
+    def DisplayDaterangeMarkup(self) -> str:
+        saved=self._useMarkupForCancelled
+        self._useMarkupForCancelled=True
+        s=self.__str__()
+        self._useMarkupForCancelled=saved
+        return s
+
+
+    @property
+    def DisplayDaterangeBare(self) -> str:
+        saved=self._cancelled
+        self._cancelled=False
+        s=self.__str__()
+        self._cancelled=saved
+        return s
+
+
     #...................
     def Match(self, s: str, strict: bool=False, complete: bool=True) -> FanzineDateRange:               # FanzineDateRange
         if s is None:
