@@ -736,7 +736,7 @@ class FanzineDate:
             return d
 
         # A 4-digit number all alone is a year
-        m=re.match("^(\d\d\d\d)$", dateText)  # Month + 2- or 4-digit year
+        m=re.match(r"^(\d\d\d\d)$", dateText)  # Month + 2- or 4-digit year
         if m is not None and m.groups() is not None and len(m.groups()) == 1:
             y=ValidFannishYear(m.groups()[0])
             if y != "0":
@@ -744,7 +744,7 @@ class FanzineDate:
                 return self
 
         # Look for mm/dd/yy and mm/dd/yyyy
-        m=re.match("^(\d{1,2})/(\d{1,2})/(\d{2}|\d{4})$", dateText)
+        m=re.match(r"^(\d{1,2})/(\d{1,2})/(\d{2}|\d{4})$", dateText)
         if m is not None and m.groups() is not None and len(m.groups()) == 3:
             g1t=m.groups()[0]
             g2t=m.groups()[1]
@@ -771,7 +771,7 @@ class FanzineDate:
 
         # Look for <month> <yy> or <yyyy> where month is a recognizable month name and the <y>s form a fannish year
         # Note that the mtext and ytext found here may be analyzed several different ways
-        m=re.match("^([\s\w\-',]+).?\s+(\d\d|\d\d\d\d)$", dateText)  # Month +[,] + 2- or 4-digit year
+        m=re.match(r"^([\s\w\-',]+).?\s+(\d\d|\d\d\d\d)$", dateText)  # Month +[,] + 2- or 4-digit year
         if m is not None and m.groups() is not None and len(m.groups()) == 2:
             mtext=m.groups()[0].replace(","," ").replace("  ", " ")     # Turn a comma-space combination into a single space
             ytext=m.groups()[1]
@@ -802,7 +802,7 @@ class FanzineDate:
                         return self
 
         # Annoyingly, the standard date parser doesn't like "." designating an abbreviated month name.  Deal with mmm. dd, yyyy
-        m=re.match("^([\s\w\-',]+).?\s+(\d+),?\s+(\d\d|\d\d\d\d)$", dateText)  # Month +[,] + 2- or 4-digit year
+        m=re.match(r"^([\s\w\-',]+).?\s+(\d+),?\s+(\d\d|\d\d\d\d)$", dateText)  # Month +[,] + 2- or 4-digit year
         if m is not None and m.groups() is not None and len(m.groups()) == 3:
             mtext=m.groups()[0].replace(","," ").replace("  ", " ")     # Turn a comma-space combination into a single space
             dtext=m.groups()[1]
@@ -818,7 +818,7 @@ class FanzineDate:
 
         # Look for <dd> <month> [,] <yyyy> where month is a recognizable month name and the <y>s form a fannish year
         # Note that the mtext and ytext found here may be analyzed several different ways
-        m=re.match("^([\d]{1,2})\s+([\s\w\-',]+).?\s+(\d\d|\d\d\d\d)$", dateText)  # Month +[,] + 2- or 4-digit year
+        m=re.match(r"^([\d]{1,2})\s+([\s\w\-',]+).?\s+(\d\d|\d\d\d\d)$", dateText)  # Month +[,] + 2- or 4-digit year
         if m is not None and m.groups() is not None and len(m.groups()) == 3:
             dtext=m.groups()[0]
             mtext=m.groups()[1].replace(",", " ").replace("  ", " ")  # Turn a comma-space combination into a single space
@@ -834,7 +834,7 @@ class FanzineDate:
 
         # There are some weird day/month formats (E.g., "St. Urho's Day 2013")
         # Look for a pattern of: <strange day/month> <year>
-        m=re.match("^(.+?)[,\s]+(\d\d|\d\d\d\d)$", dateText)  # random text + space + 2- or 4-digit year
+        m=re.match(r"^(.+?)[,\s]+(\d\d|\d\d\d\d)$", dateText)  # random text + space + 2- or 4-digit year
         if m is not None and m.groups() is not None and len(m.groups()) == 2:
             mtext=m.groups()[0].replace(","," ").replace("  ", " ")     # Turn a comma-space combination into a single space
             ytext=m.groups()[1]
@@ -850,14 +850,14 @@ class FanzineDate:
 
         # There are a few annoying entries of the form "Winter 1951-52"  They all *appear* to mean something like January 1952
         # We'll try to handle this case
-        m=re.match("^Winter[,\s]+\d\d\d\d\s*-\s*(\d\d)$", dateText)
+        m=re.match(r"^Winter[,\s]+\d\d\d\d\s*-\s*(\d\d)$", dateText)
         if m is not None and len(m.groups()) == 1:
             return cls(Year=int(m.groups()[0]), Month=1, MonthText="Winter")  # Use the second part (the 4-digit year)
 
         # There are the equally annoying entries Month-Month year (e.g., 'June - July 2001') and Month/Month year.
         # These will be taken to mean the first month
         # We'll look for the pattern <text> '-' <text> <year> with (maybe) spaces between the tokens
-        m=re.match("^(\w+)\s*[-/]\s*(\w+)\s,?\s*(\d\d\d\d)$", dateText)
+        m=re.match(r"^(\w+)\s*[-/]\s*(\w+)\s,?\s*(\d\d\d\d)$", dateText)
         if m is not None and len(m.groups()) == 3:
             month1=m.groups()[0]
             month2=m.groups()[1]
@@ -871,7 +871,7 @@ class FanzineDate:
                 return self
 
         # Next we'll look for yyyy-yy all alone
-        m=re.match("^\d\d\d\d\s*-\s*(\d\d)$", dateText)
+        m=re.match(r"^\d\d\d\d\s*-\s*(\d\d)$", dateText)
         if m is not None and len(m.groups()) == 1:
             self.Year=int(m.groups()[0])
             self.Month=1
@@ -1047,7 +1047,7 @@ class FanzineDateRange:
             return self
 
         # Strip bracketing <s></s>
-        m=re.match("\s*<s>(.*)<\/s>\s*$", s)
+        m=re.match(r"\s*<s>(.*)<\/s>\s*$", s)
         if m:
             self._cancelled=True
             self._useMarkupForCancelled=True
@@ -1080,7 +1080,7 @@ class FanzineDateRange:
 
             # Try format #2: <month> <day>-<day>[,] <year>
             # Split on blanks, then recombine the middle parts
-            slist=[s for s in re.split('[ \-,]+',s) if len(s) > 0]  # Split on spans of space, hyphen and comma; ignore empty splits
+            slist=[s for s in re.split(r'[ \-,]+',s) if len(s) > 0]  # Split on spans of space, hyphen and comma; ignore empty splits
             if len(slist) == 4:
                 m=slist[0]
                 if not IsInt(m):    # m must be a text month -- it can't be a number
@@ -1497,7 +1497,7 @@ class FanzineSerial:
         #
         #  Vol (or VOL) + optional space + nnn + optional comma + optional space
         # + #nnn + optional single alphabetic character suffix
-        m=re.match("V[oO][lL]\s*(\d+)\s*#(\d+)(\w?)$", s)
+        m=re.match(r"V[oO][lL]\s*(\d+)\s*#(\d+)(\w?)$", s)
         if m is not None and len(m.groups()) in [2, 3]:
             ns=None
             if len(m.groups()) == 3:
@@ -1506,46 +1506,46 @@ class FanzineSerial:
 
         # Now look for nnn nnn/nnn (fractions!)
         # nnn + mandatory whitespace + nnn + slash + nnn * optional whitespace
-        m=re.match("^(\d+)\s+(\d+)/(\d+)$", s)
+        m=re.match(r"^(\d+)\s+(\d+)/(\d+)$", s)
         if m is not None and len(m.groups()) == 3:
             return cls(Whole=int(m.groups()[0])+int(m.groups()[1])/int(m.groups()[2]))
 
         # Now look for nnn/nnn (which is understood as vol/num
         # Leading stuff + nnn + slash + nnn * optional whitespace
-        m=re.match("^(\d+)/(\d+)$", s)
+        m=re.match(r"^(\d+)/(\d+)$", s)
         if m is not None and len(m.groups()) == 2:
             return cls(Vol=int(m.groups()[0]), Num=int(m.groups()[1]))
 
         # Now look for xxx/nnn, where xxx is in Roman numerals
         # Leading whitespace + roman numeral characters + slash + nnn + whitespace
-        m=re.match("^([IVXLC]+)/(\d+)$", s)
+        m=re.match(r"^([IVXLC]+)/(\d+)$", s)
         if m is not None and len(m.groups()) == 2:
             #TODO: the regex detects more than just Roman numerals.  We need to bail out of this branch if that happens and not return
             return cls(Vol=InterpretRoman(m.groups()[0]), Num=int(m.groups()[1]))
 
         # Next look for nnn-nnn (which is a range of issue numbers; only the start is returned)
         # Leading stuff + nnn + dash + nnn
-        m=re.match("^(\d+)-(\d+)$", s)
+        m=re.match(r"^(\d+)-(\d+)$", s)
         if m is not None and len(m.groups()) == 2:
             return cls(Whole=int(m.groups()[0]))
 
         # Next look for #nnn
         # Leading stuff + nnn
-        m=re.match("^#(\d+)$", s)
+        m=re.match(r"^#(\d+)$", s)
         if m is not None and len(m.groups()) == 1:
             return cls(Whole=int(m.groups()[0]))
 
         # Now look for a trailing decimal number
         # Leading characters + single non-digit + nnn + dot + nnn + whitespace
         # the ? makes * a non-greedy quantifier
-        m=re.match("^.*?(\d+\.\d+)$", s)
+        m=re.match(r"^.*?(\d+\.\d+)$", s)
         if m is not None and len(m.groups()) == 1:
             return cls(Num=float(m.groups()[0]))
 
         if not strict and not complete:
             # Now look for a single trailing number
             # Leading stuff + nnn + optional single alphabetic character suffix + whitespace
-            m=re.match("^.*?([0-9]+)([a-zA-Z]?)\s*$", s)
+            m=re.match(r"^.*?([0-9]+)([a-zA-Z]?)\s*$", s)
             if m is not None and len(m.groups()) in [1, 2]:
                 ws=None
                 if len(m.groups()) == 2:
@@ -1554,7 +1554,7 @@ class FanzineSerial:
 
             # Now look for trailing Roman numerals
             # Leading stuff + mandatory whitespace + roman numeral characters + optional trailing whitespace
-            m=re.match("^.*?\s+([IVXLC]+)\s*$", s)
+            m=re.match(r"^.*?\s+([IVXLC]+)\s*$", s)
             if m is not None and len(m.groups()) == 1:
                 return cls(Num=InterpretRoman(m.groups()[0]))
 
@@ -1817,7 +1817,7 @@ class FanzineIssueSpec:
 
         # A number standing by itself is messy, since it's easy to confuse with a date
         # In the FanzineIssueSpec world, we will always treat it as a Serial, so look for that first
-        m=re.match("^(\d+)$", s)
+        m=re.match(r"^(\d+)$", s)
         if m is not None and len(m.groups()) == 1:
             w=m.groups()[0]
             fs=FanzineSerial(Whole=w)
@@ -2032,7 +2032,7 @@ class FanzineIssueSpecList:
                 # Token 0 must contain a month name as its first token and may not start with a digit
                 if not tokens[0][0].isdigit() and MonthNameToInt(tokens[0].split()[0]) is not None:
                     # Token 1 must be a 4-digit year
-                    if re.match("^\d{4}$", tokens[1]) is not None:
+                    if re.match(r"^\d{4}$", tokens[1]) is not None:
                         # The put them together and try to interpret as a date
                         trial=tokens[0]+", "+tokens[1]
                         fis=FanzineIssueSpec().Match(trial, strict=True, complete=True)    # This match must consume the entire input -- no partial matches
