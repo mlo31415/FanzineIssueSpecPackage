@@ -240,7 +240,7 @@ class FanzineSeriesInfo:
         new.Issuecount=self.Issuecount
         new.Editor=self.Editor
         new.Country=self.Country
-        new.FanzineSeriesInfo=self.FanzineSeriesInfo
+
         return new
 
     # .....................
