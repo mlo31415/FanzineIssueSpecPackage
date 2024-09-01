@@ -148,7 +148,7 @@ class FanzineSeriesInfo:
         pass
 
     # .....................
-    def __str__(self) -> str:  # FanzineSeriesInfo
+    def __str__(self) -> str:
         out=""
         if self.DisplayName != "":
             return self.DisplayName
@@ -158,7 +158,7 @@ class FanzineSeriesInfo:
         return out.strip()
 
     # .....................
-    def __repr__(self) -> str:  # FanzineSeriesInfo
+    def __repr__(self) -> str:
         out=""
         if self.DisplayName != "":
             out="'"+self.DisplayName+"'"
@@ -184,7 +184,7 @@ class FanzineSeriesInfo:
     # .....................
     # Note that page and issue count are not included in equality comparisons.
     # This allows for accumulation of those numbers while retaining series identity
-    def __eq__(self, other: FanzineSeriesInfo) -> bool:  # FanzineSeriesInfo
+    def __eq__(self, other: FanzineSeriesInfo) -> bool:
         if other is None:
             return False
 
@@ -199,7 +199,7 @@ class FanzineSeriesInfo:
 
     # .....................
     # When we add, we add to the counts
-    def __add__(self, b: [FanzineSeriesInfo, FanzineIssueInfo, int]):  # FanzineSeriesInfo
+    def __add__(self, b: [FanzineSeriesInfo, FanzineIssueInfo, int]):
         ret=FanzineSeriesInfo(SeriesName=self.SeriesName, Editor=self.Editor, DisplayName=self.DisplayName, Country=self.Country, DirURL=self.DirURL)
         #Log("FanzineSeriesInfo.add:  self.URL="+self.URL+"     b.URL="+b.URL)
         if type(b) is FanzineSeriesInfo:
@@ -217,7 +217,7 @@ class FanzineSeriesInfo:
     # .....................
     # When we add, we add to the counts
     # Note that this is an in-paces add to aupport += for mutable objects
-    def __iadd__(self, b: [FanzineSeriesInfo, FanzineIssueInfo, int]):  # FanzineSeriesInfo
+    def __iadd__(self, b: [FanzineSeriesInfo, FanzineIssueInfo, int]):
         if type(b) is FanzineSeriesInfo:
             self.Issuecount+=b.Issuecount
             self.Pagecount+=b.Pagecount
@@ -244,7 +244,7 @@ class FanzineSeriesInfo:
         return new
 
     # .....................
-    def IsEmpty(self) -> bool:  # FanzineSeriesInfo
+    def IsEmpty(self) -> bool:
         if self.SeriesName != "":
             return False
         if self._DisplayName != "":
@@ -260,89 +260,89 @@ class FanzineSeriesInfo:
 
     # .....................
     @property
-    def SeriesName(self) -> str:  # FanzineSeriesInfo
+    def SeriesName(self) -> str:
         return self._SeriesName
     @SeriesName.setter
-    def SeriesName(self, val: str) -> None:  # FanzineSeriesInfo
+    def SeriesName(self, val: str) -> None:
         self._SeriesName=val.strip()
 
     # .....................
     @property
-    def DisplayName(self) -> str:  # FanzineSeriesInfo
+    def DisplayName(self) -> str:
         if self._DisplayName != "":
             return self._DisplayName
         return self.SeriesName
     @DisplayName.setter
-    def DisplayName(self, val: str) -> None:  # FanzineSeriesInfo
+    def DisplayName(self, val: str) -> None:
         self._DisplayName=val.strip()
 
     # .....................
     @property
-    def DirURL(self) -> str:  # FanzineSeriesInfo
+    def DirURL(self) -> str:
         return self._URL
     @DirURL.setter
-    def DirURL(self, val: str) -> None:  # FanzineSeriesInfo
+    def DirURL(self, val: str) -> None:
         self._URL=val
 
     # .....................
     @property
-    def Counts(self) -> FanzineCounts:  # FanzineSeriesInfo
+    def Counts(self) -> FanzineCounts:
         return self._Counts
     @Counts.setter
-    def Counts(self, val: FanzineCounts) -> None:  # FanzineSeriesInfo
+    def Counts(self, val: FanzineCounts) -> None:
         self._Counts=val
 
     # .....................
     @property
-    def Pagecount(self) -> int:  # FanzineSeriesInfo
+    def Pagecount(self) -> int:
         return self._Counts.Pagecount
     @Pagecount.setter
-    def Pagecount(self, val: int) -> None:  # FanzineSeriesInfo
+    def Pagecount(self, val: int) -> None:
         self._Counts.Pagecount=val
         
     # .....................
     @property
-    def Issuecount(self) -> int:  # FanzineSeriesInfo
+    def Issuecount(self) -> int:
         return self._Counts.Issuecount
     @Issuecount.setter
-    def Issuecount(self, val: int) -> None:  # FanzineSeriesInfo
+    def Issuecount(self, val: int) -> None:
         self._Counts.Issuecount=val
 
     # .....................
     # Needed for compatibility, but always zero
     @property
-    def Titlecount(self) -> int:  # FanzineSeriesInfo
+    def Titlecount(self) -> int:
         return self._Counts.Titlecount
 
     # .....................
     @property
-    def Country(self) -> str:  # FanzineSeriesInfo
+    def Country(self) -> str:
         return self._Country
     @Country.setter
-    def Country(self, val: str) -> None:  # FanzineSeriesInfo
+    def Country(self, val: str) -> None:
         self._Country=val
         
     # .....................
     @property
-    def Editor(self) -> str:  # FanzineSeriesInfo
+    def Editor(self) -> str:
         return self._Editor
     @Editor.setter
-    def Editor(self, val: str) -> None:  # FanzineSeriesInfo
+    def Editor(self, val: str) -> None:
         self._Editor=val
 
     # .....................
     @property
-    def AlphabetizeIndividually(self) -> bool:  # FanzineSeriesInfo
+    def AlphabetizeIndividually(self) -> bool:
         return self._AlphabetizeIndividually
     @AlphabetizeIndividually.setter
-    def AlphabetizeIndividually(self, val: bool) -> None:  # FanzineSeriesInfo
+    def AlphabetizeIndividually(self, val: bool) -> None:
         if val is None:
             val=[]
         self._AlphabetizeIndividually=val
 
     # .....................
     @property
-    def Keywords(self) -> ParmDict:     # FanzineSeriesInfo
+    def Keywords(self) -> ParmDict:
         return self._Keywords
     # There is no setter
     def SetKeyword(self, kwd: str, val: str=""):
@@ -929,7 +929,7 @@ class FanzineDateRange:
 
         return json.dumps(d)
 
-    def FromJson(self, val: str) -> FanzineDateRange:               # FanzineDateRange
+    def FromJson(self, val: str) -> FanzineDateRange:
         d=json.loads(val)
         ver=d["ver"]
         self._startdate=FanzineDate().FromJson(d["_startdate"])
@@ -947,11 +947,11 @@ class FanzineDateRange:
         return hash(self._startdate)+hash(self._enddate)+hash(self._cancelled)
 
     # -----------------------------
-    def __eq__(self, other:FanzineDateRange) -> bool:               # FanzineDateRange
+    def __eq__(self, other:FanzineDateRange) -> bool:
             return self._startdate == other._startdate and self._enddate == other._enddate
 
     # -----------------------------
-    def __lt__(self, other:FanzineDateRange) -> bool:               # FanzineDateRange
+    def __lt__(self, other:FanzineDateRange) -> bool:
         if self._startdate < other._startdate:
             return True
         if self._startdate == other._startdate:
@@ -959,7 +959,7 @@ class FanzineDateRange:
         return False
 
     # -----------------------------
-    def __str__(self) -> str:               # FanzineDateRange
+    def __str__(self) -> str:
         d1=self._startdate
         d2=self._enddate
         if d1 is None and d2 is None:
@@ -1002,10 +1002,11 @@ class FanzineDateRange:
 
     # .....................
     @property
-    def Cancelled(self) -> bool:             # FanzineDateRange
+    def Cancelled(self) -> bool:
         return self._cancelled
+
     @Cancelled.setter
-    def Cancelled(self, val: bool) -> None:             # FanzineDateRange
+    def Cancelled(self, val: bool) -> None:
         self._cancelled=val
 
 
@@ -1037,7 +1038,7 @@ class FanzineDateRange:
 
 
     #...................
-    def Match(self, s: str, strict: bool=False, complete: bool=True) -> FanzineDateRange:               # FanzineDateRange
+    def Match(self, s: str, strict: bool=False, complete: bool=True) -> FanzineDateRange:
         if s is None:
             return self
 
@@ -1126,17 +1127,17 @@ class FanzineDateRange:
         return self
 
     #...................
-    def IsEmpty(self) -> bool:             # FanzineDateRange
+    def IsEmpty(self) -> bool:
         return self._startdate is None or self._startdate.IsEmpty() or self._enddate is None or self._enddate.IsEmpty()
 
     # ...................
     # Return the duration of the range in days
-    def Duration(self) -> int:             # FanzineDateRange
+    def Duration(self) -> int:
         if self._enddate is None or self._startdate is None:
             return 0
         return self._enddate-self._startdate
 
-    def IsOdd(self) -> bool:             # FanzineDateRange
+    def IsOdd(self) -> bool:
         if self._enddate is None or self._startdate is None:
             return True
         if self.Duration() > 5:
@@ -1178,25 +1179,25 @@ class FanzineSerial:
     # -----------------------------
     # Are the Num fields equal?
     # Both could be None; otherwise both must be equal
-    def __NumEq__(self, other: FanzineSerial) -> bool:             # FanzineSerial
+    def __NumEq__(self, other: FanzineSerial) -> bool:
         return self._Num == other._Num and CaseInsensitiveCompare(self._NumSuffix, other._NumSuffix)
 
     # -----------------------------
-    def __VolEq__(self, other: FanzineSerial) -> bool:             # FanzineSerial
+    def __VolEq__(self, other: FanzineSerial) -> bool:
         return self._Vol == other._Vol
 
     # -----------------------------
-    def __WEq__(self, other: FanzineSerial) -> bool:             # FanzineSerial
+    def __WEq__(self, other: FanzineSerial) -> bool:
         return self._Whole == other._Whole and CaseInsensitiveCompare(self._WSuffix, other._WSuffix)
 
     # -----------------------------
-    def __VNEq__(self, other: FanzineSerial) -> bool:             # FanzineSerial
+    def __VNEq__(self, other: FanzineSerial) -> bool:
         return self.__VolEq__(other) and self.__NumEq__(other)
 
     # -----------------------------
     # Two issue designations are deemed to be equal if they are identical or if the VN matches while at least on of the Wholes in None or
     # is the Whole matches and at least one of the Vs and Ns is None.  (We would allow match of (W13, V3, N2) with (W13), etc.)
-    def __eq__(self, other: FanzineSerial) -> bool:             # FanzineSerial
+    def __eq__(self, other: FanzineSerial) -> bool:
         # if the Whole numbers match, the two are the same. (Even if the Vol/Num differ.)
         if self._Whole is not None and self.__WEq__(other):
             return True
@@ -1209,13 +1210,13 @@ class FanzineSerial:
         return False
 
     # -----------------------------
-    def __ne__(self, other: FanzineSerial) -> bool:             # FanzineSerial
+    def __ne__(self, other: FanzineSerial) -> bool:
         return not self.__eq__(other)
 
     # -----------------------------
     # Define < operator for sorting
     # Is self less than other?
-    def __lt__(self, other: FanzineSerial) -> bool:             # FanzineSerial
+    def __lt__(self, other: FanzineSerial) -> bool:
         if other is None:
             return False
         # If both have Wholes, use Whole for the comparison
@@ -1253,7 +1254,7 @@ class FanzineSerial:
         return False
 
     # -----------------------------
-    def Copy(self, other: FanzineSerial) -> None:             # FanzineSerial
+    def Copy(self, other: FanzineSerial) -> None:
         self._Vol=other._Vol
         self._Num=other._Num
         self._NumSuffix=other._NumSuffix
@@ -1271,56 +1272,56 @@ class FanzineSerial:
 
     # .....................
     @property
-    def Vol(self) -> Optional[int]:             # FanzineSerial
+    def Vol(self) -> Optional[int]:
         return self._Vol
 
     @Vol.setter
-    def Vol(self, val: Union[None, int, str]) -> None:             # FanzineSerial
+    def Vol(self, val: Union[None, int, str]) -> None:
         self._Vol=self.SetIntProperty(val)
 
     # .....................
     @property
-    def Num(self) -> Optional[int]:             # FanzineSerial
+    def Num(self) -> Optional[int]:
         return self._Num
 
     @Num.setter
-    def Num(self, val: Union[None, int, str]) -> None:             # FanzineSerial
+    def Num(self, val: Union[None, int, str]) -> None:
         self._Num=self.SetIntProperty(val)
 
     # .....................
     @property
-    def NumSuffix(self) -> Optional[str]:             # FanzineSerial
+    def NumSuffix(self) -> Optional[str]:
         return self._NumSuffix
 
     @NumSuffix.setter
-    def NumSuffix(self, val: Optional[str]) -> None:             # FanzineSerial
+    def NumSuffix(self, val: Optional[str]) -> None:
         if val is None:
             val=""
         self._NumSuffix=val
 
     # .....................
     @property
-    def Whole(self) -> Optional[int]:                 # FanzineSerial
+    def Whole(self) -> Optional[int]:
         return self._Whole
 
     @Whole.setter
-    def Whole(self, val: Union[None, int, str]) -> None:             # FanzineSerial
+    def Whole(self, val: Union[None, int, str]) -> None:
         self._Whole=self.SetIntProperty(val)
 
     # .....................
     @property
-    def WSuffix(self) -> Optional[str]:             # FanzineSerial
+    def WSuffix(self) -> Optional[str]:
         return self._WSuffix
 
     @WSuffix.setter
-    def WSuffix(self, val: Optional[str]) -> None:             # FanzineSerial
+    def WSuffix(self, val: Optional[str]) -> None:
         if val is None:
             val=""
         self._WSuffix=val
 
     # .....................
     # Does this instance have anything defined for the serial number?
-    def IsEmpty(self) -> bool:             # FanzineSerial
+    def IsEmpty(self) -> bool:
         if self._NumSuffix is not None and len(self._NumSuffix) > 0:
             return False
         if self._Num is not None:
@@ -1335,7 +1336,7 @@ class FanzineSerial:
 
     # .......................
     # Convert the FanzineIssueSpec into a debugging form
-    def __repr__(self) -> str:             # FanzineSerial
+    def __repr__(self) -> str:
         # if self.UninterpretableText is not None:
         #     return "IS("+self.UninterpretableText+")"
 
@@ -1362,7 +1363,7 @@ class FanzineSerial:
 
     # .......................
     # Convert the FanzineIssueSpec into a pretty string for display or printing
-    def __str__(self) -> str:             # FanzineSerial
+    def __str__(self) -> str:
         # if self.UninterpretableText is not None:
         #     return self.UninterpretableText.strip()
 
@@ -1399,7 +1400,7 @@ class FanzineSerial:
         # Return a tuple of Volume and Number
         # If there's no volume specified, Volume is None and Number is the whole number
         # If we can't make sense of it, return (None, None), so if the 2nd member of the tuple is None, conversion failed.
-    def DecodeIssueDesignation(self, s: str) -> tuple[ Optional[int], Optional[int] ]:             # FanzineSerial
+    def DecodeIssueDesignation(self, s: str) -> tuple[ Optional[int], Optional[int] ]:
         with suppress(Exception):
             return None, int(s)
 
@@ -1445,7 +1446,7 @@ class FanzineSerial:
 
     # =============================================================================
     # Format the Vol/Num/Whole information
-    def FormatSerialForSorting(self) -> str:             # FanzineSerial
+    def FormatSerialForSorting(self) -> str:
         if self.Whole is not None and self.Vol is not None and self.Num is not None:
             return "#"+"{0:7.2f}".format(self.Whole)+"  (V"+"{0:7.2f}".format(self.Vol)+"#"+"{0:7.2f}".format(self.Num)+")"+self.NumSuffix
 
@@ -1479,7 +1480,7 @@ class FanzineSerial:
     #       ...nn.mm
     #       ...nn[ ]
     @classmethod
-    def Match(cls, s: str, scan: bool=False, strict: bool=False, complete: bool=False):             # FanzineSerial
+    def Match(cls, s: str, scan: bool=False, strict: bool=False, complete: bool=False):
         s=s.strip()     # Remove leading and trailing whitespace
 
         # First look for a Vol+Num designation: Vnnn #mmm
@@ -1624,15 +1625,15 @@ class FanzineIssueSpec:
     # is the Whole matches and at least one of the Vs and Ns is None.  (We would allow match of (W13, V3, N2) with (W13), etc.)
 
     # Class equality check.
-    def __eq__(self, other: FanzineIssueSpec) -> bool:         # FanzineIssueSpec
+    def __eq__(self, other: FanzineIssueSpec) -> bool:
         return self._FS == other._FS and self._FD == other._FD
 
-    def __ne__(self, other: FanzineIssueSpec):         # FanzineIssueSpec
+    def __ne__(self, other: FanzineIssueSpec):
         return not self.__eq__(other)
 
     #-----------------------------
     # Define < operator for sorting
-    def __lt__(self, other: FanzineIssueSpec) -> bool:         # FanzineIssueSpec
+    def __lt__(self, other: FanzineIssueSpec) -> bool:
         if other is None:
             return False
         if self._FD is not None and other._FD is not None:
@@ -1641,7 +1642,7 @@ class FanzineIssueSpec:
             return self._FS < other._FS
         return False
 
-    def Copy(self, other: FanzineIssueSpec) -> None:         # FanzineIssueSpec
+    def Copy(self, other: FanzineIssueSpec) -> None:
         self._FD=other._FD
         self._FS=other._FS
         #self._UninterpretableText=other._UninterpretableText
@@ -1662,29 +1663,29 @@ class FanzineIssueSpec:
 
     # .....................
     @property
-    def FD(self) -> Optional[FanzineDate]:         # FanzineIssueSpec
+    def FD(self) -> Optional[FanzineDate]:
         return self._FD
 
     @FD.setter
-    def FD(self, val: FanzineDate) -> None:         # FanzineIssueSpec
+    def FD(self, val: FanzineDate) -> None:
         self._FD=val
 
     # .....................
     @property
-    def FS(self) ->Optional[FanzineSerial]:         # FanzineIssueSpec
+    def FS(self) ->Optional[FanzineSerial]:
         return self._FS
 
     @FS.setter
-    def FS(self, val: FanzineSerial) -> None:         # FanzineIssueSpec
+    def FS(self, val: FanzineSerial) -> None:
         self._FS=val
 
     # .....................
     @property
-    def Vol(self) -> Optional[int]:         # FanzineIssueSpec
+    def Vol(self) -> Optional[int]:
         return self._FS.Vol
 
     @Vol.setter
-    def Vol(self, val: Optional[int, str]) -> None:         # FanzineIssueSpec
+    def Vol(self, val: Optional[int, str]) -> None:
         if val is not None and isinstance(val, str) and len(val) == 0:
             self._FS.Vol=None
         else:
@@ -1692,11 +1693,11 @@ class FanzineIssueSpec:
 
     # .....................
     @property
-    def Num(self) -> Optional[int]:         # FanzineIssueSpec
+    def Num(self) -> Optional[int]:
         return self._FS.Num
 
     @Num.setter
-    def Num(self, val: Optional[int, str]) -> None:         # FanzineIssueSpec
+    def Num(self, val: Optional[int, str]) -> None:
         if val is not None and isinstance(val, str) and len(val) == 0:
             self._FS.Num=None
         else:
@@ -1704,11 +1705,11 @@ class FanzineIssueSpec:
 
     # .....................
     @property
-    def NumSuffix(self) -> Optional[str]:         # FanzineIssueSpec
+    def NumSuffix(self) -> Optional[str]:
         return self._FS.NumSuffix
 
     @NumSuffix.setter
-    def NumSuffix(self, val: Optional[str]) -> None:         # FanzineIssueSpec
+    def NumSuffix(self, val: Optional[str]) -> None:
         if val is not None and isinstance(val, str) and len(val) == 0:
             self._FS.NumSuffix=None
         else:
@@ -1716,11 +1717,11 @@ class FanzineIssueSpec:
 
     #.....................
     @property
-    def Whole(self) -> Optional[int]:         # FanzineIssueSpec
+    def Whole(self) -> Optional[int]:
         return self._FS.Whole
 
     @Whole.setter
-    def Whole(self, val: Optional[int, str]) -> None:         # FanzineIssueSpec
+    def Whole(self, val: Optional[int, str]) -> None:
         print("Setting _FS.Whole to "+str(val))
         if val is not None and isinstance(val, str) and len(val) == 0:
             self._FS.Whole=None
@@ -1730,11 +1731,11 @@ class FanzineIssueSpec:
 
     # .....................
     @property
-    def WSuffix(self) -> Optional[str]:         # FanzineIssueSpec
+    def WSuffix(self) -> Optional[str]:
         return self._FS.WSuffix
 
     @WSuffix.setter
-    def WSuffix(self, val: Optional[str]) -> None:         # FanzineIssueSpec
+    def WSuffix(self, val: Optional[str]) -> None:
         if val is not None and isinstance(val, str) and len(val) == 0:
             self._FS.WSuffix=None
         else:
@@ -1742,70 +1743,70 @@ class FanzineIssueSpec:
 
     #.....................
     @property
-    def Year(self) -> Optional[int]:         # FanzineIssueSpec
+    def Year(self) -> Optional[int]:
         return self._FD.Year
 
     @Year.setter
-    def Year(self, val: Optional[int, str]) -> None:         # FanzineIssueSpec
+    def Year(self, val: Optional[int, str]) -> None:
         self._FS.Year=val
 
     #.....................
     # This is a non-settable property -- it is always derived from the numeric Year
     @property
-    def YearText(self) -> Optional[str]:         # FanzineIssueSpec
+    def YearText(self) -> Optional[str]:
         return self._FD.YearText
 
     #.....................
     @property
-    def Month(self) ->Optional[int]:         # FanzineIssueSpec
+    def Month(self) ->Optional[int]:
         return self._FD.Month
 
     @Month.setter
-    def Month(self, val: Optional[int, str]) -> None:         # FanzineIssueSpec
+    def Month(self, val: Optional[int, str]) -> None:
         self._FD.Month=val
 
     #.....................
     @property
-    def MonthText(self) -> Optional[str]:         # FanzineIssueSpec
+    def MonthText(self) -> Optional[str]:
         return self._FD.MonthText
 
 
     #.....................
     @property
-    def Day(self) -> Optional[int]:             # FanzineIssueSpec
+    def Day(self) -> Optional[int]:
         return self._FD.Day
 
     @Day.setter
-    def Day(self, val: Optional[int]) -> None:         # FanzineIssueSpec
+    def Day(self, val: Optional[int]) -> None:
         self._FD.Day=val
 
     # .....................
     @property
-    def DayText(self) -> Optional[str]:         # FanzineIssueSpec
+    def DayText(self) -> Optional[str]:
         return self._FD.DayText
     # There is no setter; Setting should be done when creating the instance or through the Day setter
 
     #.....................
     @property
-    def DateStr(self) -> str:                   # FanzineIssueSpec
+    def DateStr(self) -> str:
         return str(self._FD)
 
     @property
-    def SerialStr(self) -> str:                  # FanzineIssueSpec
+    def SerialStr(self) -> str:
         return str(self._FS)
 
     # .....................
     # Return a datetime.date object
-    def Date(self) -> datetime.date:                     # FanzineIssueSpec
+    def Date(self) -> datetime.date:
         return self._FD.Date
 
     #.......................
-    def IsEmpty(self) -> bool:                          # FanzineIssueSpec
+    def IsEmpty(self) -> bool:
         return self._FD.IsEmpty() and self._FS.IsEmpty()
 
 
     # =====================================================================================
-#    def DecodeIssueDesignation(self, s: str) -> None:         # FanzineIssueSpec
+#    def DecodeIssueDesignation(self, s: str) -> None:
 #        self._FS.DecodeIssueDesignation(s)
 
 
@@ -1813,11 +1814,11 @@ class FanzineIssueSpec:
     # Take the input string and turn it into a FIS
     # The input could be a single date or it could be a single serial ID or it could be a range (e.g., 12-17)
     @classmethod
-    def Match(cls, s: str, strict: bool = False, complete: bool=False):                   # FanzineIssueSpec
+    def Match(cls, s: str, strict: bool = False, complete: bool=False):
 
         # A number standing by itself is messy, since it's easy to confuse with a date
         # In the FanzineIssueSpec world, we will always treat it as a Serial, so look for that first
-        m=re.match(r"^(\d+)$", s)
+        m=re.match("^(\d+)$", s)
         if m is not None and len(m.groups()) == 1:
             w=m.groups()[0]
             fs=FanzineSerial(Whole=w)
@@ -1845,17 +1846,17 @@ class FanzineIssueSpec:
 
     # =====================================================================================
     # Look for a FIS in the input string.  Return a tuple of (success, <unmatched text>)
-    def Scan(self, s: str, strict: bool=False) -> tuple[bool, str]:        # FanzineIssueSpec
+    def Scan(self, s: str, strict: bool=False) -> tuple[bool, str]:
         raise Exception
 
 
     #=============================================================================
-    def FormatDateForSorting(self) -> str:         # FanzineIssueSpec
+    def FormatDateForSorting(self) -> str:
         return self._FD.FormatDateForSorting()
 
     #=============================================================================
     # Format the Vol/Num/Whole information
-    def FormatSerialForSorting(self) -> str:         # FanzineIssueSpec
+    def FormatSerialForSorting(self) -> str:
         return self._FS.FormatSerialForSorting()
 
 ######################################################################################################################
@@ -1869,13 +1870,13 @@ class FanzineIssueSpec:
 #TODO: a series does not have a consistent set throughout.
 
 class FanzineIssueSpecList:
-    def __init__(self, List: Optional[list[FanzineIssueSpec]]=None) -> None:      # FanzineIssueSpecList
+    def __init__(self, List: Optional[list[FanzineIssueSpec]]=None) -> None:
         self._List=None
         self.List=List  # Use setter
         pass
 
     # ...............................
-    def AppendIS(self, fanzineIssueSpec: Union[None, FanzineIssueSpec, FanzineIssueSpecList]) -> None:      # FanzineIssueSpecList
+    def AppendIS(self, fanzineIssueSpec: Union[None, FanzineIssueSpec, FanzineIssueSpecList]) -> None:
         if fanzineIssueSpec is None:
             return
         self.Extend(fanzineIssueSpec)
@@ -1883,11 +1884,11 @@ class FanzineIssueSpecList:
 
     # ...............................
     # Basically, this is just a synonym for Extend
-    def Append(self, lst: Union[FanzineIssueSpecList, list[FanzineIssueSpec], FanzineIssueSpec, None]) -> FanzineIssueSpecList:      # FanzineIssueSpecList
+    def Append(self, lst: Union[FanzineIssueSpecList, list[FanzineIssueSpec], FanzineIssueSpec, None]) -> FanzineIssueSpecList:
         return self.Extend(lst)
 
     # ...............................
-    def Extend(self, val: Union[FanzineIssueSpecList, list[FanzineIssueSpec], FanzineIssueSpec, None]) -> FanzineIssueSpecList:      # FanzineIssueSpecList
+    def Extend(self, val: Union[FanzineIssueSpecList, list[FanzineIssueSpec], FanzineIssueSpec, None]) -> FanzineIssueSpecList:
         if self._List is None:
             self._List=[]
 
@@ -1909,7 +1910,7 @@ class FanzineIssueSpecList:
         return self
 
     # ...............................
-    def IsEmpty(self) -> bool:      # FanzineIssueSpecList
+    def IsEmpty(self) -> bool:
         if self._List is None or len(self._List) == 0:
             return True
         # Next we go through the elements of the list. If *any* element is non-empty, then the whole FISL is non-empty
@@ -1919,7 +1920,7 @@ class FanzineIssueSpecList:
         return True
 
     # ...............................
-    def __repr__(self) -> str:      # FanzineIssueSpecList
+    def __repr__(self) -> str:
         s=""
         if self._List is not None:
             for i in self:
@@ -1935,7 +1936,7 @@ class FanzineIssueSpecList:
 
 
     #...............................
-    def __str__(self) -> str:   # Format the ISL for pretty      # FanzineIssueSpecList
+    def __str__(self) -> str:   # Format the ISL for pretty
         s=""
         for i in self:
             if i is not None:
@@ -1952,11 +1953,11 @@ class FanzineIssueSpecList:
 
     # ...............................
     @property
-    def List(self) -> FanzineIssueSpecList:      # FanzineIssueSpecList
+    def List(self) -> FanzineIssueSpecList:
         return self._List
 
     @List.setter
-    def List(self, val: Optional[FanzineIssueSpec, FanzineIssueSpecList]) -> None:      # FanzineIssueSpecList
+    def List(self, val: Optional[FanzineIssueSpec, FanzineIssueSpecList]) -> None:
         if val is None:
             self._List=[]
             return
@@ -1977,17 +1978,17 @@ class FanzineIssueSpecList:
 
     #-----------------------------------
     # Iterators which allow a FanzineIssueSpecList to be iterated directly and not through _List
-    def __getitem__(self, key: int) -> FanzineIssueSpec:      # FanzineIssueSpecList
+    def __getitem__(self, key: int) -> FanzineIssueSpec:
         return self._List[key]
 
-    def __setitem__(self, key: int, value: FanzineIssueSpec) -> FanzineIssueSpecList:      # FanzineIssueSpecList
+    def __setitem__(self, key: int, value: FanzineIssueSpec) -> FanzineIssueSpecList:
         self.List[key]=value
         return self
 
 
     # =====================================================================================
     # Pull a Serial off of the end of a string, returning a FISL and the remainder of the string
-    def GetTrailingSerial(self, s: str) -> tuple[Optional[FanzineIssueSpecList], str]:       # FanzineIssueSpecList
+    def GetTrailingSerial(self, s: str) -> tuple[Optional[FanzineIssueSpecList], str]:
         # Try to greedily (reverse-greedily?) interpret the trailing text as a FanzineIssueSpec.
         # We do this by interpreting more and more tokens starting from the end until we have something that is no longer recognizable as a FanzineIssueSpec
         # The just-previous set of tokens constitutes the full IssueSpec, and the remaining leading tokens are the series name.
@@ -2017,7 +2018,7 @@ class FanzineIssueSpecList:
     # 1, 2, 3, 7, 9-12, 14A, V7#40, VIII, IX, 99, Jan 1999, March 31, 2005, 2007
     # The one place we allow internal commas is in a date where the month/day can be separated from the year by a comma.
     @classmethod
-    def Match(cls, s: str, strict: bool=False, complete: bool=False) -> FanzineIssueSpecList:      # FanzineIssueSpecList
+    def Match(cls, s: str, strict: bool=False, complete: bool=False) -> FanzineIssueSpecList:
         fislist: list[FanzineIssueSpec]=[]      # Accumulate the list of FISs here
 
         tokens=[t.strip() for t in s.split(",")]        # Split the input on commas
@@ -2078,7 +2079,7 @@ class FanzineIssueSpecList:
 
     #------------------------------------------------------------------------------------
     # Look for a FISL in the input string.  Return a tuple of (success, <unmatched text>)
-    def Scan(self, s: str, strict: bool=False) -> tuple[bool, str]:      # FanzineIssueSpecList
+    def Scan(self, s: str, strict: bool=False) -> tuple[bool, str]:
         raise Exception
 
 
@@ -2125,7 +2126,7 @@ class FanzineIssueInfo:
         self.Temp=Temp
 
     # .....................
-    def __str__(self) -> str:                       # FanzineIssueInfo
+    def __str__(self) -> str:
         out=""
         if self.DisplayName != "":
             return self.DisplayName
@@ -2141,7 +2142,7 @@ class FanzineIssueInfo:
         return out.strip()
 
     # .....................
-    def __repr__(self) -> str:                       # FanzineIssueInfo
+    def __repr__(self) -> str:
         out=""
         if self.DisplayName != "":
             out="'"+self.DisplayName+"'"
@@ -2161,7 +2162,7 @@ class FanzineIssueInfo:
         return out.strip()
 
     # .....................
-    def __eq__(self, other:FanzineIssueInfo) -> bool:                       # FanzineIssueInfo
+    def __eq__(self, other:FanzineIssueInfo) -> bool:
         if self.SeriesName != other.SeriesName:
             return False
         if self._Editor != other._Editor:
@@ -2194,14 +2195,14 @@ class FanzineIssueInfo:
         return fz
 
     # .....................
-    def IsEmpty(self) -> bool:                       # FanzineIssueInfo
+    def IsEmpty(self) -> bool:
         if self.SeriesName != "" or self.IssueName != "" or self._DisplayName != "" or self.DirURL != "" or self.PageFilename != "" or self.Pagecount > 0 or self.Editor != "" or self.Taglist or self.Mailings:
             return False
         return self.FIS.IsEmpty()
 
     # .....................
     @property
-    def SeriesName(self) -> str:    # FanzineIssueInfo
+    def SeriesName(self) -> str:
         if self._Series is None:
             return ""
         return self._Series.SeriesName
@@ -2211,101 +2212,101 @@ class FanzineIssueInfo:
 
     # .....................
     @property
-    def Series(self) -> FanzineSeriesInfo:                       # FanzineIssueInfo
+    def Series(self) -> FanzineSeriesInfo:
         if self._Series is None:
             self._Series=FanzineSeriesInfo()
         return self._Series
     @Series.setter
-    def Series(self, val: Optional[FanzineSeriesInfo]) -> None:                       # FanzineIssueInfo
+    def Series(self, val: Optional[FanzineSeriesInfo]) -> None:
         self._Series=val
 
     # .....................
     @property
-    def IssueName(self) -> str:                       # FanzineIssueInfo
+    def IssueName(self) -> str:
         return self._IssueName
     @IssueName.setter
-    def IssueName(self, val: str) -> None:                       # FanzineIssueInfo
+    def IssueName(self, val: str) -> None:
         self._IssueName=val.strip()
 
     # .....................
     @property
-    def DisplayName(self) -> str:                       # FanzineIssueInfo
+    def DisplayName(self) -> str:
         if self._DisplayName != "":
             return self._DisplayName
         if self.FIS is not None and self.SeriesName != "":
             return self.SeriesName+" "+str(self.FIS)
         return self.SeriesName
     @DisplayName.setter
-    def DisplayName(self, val: str) -> None:                       # FanzineIssueInfo
+    def DisplayName(self, val: str) -> None:
         self._DisplayName=val.strip()
 
     # .....................
     @property
-    def DirURL(self) -> str:                       # FanzineIssueInfo
+    def DirURL(self) -> str:
         return self._DirURL
     @DirURL.setter
-    def DirURL(self, val: str) -> None:                       # FanzineIssueInfo
+    def DirURL(self, val: str) -> None:
         self._DirURL=val
 
     # .....................
     @property
-    def PageFilename(self) -> str:                       # FanzineIssueInfo
+    def PageFilename(self) -> str:
         return self._PageFilename
     @PageFilename.setter
-    def PageFilename(self, val: str) -> None:                       # FanzineIssueInfo
+    def PageFilename(self, val: str) -> None:
         self._PageFilename=val.strip()
 
     # .....................
     @property
-    def URL(self) -> str:                       # FanzineIssueInfo
+    def URL(self) -> str:
         return self.DirURL+"/"+self.PageFilename
 
     # .....................
     @property
-    def Temp(self) -> any:                       # FanzineIssueInfo
+    def Temp(self) -> any:
         return self._Temp
     @Temp.setter
-    def Temp(self, val: any) -> None:                       # FanzineIssueInfo
+    def Temp(self, val: any) -> None:
         self._Temp=val
 
     # .....................
     @property
-    def FIS(self) -> Optional[FanzineIssueSpec]:                       # FanzineIssueInfo
+    def FIS(self) -> Optional[FanzineIssueSpec]:
         return self._FIS
     @FIS.setter
-    def FIS(self, val: FanzineIssueSpec) -> None:                       # FanzineIssueInfo
+    def FIS(self, val: FanzineIssueSpec) -> None:
         self._FIS=val
 
     # .....................
     @property
-    def Position(self) -> Optional[int]:                       # FanzineIssueInfo
+    def Position(self) -> Optional[int]:
         return self._Position
     @Position.setter
-    def Position(self, val: int) -> None:                       # FanzineIssueInfo
+    def Position(self, val: int) -> None:
         self._Position=val
 
     # .....................
     @property
-    def Locale(self) -> Locale:                       # FanzineIssueInfo
+    def Locale(self) -> Locale:
         return self._Locale
     # @Locale.setter
-    # def Locale(self, val: FanzineIssueSpec) -> None:                       # FanzineIssueInfo
+    # def Locale(self, val: FanzineIssueSpec) -> None:
     #     self._Locale=val
 
     # .....................
     @property
-    def Pagecount(self) -> int:                       # FanzineIssueInfo
+    def Pagecount(self) -> int:
         return self._Pagecount if self._Pagecount > 0 else 1
     @Pagecount.setter
-    def Pagecount(self, val: int) -> None:                       # FanzineIssueInfo
+    def Pagecount(self, val: int) -> None:
         self._Pagecount=val
 
     # .....................
     @property
-    def Editor(self) -> str:                       # FanzineIssueInfo
+    def Editor(self) -> str:
         return self._Editor
     @Editor.setter
-    def Editor(self, val: str) -> None:                       # FanzineIssueInfo
+    def Editor(self, val: str) -> None:
         self._Editor=val
 
     # .....................
