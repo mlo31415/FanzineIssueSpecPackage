@@ -2186,7 +2186,7 @@ class FanzineIssueInfo:
 
 
     def DeepCopy(self) -> FanzineIssueInfo:
-        fz=FanzineIssueInfo(Series=self.Series, IssueName=self.IssueName, DisplayName=self.DisplayName, DirURL=self.DirURL,
+        fz=FanzineIssueInfo(Series=self.Series.Deepcopy(), IssueName=self.IssueName, DisplayName=self.DisplayName, DirURL=self.DirURL,
                             PageFilename=self.PageFilename, FIS=self.FIS, Pagecount=self.Pagecount, Editor=self.Editor, Country="",
                             Taglist=None, Mailings=self.Mailings, Temp=self.Temp)
         # Do some touch-ups
