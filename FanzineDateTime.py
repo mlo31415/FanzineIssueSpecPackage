@@ -207,7 +207,7 @@ class FanzineDate:
             return self._DayText
         if self._Day is not None:
             return DayName(self._Day)
-        return None
+        return ""
     # There is no DayText setter -- to set it use the init or the Day setter
 
     # .....................
@@ -1033,6 +1033,8 @@ def ValidateDay(d: int, m: int, year: int=None) -> bool:
     if year is not None and year%4 == 0 and year % 400 != 0:
         if m == 2:
             monthlength=29
+    if d is None or monthlength is None:
+        return False
     return 0 < d <= monthlength
 
 
