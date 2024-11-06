@@ -755,7 +755,7 @@ class FanzineDateRange:
 # Return a tuple of (month, day)
 # (Day defaults to 1 if no day was supplied.)
 def InterpretMonthDay(s: str) -> tuple[int, int|None]|None:
-    s=s.strip() # Get rid of leading and traling blanks as they can't possibly be of interest
+    s=s.strip() # Get rid of leading and trailing blanks as they can't possibly be of interest
     s=s.removesuffix(",")    # Get rid of trailing comma
 
     s=s.replace("    ", " ").replace("   ", " ").replace("  ", " ") # Turn runs of up to 24 spaces into a single space
