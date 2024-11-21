@@ -748,7 +748,13 @@ class FanzineDateRange:
             return True
         return False
 
-
+    @property
+    def DisplayDaterangeBare(self) -> str:
+        saved=self._cancelled
+        self._cancelled=False
+        s=self.__str__()
+        self._cancelled=saved
+        return s
 
 #=================================================================================
 # Deal with things of the form "June 20," and "20 June" and just "June"
