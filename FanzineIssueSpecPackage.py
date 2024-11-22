@@ -1291,7 +1291,8 @@ class FanzineIssueInfo:
 
     def __init__(self, Series: FanzineSeriesInfo|None=None, IssueName: str="", DisplayName: str="",
                  DirURL: str="", PageFilename: str="", FIS: FanzineIssueSpec|None=None, Position: int=-1,
-                 Pagecount: int|None=None, Editor: str="", Country: str="", Taglist: list[str]=None, Mailings: list[str]=None, Temp: any=None, AlphabetizeIndividually: bool=False) -> None:
+                 Pagecount: int|None=None, Editor: str="", Country: str="", Taglist: list[str]=None, Mailings: list[str]=None, Temp: any=None, AlphabetizeIndividually: bool=False,
+                 FanzineType: str="") -> None:
         _Series: FanzineSeriesInfo|None=None
         _IssueName: str=""      # Name of this issue (does not include issue #/date info)
         _DisplayName: str=""    # Name to use for this issue. Includes issue serial and or date
@@ -1306,6 +1307,7 @@ class FanzineIssueInfo:
         _Mailings: list[str]=[]  # A List of APA mailings this issue was a part of
         _Temp: any=None     # Used outside the class to hold random information
         _AlphabetizeIndividually: bool=False
+        _FanzineType: str=""
 
         # Use the properties to set the values for all of the instance variables. We do this so that any special setter processing is done with the init values.
         self.Series=Series
@@ -1322,6 +1324,7 @@ class FanzineIssueInfo:
         self.Mailings=Mailings
         self.AlphabetizeIndividually=AlphabetizeIndividually
         self.Temp=Temp
+        self._FanzineType=FanzineType
 
     # .....................
     def __str__(self) -> str:                       
@@ -1375,6 +1378,8 @@ class FanzineIssueInfo:
             return False
         if self._Pagecount != other._Pagecount:
             return False
+        if self._FanzineType != other._FanzineType:
+            return False
         if self._FIS is not None and not self._FIS.IsEmpty():
             if other._FIS is None or other._FIS.IsEmpty():
                 return False
@@ -1386,7 +1391,7 @@ class FanzineIssueInfo:
     def DeepCopy(self) -> FanzineIssueInfo:
         fz=FanzineIssueInfo(Series=self.Series, IssueName=self.IssueName, DisplayName=self.DisplayName, DirURL=self.DirURL,
                             PageFilename=self.PageFilename, FIS=self.FIS, Pagecount=self.Pagecount, Editor=self.Editor, Country="",
-                            Taglist=None, Mailings=self.Mailings, Temp=self.Temp)
+                            Taglist=None, Mailings=self.Mailings, Temp=self.Temp, FanzineType=self.FanzineType)
         # Do some touch-ups
         fz._Locale=self.Locale
         fz.Taglist=[x for x in self.Taglist]
@@ -1509,17 +1514,23 @@ class FanzineIssueInfo:
 
     # .....................
     @property
+    def FanzineType(self) -> str:
+        return self._FanzineType
+    @FanzineType.setter
+    def FanzineType(self, val: str) -> None:
+        self._FanzineType=val
+
+    # .....................
+    @property
     def SeriesEditor(self) -> str:
         if self._Series.Editor is not None:
             return self._Series.Editor
         return self.Editor
 
-
     # .....................
     @property
     def Taglist(self) -> list[str]:  # FanzineIssueInfo
         return self._Taglist
-
     @Taglist.setter
     def Taglist(self, val: list[str]) -> None:  # FanzineIssueInfo
         if val is None:
@@ -1545,6 +1556,7 @@ class FanzineIssueInfo:
         if val is None:
             val=[]
         self._AlphabetizeIndividually=val
+
 
 ######################################################################################################################
 ######################################################################################################################
@@ -1575,7 +1587,6 @@ class FanzineSeriesList:
     @property
     def Editor(self) -> str:            
         return self._Editor
-
     @Editor.setter
     def Editor(self, val: str) -> None:            
         self._Editor=val
@@ -1586,7 +1597,6 @@ class FanzineSeriesList:
         if self._Eligible is None:
             return False
         return self._Eligible
-
     @Eligible.setter
     def Eligible(self, val: bool) -> None:
         self._Eligible=val
@@ -1596,7 +1606,6 @@ class FanzineSeriesList:
     def FIIL(self) -> list[FanzineIssueInfo]|None:
         #TODO: If we're returning an FIIL independent of the FSL, shouldn't we fill in the values which would be gotten by reference to the FSL?
         return self._FIIL
-
     @FIIL.setter
     def FIIL(self, val: FanzineIssueSpecList|None) -> None:
         # If there is no existing list of FIIs, we create one from the FISL
@@ -1610,7 +1619,6 @@ class FanzineSeriesList:
     @property
     def Notes(self) -> str:            
         return self._Notes
-
     @Notes.setter
     def Notes(self, val: str) -> None:            
         self._Notes=val.strip()
@@ -1619,7 +1627,6 @@ class FanzineSeriesList:
     @property
     def SeriesURL(self) -> str:            
         return self._SeriesURL
-
     @SeriesURL.setter
     def SeriesURL(self, val: str) -> None:            
         self._SeriesURL=val.strip()
