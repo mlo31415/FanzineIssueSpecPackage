@@ -1142,6 +1142,7 @@ def InterpretNamedDay(dayString: str) -> tuple[int, int]|None:
         "spring equinox": (3, 20),
         "april fool's day": (4, 1),
         "good friday": (4, 8),
+        "solar eclipse": (4,8),     # 2024 only...
         "easter": (4, 10),
         "national garlic day": (4, 19),
         "world free press day": (5, 3),
@@ -1156,6 +1157,7 @@ def InterpretNamedDay(dayString: str) -> tuple[int, int]|None:
         "stampede": (7, 10),
         "stampede rodeo": (7, 10),
         "stampede parade": (7, 10),
+        "calgary stampede parade": (7, 10),
         "system administrator appreciation day": (7, 25),
         "apres le deluge": (8, 1),  # Opuntia, 2013 Calgary floods
         "august 14 to 16": (8, 15),
