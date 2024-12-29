@@ -25,7 +25,7 @@ from contextlib import suppress
 from datetime import datetime
 
 from Locale import Locale
-from FanzineDateTime import FanzineDate
+from FanzineDateTime import FanzineDate, MonthNameToInt
 
 from Log import Log, LogError
 from HelpersPackage import ToNumeric, IsNumeric, IsInt, Int
@@ -975,6 +975,11 @@ class FanzineIssueSpec:
     @property
     def DateStr(self) -> str:                
         return str(self._FD)
+
+    @property
+    def MonthYear(self) -> str:
+        s=self.MonthText+" "+self.YearText
+        return s.strip()
 
     @property
     def SerialStr(self) -> str:                 
