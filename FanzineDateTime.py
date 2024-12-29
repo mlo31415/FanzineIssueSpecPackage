@@ -55,7 +55,7 @@ class FanzineDate:
 
 
     # -----------------------------
-    def __eq__(self, other: "FanzineDate") -> bool:
+    def __eq__(self, other: Self) -> bool:
         # Empty dates are equal
         if (self is None and other is None) or (self.IsEmpty() and other.IsEmpty()):
             return True
@@ -71,7 +71,7 @@ class FanzineDate:
         return self._Year == other._Year and self._Month == other._Month and self._Day == other._Day
 
     # -----------------------------
-    def __ne__(self, other: "FanzineDate") -> bool:
+    def __ne__(self, other: Self) -> bool:
         return not self.__eq__(other)
 
     def __sub__(self, other):
@@ -89,7 +89,7 @@ class FanzineDate:
 
     # -----------------------------
     # Define < operator for sorting
-    def __lt__(self, other: "FanzineDate") -> bool:
+    def __lt__(self, other: Self) -> bool:
         if self._Year is None:
             return True
         if other._Year is None:
@@ -111,7 +111,7 @@ class FanzineDate:
         return False
 
     # -----------------------------
-    def Copy(self, other: "FanzineDate") -> None:
+    def Copy(self, other: Self) -> None:
         self._Year=other._Year
         self._Month=other._Month
         self._MonthText=other._MonthText
@@ -357,7 +357,7 @@ class FanzineDate:
     # strict=true means that dubious forms will be rejected
     # complete=True means that *all* the input string must be part of the date
     @classmethod
-    def Match(cls, s: str, strict: bool=False, complete: bool=True) -> "FanzineDate":
+    def Match(cls, s: str, strict: bool=False, complete: bool=True) -> Self:
 
         self=cls()
 
