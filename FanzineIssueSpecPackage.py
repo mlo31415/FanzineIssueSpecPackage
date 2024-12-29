@@ -123,7 +123,7 @@ class FanzineSeriesInfo:
         _SeriesName: str=""  # Name of the fanzine series of which this is an issue
         _DisplayName: str=""  # Name to use for this issue. Includes issue serial and or date
         _DirURL: str=""  # URL of series directory
-        _Counts: FanzineCounts  # Page and Issue count for all the issues fanac has for this series
+        _Counts: FanzineCounts  # Page and IssueName count for all the issues fanac has for this series
         _Editor: str=""  # The editor for this series (if there was one for essentially all issues)
         _Country: str="" # The country for this issue (gotten from the series's country
         _AlphabetizeIndividually: bool=False
@@ -342,7 +342,7 @@ class FanzineSeriesInfo:
         return self._Keywords
     # There is no setter
     def SetKeyword(self, kwd: str, val: str=""):
-        self._Keywords[kwd]=val # If no value is suppled, we use ""
+        self._Keywords[kwd]=val # If no value is supplied, we use ""
 
 
 #
@@ -535,8 +535,6 @@ class FanzineSerial:
     # .......................
     # Convert the FanzineIssueSpec into a debugging form
     def __repr__(self) -> str:             # FanzineSerial
-        # if self.UninterpretableText is not None:
-        #     return "IS("+self.UninterpretableText+")"
 
         v="-"
         if self.Vol is not None:
@@ -553,21 +551,12 @@ class FanzineSerial:
                 w+=str(self.WSuffix)
 
         s="V"+v+", N"+n+", W"+w
-        # if self.TrailingGarbage is not None:
-        #     s+=", TG='"+self.TrailingGarbage+"'"
-        # if self.UninterpretableText is not None:
-        #     s+=", UT='"+self.UninterpretableText+"'"
         return s
 
     # .......................
     # Convert the FanzineIssueSpec into a pretty string for display or printing
     def __str__(self) -> str:             # FanzineSerial
-        # if self.UninterpretableText is not None:
-        #     return self.UninterpretableText.strip()
-
         tg=""
-        # if self.TrailingGarbage is not None:
-        #     tg=" "+self.TrailingGarbage
 
         if self.Vol is not None and self.Num is not None and self.Whole is not None:
             s="V"+str(self.Vol)+"#"+str(self.Num)
@@ -843,8 +832,6 @@ class FanzineIssueSpec:
     def Copy(self, other: FanzineIssueSpec) -> None:        
         self._FD=other._FD
         self._FS=other._FS
-        #self._UninterpretableText=other._UninterpretableText
-        #self._TrailingGarbage=other._TrailingGarbage
 
     def DeepCopy(self, other: FanzineIssueSpec) -> None:
         self.Vol=other.Vol
@@ -1063,7 +1050,7 @@ class FanzineIssueSpec:
 ######################################################################################################################
 ######################################################################################################################
 # A Fanzine issue spec list contains the information to handle a list of issues of a single fanzine.
-# It includes the series name, editors(s), and a list of Fanzine Issue specs.
+# It includes the series name, editors(s), and a list of Fanzine IssueName specs.
 #TODO: This can be profitably extended by changing the FISL class to include specific names and editors for each issue, since sometimes
 #TODO: a series does not have a consistent set throughout.
 
