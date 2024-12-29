@@ -119,8 +119,6 @@ class FanzineDate:
         self._DayText=other._DayText
         self._MonthDayText=other._MonthDayText
         self._LongDates=other._LongDates        # Used only to coerce the __str__ to use long dates one time only
-        #self._UninterpretableText=other._UninterpretableText
-        #self._TrailingGarbage=other._TrailingGarbage
 
     # .....................
     @property
@@ -130,10 +128,10 @@ class FanzineDate:
 
     #......................
     @property
-    def DateTime(self):
+    def datetime(self):
         return self.DateTime
-    @DateTime.setter
-    def DateTime(self, val: datetime):
+    @datetime.setter
+    def datetime(self, val: datetime):
         #assert type(val) is datetime
         self.Year=val.year
         self.Month=val.month
@@ -226,38 +224,42 @@ class FanzineDate:
         y=self._Year if self._Year is not None else 1
         m=self._Month if self._Month is not None else 1
         d=self._Day if self._Day is not None else 1
-        return datetime(y, m, d).date
+        return datetime(y, m, d)  #.date
+    @Date.setter
+    def Date(self, val):
+        assert False
 
     # .......................
     # Convert the FanzineDate into a debugging form
     def __repr__(self) -> str:
-        #if self.UninterpretableText is not None:
-        #    return"("+self.UninterpretableText+")"
 
         d=""
         if self.Year is not None:
             d=str(self.Year)
         if self.Month is not None:
-            d=d+":"+str(self.Month)
-        if self.MonthText is not None:
-            d=d+":"+self.MonthText
+            if len(d) > 0:
+                d+=":"
+            d+=str(self.Month)
+        elif self.MonthText is not None:
+            if len(d) > 0:
+                d+=":"
+            d+=self.MonthText
         if self.Day is not None:
-            d=d+"::"+str(self.Day)
-        if self.DayText is not None:
-            d=d+"::"+self.DayText
+            if len(d) > 0:
+                d+=":"
+            d+=str(self.Day)
+        elif self.DayText is not None:
+            if len(d) > 0:
+                d+=":"
+            d+=self.DayText
         if self.MonthDayText is not None:
-            d=d+":::"+self.MonthDayText
+            if len(d) > 0:
+                d+=":"
+            d+=self.MonthDayText
         if d == "":
-            d="-"
+            d="---"
 
-        s="D"+d
-        #if self.TrailingGarbage is not None:
-        #    s=s+", TG='"+self.TrailingGarbage+"'"
-        #if self.UninterpretableText is not None:
-        #    s=s+", UT='"+self.UninterpretableText+"'"
-        s=s+")"
-
-        return s
+        return d
 
     # .......................
     def IsEmpty(self) -> bool:
@@ -545,6 +547,7 @@ class FanzineDate:
                     self.Year=d.year
                     self.Month=d.month
                     self.Day=d.day
+                    self.DateTime=d
                     return self
 
         # Nothing worked
