@@ -28,7 +28,7 @@ from Locale import Locale
 from FanzineDateTime import FanzineDate, MonthNameToInt
 
 from Log import Log, LogError
-from HelpersPackage import ToNumeric, IsNumeric, IsInt, Int
+from HelpersPackage import ToNumeric, IsInt
 from HelpersPackage import Pluralize
 from HelpersPackage import InterpretNumber, InterpretRoman, InterpretInteger
 from HelpersPackage import CaseInsensitiveCompare
