@@ -1,6 +1,7 @@
 from __future__ import annotations
 
-from datetime import datetime
+
+from datetime import datetime, timedelta
 from dateutil import parser
 import re
 from contextlib import suppress
@@ -1242,3 +1243,48 @@ def StandardizeMonth(month: str) -> str:
         return month
 
     return table[month.lower().strip()]
+
+
+
+# Interpret text as a standard datetime string
+def ToDatetime(text: str= "") -> datetime|None:
+    Log(f"ToDatetime({text})")
+    text=text.strip()
+    if text == "":
+        return None
+
+    # Look for ..sometime.. nn:nn... [am|pm] [EST|...]
+    # That is, an arbitrary string followed by whitespace at least one digit followed by (Once or twice (a colon followed by at least o digit) followed by perhaps a decimal point followed by digits followed by notning buy alpha changers or white space
+    # The goal is to handle these:
+    #   Thursday, March 25, 2003 10pm
+    # ...20:12:13 EST
+    # ...15.35.17.04 CST
+    # etc.
+    timetext=""
+    datetext=""
+    m=re.match(r"^.*\w[0-9]{1,2}(:[0-9]{1,2})[1,2](.[0-9]+)?[a-zA-Z. ]*$", text)
+    if m is not None:
+        # We split this into the time part and the date part.  We split at the last space before the 1st colon
+        loccol=text.find(":")
+        locsp=text[:loccol].rfind(" ")
+        timetext=text[locsp:].strip()
+        datetext=text[:locsp].strip()
+    date=FanzineDate().Match(datetext)
+    td=None
+    if timetext != "":
+        time=datetime.strptime(timetext, "%I:%M:%S %p")
+        td=timedelta(hours=time.hour, minutes=time.minute, seconds=time.second)
+    Log(f"   {date=}")
+    Log(f"   {time=}")
+
+    date=date.Date
+    if td is not None:
+        date=date+td
+    return date
+
+
+# Turn a datetime into a standard datetime string
+def FromDatetime(dt: datetime|None=None) -> str:
+    if dt is None:
+        return ""
+    return dt.strftime("%B %d, %Y  %I:%M:%S %p")+"\n"
