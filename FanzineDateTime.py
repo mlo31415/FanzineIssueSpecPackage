@@ -23,11 +23,18 @@ class FanzineDate:
                  MonthDayText: str|None =None,
                  DateTime: datetime|None = None) -> None:
 
+        self._Year=None
+        self._Month=None
+        self._Day=None
+        self._MonthText=None
+        self._DayText=None
+        self._MonthDay=None
+
         if DateTime is not None:
             self.DateTime=DateTime
             return
 
-        self.Year=Year
+        self._Year=Year
 
         self._Month=None
         self._MonthText=None
