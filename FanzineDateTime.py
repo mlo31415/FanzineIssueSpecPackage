@@ -881,19 +881,28 @@ def ValidateData(val: str, valtype: str) -> int:
 
 
 # =================================================================================
-def MonthLength(m: int) -> int:
-    if m == 2:   # This messes up leap years. De minimus
-        return 28
-    if m in [4, 6, 9, 11]:
+def MonthLength(m: int, year: int=None) -> int:
+    if m == 2:
+        if y is None:  # Missing year is probably a non-leap year
+            return 28
+        if y%4 != 0:    # It's definitely a non-leap year
+            return 28
+        if y == 2000:   # It's a special century leap year
+            return 29
+        return 29       # It must be an ordinary leap year then
+
+    if m in [4, 6, 9, 11]:      # Thirty days hath September...
         return 30
-    if m in [1, 3, 5, 7, 8, 10, 12]:
+    if m in [1, 3, 5, 7, 8, 10, 12]:        # All the rest have 31...
         return 31
+    assert False    # Crash and burn
 
 # =================================================================================
 # Make sure day is within month
-# We take a month and day and return a month and day
-def BoundDay(d: int|None, m: int|None, y: int|None) -> tuple[int|None, int|None, int|None]:
-    if d is None:
+# We take a month and day and return a year, a month and a day
+# This will move April 0 to Mar 31, Sept 33 to Oct 3 and Dec 32 2020 to Jan 1 2021.
+def BoundDay(d: int|None, m: int|None, y: int|None=None) -> tuple[int|None, int|None, int|None]:
+    if d is None:    # Should never happen!
         return None, None, None
     if m is None:    # Should never happen!
         return None, None, None
@@ -902,7 +911,7 @@ def BoundDay(d: int|None, m: int|None, y: int|None) -> tuple[int|None, int|None,
         return None, None, None
 
     # Deal with the normal case
-    if 1 <= d <= MonthLength(m):
+    if 1 <= d <= MonthLength(m, year=y):
         return d, m, y
 
     # Deal with negative days
@@ -912,12 +921,12 @@ def BoundDay(d: int|None, m: int|None, y: int|None) -> tuple[int|None, int|None,
             if m < 1:
                 m=12
                 y=y-1
-            d=d+MonthLength(m)
+            d=d+MonthLength(m, year=y)
         return d, m, y
 
     # The day is past the end of the month.  Move it to the next month.
-    while d > MonthLength(m):
-        d=d-MonthLength(m)
+    while d > MonthLength(m, year=y):
+        d=d-MonthLength(m, year=y)
         m=m+1
         if m > 12:
             m=1
@@ -1046,11 +1055,7 @@ def ValidFannishYear(ytext: str) -> str:
 # =================================================================================
 # Take a day and month and (optionally) year and check for consistency
 def ValidateDay(d: int, m: int, year: int=None) -> bool:
-    monthlength=MonthLength(m)
-    # Handle leap years
-    if year is not None and year%4 == 0 and year % 400 != 0:
-        if m == 2:
-            monthlength=29
+    monthlength=MonthLength(m, year=year)
     if d is None or monthlength is None:
         return False
     return 0 < d <= monthlength
