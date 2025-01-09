@@ -883,11 +883,11 @@ def ValidateData(val: str, valtype: str) -> int:
 # =================================================================================
 def MonthLength(m: int, year: int=None) -> int:
     if m == 2:
-        if y is None:  # Missing year is probably a non-leap year
+        if year is None:  # Missing year is probably a non-leap year
             return 28
-        if y%4 != 0:    # It's definitely a non-leap year
+        if year%4 != 0:    # It's definitely a non-leap year
             return 28
-        if y == 2000:   # It's a special century leap year
+        if year == 2000:   # It's a special century leap year
             return 29
         return 29       # It must be an ordinary leap year then
 
