@@ -943,9 +943,12 @@ class FanzineIssueSpec:
 
     #.....................
     @property
-    def Month(self) ->int|None:       
-        return self._FD.Month
+    def MonthNum(self) ->int|None:
+        return self._FD.MonthNum
 
+    @property
+    def Month(self) -> int|None:
+        assert False
     @Month.setter
     def Month(self, val: int|str|None)-> None:      
         self._FD.Month=val
@@ -953,7 +956,7 @@ class FanzineIssueSpec:
     #.....................
     @property
     def MonthText(self) -> str|None:      
-        return self._FD.MonthText
+        return self._FD.MonthName
 
 
     #.....................

@@ -8,7 +8,7 @@ from contextlib import suppress
 import math
 
 from Log import Log, LogError
-from HelpersPackage import ToNumeric, IsNumeric, IsInt, Int
+from HelpersPackage import ToNumeric, IsNumeric, IsInt, Int, Int0
 from HelpersPackage import RemoveHTMLDebris
 from HelpersPackage import CanonicizeColumnHeaders
 
@@ -16,34 +16,62 @@ from HelpersPackage import CanonicizeColumnHeaders
 class FanzineDate:
     def __init__(self,
                  Year: int|str|None=None,
+                 YearText: int|str|None=None,
                  Month: int|str|tuple[int, str]|None=None,
                  MonthText: str|None=None,
                  Day: int|str|tuple[int, str]|None=None,
                  DayText: str|None=None,
                  MonthDayText: str|None =None,
+                 DateText: str|None=None,
                  DateTime: datetime|None = None) -> None:
 
         self._Year=None
+        self._YearText=None
         self._Month=None
         self._Day=None
         self._MonthText=None
+        self._MonthDayText=None
         self._DayText=None
-        self._MonthDay=None
+        self._DateText=None
+
+        if DateText is not None and len(DateText) > 0:
+            self.Match(DateText)
+            return
 
         if DateTime is not None:
             self.DateTime=DateTime
             return
 
+        # Handle simple years (boring things like 1995 and 89)
         self._Year=Year
+        self._YearText=YearText
+        if self._Year is None and self._YearText is not None:
+            y=Int0(self._YearText)
+            if y > 0:
+                self._Year=y
 
-        self._Month=None
-        self._MonthText=None
-        if not isinstance(Month, tuple) and MonthText is not None:
-            Month=(Month, MonthText)
-        self.Month=Month
-        if Month is None and MonthText is not None:
-            self.Month=InterpretMonth(MonthText)        # If only Monthtext is defined, use it to calculate Month
+        # Handle the month except for "Winter"
+        self.Month=(Month, MonthText)
 
+#TODO: This really ought to be moved into the Year or Month setter, somehow
+        # Deal with things like "Winter 1960-61" and "Winter 1993-4" without a day or month
+        if YearText is not None and "-" in YearText:
+            yt=self._YearText[:self._YearText.index("-")]   # We're only interested in the ending year
+            century=self._YearText[:2]
+            if century == "19":
+                self._Year=1900+Int0(yt)
+            else:
+                self._Year=2000+Int0(yt)
+            self._Year=Int0(yt)
+            if self.MonthText is not None and self.MonthText.lower().startswith("win"):
+                self._Month=1        # Winter xxxx-yy is always assumed to be January yy and not December xxxx
+                self._Year+=1
+
+        # Numeric DayText values should be stored as day and not as daytext
+        if DayText is not None:
+            if Int0(DayText) > 0:
+                Day=Int0(DayText)
+                DayText=None
         self._Day=None
         self._DayText=None
         if isinstance(Day, tuple):
@@ -64,7 +92,7 @@ class FanzineDate:
 
 
     # -----------------------------
-    def __eq__(self, other: Self) -> bool:
+    def __eq__(self, other) -> bool:
         # Empty dates are equal
         if (self is None and other is None) or (self.IsEmpty() and other.IsEmpty()):
             return True
@@ -80,15 +108,15 @@ class FanzineDate:
         return self._Year == other._Year and self._Month == other._Month and self._Day == other._Day
 
     # -----------------------------
-    def __ne__(self, other: Self) -> bool:
+    def __ne__(self, other) -> bool:
         return not self.__eq__(other)
 
     def __sub__(self, other):
         y1=self.Year if self.Year is not None else 1
-        m1=self.Month if self.Month is not None else 1
+        m1=self.MonthNum if self.MonthNum is not None else 1
         d1=self.Day if self.Day is not None else 1
         y2=other.Year if other.Year is not None else 1
-        m2=other.Month if other.Month is not None else 1
+        m2=other.MonthNum if other.MonthNum is not None else 1
         d2=other.Day if other.Day is not None else 1
         try:
             return (datetime(y1, m1, d1) - datetime(y2, m2, d2)).days
@@ -98,29 +126,28 @@ class FanzineDate:
 
     # -----------------------------
     # Define < operator for sorting
-    def __lt__(self, other: Self) -> bool:
+    def __lt__(self, other) -> bool:
         if self._Year is None:
             return True
         if other._Year is None:
             return False
         if self._Year != other._Year:
             return self._Year < other._Year
-        if self._Month is None:
+        if self.MonthNum is None:
             return True
         if other._Month is None:
             return False
-        if self._Month != other._Month:
-            return self._Month < other._Month
+        if self.MonthNum != other.MonthNum:
+            return self.MonthNum < other.MonthNum
         if self._Day is None:
             return True
         if other._Day is None:
             return False
-        if self._Day != other._Day:
-            return self._Day < other._Day
-        return False
+        return self._Day < other._Day
+
 
     # -----------------------------
-    def Copy(self, other: Self) -> None:
+    def Copy(self, other) -> None:
         self._Year=other._Year
         self._Month=other._Month
         self._MonthText=other._MonthText
@@ -152,10 +179,7 @@ class FanzineDate:
         return self._Year
     @Year.setter
     def Year(self, val: int|str) -> None:
-        if isinstance(val, str):
-            self._Year=ToNumeric(YearAs4Digits(val))
-        else:
-            self._Year=YearAs4Digits(val)
+        self._Year=YearAs4Digits(val)
 
     # .....................
     # This is a non-settable property -- it is always derived from the numeric Year
@@ -165,19 +189,52 @@ class FanzineDate:
 
     # .....................
     @property
-    def Month(self) -> int:
+    def MonthName(self) -> str:
+        if self._MonthText is not None:
+            return self._MonthText
+        return MonthName(self._Month)
+    @property
+    def MonthNum(self) -> int:
         return self._Month
+    @property
+    def Month(self) -> int:
+        assert False
     @Month.setter
     def Month(self, val: int|str|tuple[int, str]) -> None:
+        self._Month=None
+        self._MonthText=None
+
         if isinstance(val, str):
+            # When a numeric value is input as a string, convert it to int before processing.
+            if Int0(val) > 0:
+                val=Int0(val)
+
+        # When a tuple is supplied, both members must be non-null.  If one is None, demote Val to either int or str as appropriate
+        if isinstance(val, tuple):
+            if val[0] is None:
+                val=val[1]
+            elif val[1] is None:
+                val=val[0]
+
+        # Now interpret val and set _month and _Monthtext
+        if isinstance(val, str):
+            if len(val) == 0:
+                return  # A null string sets nothing
             self._Month=InterpretMonth(val)     # If you supply only the MonthText, the Month number is computed
-            self._MonthText=val if (val is not None and len(val) > 0) else None
-        elif isinstance(val, tuple):    # Use the Tuple to set both Month and MonthText
+            if MonthName(self._Month) != val and MonthName(self._Month, True) != val and Int0(val) == 0:
+                # Only month names which are not normal month names are recorded and MonthText.
+                self._MonthText=val
+        elif isinstance(val, tuple):    # Use the Tuple to set both MonthNum and MonthText
             self._Month=val[0]
-            self._MonthText=val[1] if (val[1] is not None and len(val) > 0) else None
+            if val[1] is not None and len(val) > 0:
+                self._MonthText=val[1]
+
         else:
             self._Month=val
-            self._MonthText=None  # If we set a numeric month, any text month gets blown away as no longer relevant
+
+        if self._Month is None and self._MonthText is not None:
+            self._Month=InterpretMonth(self._MonthText)
+        Log(f"Month({val}) --> {self._Month} and {self._MonthText}")
 
     # .....................
     @property
@@ -189,7 +246,7 @@ class FanzineDate:
         return ""
     @MonthText.setter
     def MonthText(self, mt: str):
-        self._MonthText=mt
+        assert False
 
     # .....................
     @property
@@ -225,13 +282,16 @@ class FanzineDate:
     def MonthDayText(self,val):
         self._MonthDayText=val
 
+    @property
+    def SortYearMonth(self) -> str:
+        return f"{self.Year}_{str(self.MonthNum):02}"
     # .....................
     @property
     def Date(self) -> datetime.date|None:
         if self.IsEmpty():
             return None
         y=self._Year if self._Year is not None else 1
-        m=self._Month if self._Month is not None else 1
+        m=self.Month if self.Month is not None else 1
         d=self._Day if self._Day is not None else 1
         return datetime(y, m, d)  #.date
     @Date.setter
@@ -291,13 +351,13 @@ class FanzineDate:
         y=self.Year
         yt=str(y) if y is not None else ""
 
-        m=self.Month
+        m=self.MonthNum
         mt=""
         if m is not None:
             mt=MonthName(m, short=not self._LongDates) if m is not None else None
         self._LongDates=False       # LongDates only stays set for a single use of str()
         if self._MonthText is not None:
-            mt=self._MonthText
+            mt=self.MonthText
             m=0
 
         d=self.Day
@@ -346,8 +406,12 @@ class FanzineDate:
             y=YearName(self._Year)
 
         m="00"
-        if self._Month is not None:
-            m=format(self._Month, '02d')
+        if self.MonthNum is not None:
+            m=format(self.MonthNum, '02d')
+        if self.MonthNum == 1 and self.MonthText is not None and self.MonthText.lower().startswith("win"):
+            m+="j"
+        else:
+            m+="z"
 
         d="00"
         if self._Day is not None:
@@ -368,7 +432,7 @@ class FanzineDate:
     # strict=true means that dubious forms will be rejected
     # complete=True means that *all* the input string must be part of the date
     @classmethod
-    def Match(cls, s: str, strict: bool=False, complete: bool=True) -> Self:
+    def Match(cls, s: str, strict: bool=False, complete: bool=True):
 
         self=cls()
 
@@ -405,7 +469,7 @@ class FanzineDate:
                 # The US date format has the first group as the month and the second as the day.  See if this works.
                 m=int(g1t)
                 d=int(g2t)
-                if ValidateDay(d, m, y):
+                if ValidateDayOfMonth(d, m, y):
                     self.Year=y
                     self.Month=m
                     self.Day=d
@@ -414,7 +478,7 @@ class FanzineDate:
                 # Maybe European date format?
                 d=int(g1t)
                 m=int(g2t)
-                if ValidateDay(d, m, y):
+                if ValidateDayOfMonth(d, m, y):
                     self.Year=y
                     self.Month=m
                     self.Day=d
@@ -524,10 +588,11 @@ class FanzineDate:
         # Next we'll look for yyyy-yy all alone
         m=re.match(r"^\d\d\d\d\s*-\s*(\d\d)$", dateText)
         if m is not None and len(m.groups()) == 1:
-            self.Year=int(m.groups()[0])
+            # Use the second part of the year, and given that this is yyyy-yy, it probably is a vaguely winterish date
+            self.Year=int(m.groups()[0])    # This will add the leading 19 or 20 as needed
             self.Month=1
             return self
-            # Use the second part of the year, and given that this is yyyy-yy, it probably is a vaguely winterish date
+
 
         # Another form is the fannish "April 31, 1967" -- didn't want to miss that April mailing date!
         # We look for <month><number>,<year> with possible spaces between. Comma is optional.
@@ -611,18 +676,18 @@ class FanzineDateRange:
         elif d1 is not None and d2 is None:
             s=str(d1)
         elif d1.Year == d2.Year:
-            if d1.Month == d2.Month:
-                if d1.Month is None:
+            if d1.MonthNum == d2.MonthNum:
+                if d1.MonthNum is None:
                     s=str(d1.Year)
                 elif d1.Day == d2.Day:
                     if d1.Day is None:
-                        s=MonthName(d1.Month)+" "+str(d1.Year)
+                        s=MonthName(d1.MonthNum)+" "+str(d1.Year)
                     else:
-                        s=MonthName(d1.Month)+" "+str(d1.Day)+", "+str(d1.Year)
+                        s=MonthName(d1.MonthNum)+" "+str(d1.Day)+", "+str(d1.Year)
                 else:
-                    s=MonthName(d1.Month)+" "+str(d1.Day)+"-"+str(d2.Day)+", "+str(d1.Year)
+                    s=MonthName(d1.MonthNum)+" "+str(d1.Day)+"-"+str(d2.Day)+", "+str(d1.Year)
             else:
-                s=MonthName(d1.Month)+" "+str(d1.Day)+"-"+MonthName(d2.Month)+" "+str(d2.Day)+", "+str(d1.Year)
+                s=MonthName(d1.MonthNum)+" "+str(d1.Day)+"-"+MonthName(d2.MonthNum)+" "+str(d2.Day)+", "+str(d1.Year)
         else:
             s=str(d1)+"-"+str(d2)
 
@@ -684,11 +749,11 @@ class FanzineDateRange:
             # s2 should contain a full date, including year
             s1, s2=s.split("-")
             d2=FanzineDate().Match(s2)
-            if not d2.IsEmpty() and not d2.Day is None and not d2.Month is None:
+            if not d2.IsEmpty() and not d2.Day is None and not d2.MonthNum is None:
                 # Add s2's year to the end of s1
                 s1+=" "+str(d2.Year)
                 d1=FanzineDate().Match(s1)
-                if not d1.IsEmpty() and not d1.Day is None and not d1.Month is None:
+                if not d1.IsEmpty() and not d1.Day is None and not d1.MonthNum is None:
                     self._startdate=d1
                     self._enddate=d2
                     return self
@@ -1034,7 +1099,7 @@ def YearAs4Digits(year: int|str|None)-> int|None:
         try:
             year=int(year)
         except:
-            return year
+            return -1
     if year > 100:
         return year
     if year < 33:
@@ -1055,7 +1120,7 @@ def ValidFannishYear(ytext: str) -> str:
 
 # =================================================================================
 # Take a day and month and (optionally) year and check for consistency
-def ValidateDay(d: int, m: int, year: int=None) -> bool:
+def ValidateDayOfMonth(d: int, m: int, year: int=None) -> bool:
     monthlength=MonthLength(m, year=year)
     if d is None or monthlength is None:
         return False
