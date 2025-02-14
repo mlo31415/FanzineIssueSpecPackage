@@ -595,8 +595,7 @@ class FanzineDate:
             y=int(year)
             if m is not None:
                 self.Year=y
-                self.Month=m
-                self.MonthText=month1+"-"+month2
+                self.Month=m, month1+"-"+month2
                 return self
 
         # Next we'll look for yyyy-yy all alone
