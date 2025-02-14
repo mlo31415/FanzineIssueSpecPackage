@@ -220,22 +220,31 @@ class FanzineDate:
         if isinstance(val, str):
             if len(val) == 0:
                 return  # A null string sets nothing
-            self._Month=InterpretMonth(val)     # If you supply only the MonthText, the Month number is computed
-            if MonthName(self._Month) != val and MonthName(self._Month, True) != val and Int0(val) == 0:
-                # Only month names which are not normal month names are recorded and MonthText.
-                self._MonthText=val
+            self._MonthNum=InterpretMonth(val)     # If you supply only the MonthText, the Month number is computed
+            self._MonthText=val
         elif isinstance(val, tuple):    # Use the Tuple to set both MonthNum and MonthText
             self._MonthNum=val[0]
             if val[1] is not None and len(val) > 0:
                 self._MonthText=val[1]
 
         else:
-            self._Month=val
             self._MonthNum=val
 
-        if self._Month is None and self._MonthText is not None:
-            self._Month=InterpretMonth(self._MonthText)
-        Log(f"Month({val}) --> {self._Month} and {self._MonthText}")
+        # If we have a monthText, but no MonthNum, compute it.
+        if self._MonthNum is None and self._MonthText is not None:
+            self._MonthNum=InterpretMonth(self._MonthText)
+
+        # Now strip away any MonthText which is just a duplicate of MonthNum (eg., "Jan" and 1)
+        if self._MonthNum is not None and self._MonthText is not None:
+            if self._MonthText == MonthName(self._MonthNum) or self._MonthText == MonthName(self._MonthNum, short=True) or self._MonthText == MonthName(self._MonthNum, middle=True):
+                self._MonthText=None    # We don;t want the redundant MonthText
+            elif self._MonthNum == Int0(self.MonthText):
+                self._MonthText=None
+
+        if self._MonthNum is not None and self._MonthText is not None:
+            Log(f"Month({val}) --> {self._MonthNum} and {self._MonthText}")
+            i=0
+
 
     # .....................
     @property
