@@ -1178,7 +1178,7 @@ def InterpretYear(yearText: int|str|None)-> int|str|None:
     return None
 
 # Format an integer month as text
-def MonthName(month: int, short=False) -> str:
+def MonthName(month: int, short=False, middle=False) -> str:
     if month is None:
         return ""
 
