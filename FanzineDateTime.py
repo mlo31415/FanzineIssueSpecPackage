@@ -27,7 +27,7 @@ class FanzineDate:
 
         self._Year=None
         self._YearText=None
-        self._Month=None
+        self._MonthNum=None
         self._Day=None
         self._MonthText=None
         self._MonthDayText=None
@@ -64,7 +64,7 @@ class FanzineDate:
                 self._Year=2000+Int0(yt)
             self._Year=Int0(yt)
             if self.MonthText is not None and self.MonthText.lower().startswith("win"):
-                self._Month=1        # Winter xxxx-yy is always assumed to be January yy and not December xxxx
+                self._MonthNum=1        # Winter xxxx-yy is always assumed to be January yy and not December xxxx
                 self._Year+=1
 
         # Numeric DayText values should be stored as day and not as daytext
@@ -100,12 +100,12 @@ class FanzineDate:
         if other is None:
             return False
         # If either date is entirely None, it's not equal
-        if self._Year is None and self._Month is None and self._Day is None:
+        if self._Year is None and self._MonthNum is None and self._Day is None:
             return False
         if other._Year is None and other._Month is None and other._Day is None:
             return False
         # OK, we know that both self and other have a non-None date element, so just check for equality
-        return self._Year == other._Year and self._Month == other._Month and self._Day == other._Day
+        return self._Year == other._Year and self._MonthNum == other._Month and self._Day == other._Day
 
     # -----------------------------
     def __ne__(self, other) -> bool:
@@ -135,7 +135,7 @@ class FanzineDate:
             return self._Year < other._Year
         if self.MonthNum is None:
             return True
-        if other._Month is None:
+        if other._MonthNum is None:
             return False
         if self.MonthNum != other.MonthNum:
             return self.MonthNum < other.MonthNum
@@ -149,7 +149,7 @@ class FanzineDate:
     # -----------------------------
     def Copy(self, other) -> None:
         self._Year=other._Year
-        self._Month=other._Month
+        self._MonthNum=other._MonthNum
         self._MonthText=other._MonthText
         self._Day=other._Day
         self._DayText=other._DayText
@@ -192,20 +192,20 @@ class FanzineDate:
     def MonthName(self) -> str:
         if self._MonthText is not None:
             return self._MonthText
-        return MonthName(self._Month)
+        return MonthName(self._MonthNum)
     @property
     def MonthNum(self) -> int:
-        return self._Month
+        return self._MonthNum
     @property
     def Month(self) -> int:
         assert False
     @Month.setter
     def Month(self, val: int|str|tuple[int, str]) -> None:
-        self._Month=None
+        self._MonthNum=None
         self._MonthText=None
 
         if isinstance(val, str):
-            # When a numeric value is input as a string, convert it to int before processing.
+            # When a numeric value is input as a string, convert it to int before processing.  E.g., "2" -> 2
             if Int0(val) > 0:
                 val=Int0(val)
 
@@ -225,12 +225,13 @@ class FanzineDate:
                 # Only month names which are not normal month names are recorded and MonthText.
                 self._MonthText=val
         elif isinstance(val, tuple):    # Use the Tuple to set both MonthNum and MonthText
-            self._Month=val[0]
+            self._MonthNum=val[0]
             if val[1] is not None and len(val) > 0:
                 self._MonthText=val[1]
 
         else:
             self._Month=val
+            self._MonthNum=val
 
         if self._Month is None and self._MonthText is not None:
             self._Month=InterpretMonth(self._MonthText)
@@ -241,8 +242,8 @@ class FanzineDate:
     def MonthText(self) -> str:
         if self._MonthText is not None:
             return self._MonthText
-        if self._Month is not None:
-            return MonthName(self._Month)
+        if self._MonthNum is not None:
+            return MonthName(self._MonthNum)
         return ""
     @MonthText.setter
     def MonthText(self, mt: str):
@@ -336,7 +337,7 @@ class FanzineDate:
             return False
         if self._Day is not None:
             return False
-        if self._Month is not None:
+        if self._MonthNum is not None:
             return False
         if self._Year is not None:
             return False
