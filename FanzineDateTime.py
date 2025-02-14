@@ -410,7 +410,7 @@ class FanzineDate:
 
 
     # =============================================================================
-    def FormatDateForSorting(self) -> str:
+    def FormatYearMonthForSorting(self) -> str:
         y="0000"
         if self._Year is not None:
             y=YearName(self._Year)
@@ -418,16 +418,20 @@ class FanzineDate:
         m="00"
         if self.MonthNum is not None:
             m=format(self.MonthNum, '02d')
-        if self.MonthNum == 1 and self.MonthText is not None and self.MonthText.lower().startswith("win"):
-            m+="j"
+        if self.MonthNum is not None and self.MonthText is not None:
+            m+=f"-{(self.MonthText+'   ')[:3]}"
         else:
-            m+="z"
+            m+="-Zzz"
 
+        Log(f"{self._Year=}  {self.MonthNum=}   {y+"-"+m}")
+        return y+"-"+m
+
+    def FormatYearMonthDayForSorting(self) -> str:
         d="00"
         if self._Day is not None:
             d=format(self._Day, '02d')
 
-        return y+"-"+m+"_"+d
+        return self.FormatYearMonthForSorting()+"_"+d
 
 
     # =============================================================================
