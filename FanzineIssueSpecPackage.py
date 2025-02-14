@@ -1044,8 +1044,11 @@ class FanzineIssueSpec:
 
 
     #=============================================================================
-    def FormatDateForSorting(self) -> str:         
-        return self._FD.FormatDateForSorting()
+    def FormatYearMonthForSorting(self) -> str:
+        return self._FD.FormatYearMonthForSorting()
+
+    def FormatYearMonthDayForSorting(self) -> str:
+        return self._FD.FormatYearMonthDayForSorting()
 
     #=============================================================================
     # Format the Vol/Num/Whole information
