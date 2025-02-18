@@ -88,7 +88,7 @@ class FanzineDate:
 
 
     def __hash__(self) -> int:
-        return hash(self.Year)+hash(self.Month)+hash(self.MonthText)+hash(self.Day)+hash(self.DayText)+hash(self.MonthDayText)
+        return hash(self.Year)+hash(self.MonthNum)+hash(self.MonthText)+hash(self.Day)+hash(self.DayText)+hash(self.MonthDayText)
 
 
     # -----------------------------
@@ -102,10 +102,10 @@ class FanzineDate:
         # If either date is entirely None, it's not equal
         if self._Year is None and self._MonthNum is None and self._Day is None:
             return False
-        if other._Year is None and other._Month is None and other._Day is None:
+        if other._Year is None and other._MonthNum is None and other._Day is None:
             return False
         # OK, we know that both self and other have a non-None date element, so just check for equality
-        return self._Year == other._Year and self._MonthNum == other._Month and self._Day == other._Day
+        return self._Year == other._Year and self._MonthNum == other._MonthNum and self._Day == other._Day
 
     # -----------------------------
     def __ne__(self, other) -> bool:
@@ -216,7 +216,7 @@ class FanzineDate:
             elif val[1] is None:
                 val=val[0]
 
-        # Now interpret val and set _month and _Monthtext
+        # Now interpret val and set _MonthNum and _MonthText
         if isinstance(val, str):
             if len(val) == 0:
                 return  # A null string sets nothing
