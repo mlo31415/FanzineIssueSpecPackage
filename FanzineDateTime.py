@@ -301,7 +301,7 @@ class FanzineDate:
         if self.IsEmpty():
             return None
         y=self._Year if self._Year is not None else 1
-        m=self.Month if self.Month is not None else 1
+        m=self.MonthNum if self.MonthNum is not None else 1
         d=self._Day if self._Day is not None else 1
         return datetime(y, m, d)  #.date
     @Date.setter
@@ -315,10 +315,10 @@ class FanzineDate:
         d=""
         if self.Year is not None:
             d=str(self.Year)
-        if self.Month is not None:
+        if self.MonthNum is not None:
             if len(d) > 0:
                 d+=":"
-            d+=str(self.Month)
+            d+=str(self.MonthNum)
         elif self.MonthText is not None:
             if len(d) > 0:
                 d+=":"
@@ -418,13 +418,16 @@ class FanzineDate:
         m="00"
         if self.MonthNum is not None:
             m=format(self.MonthNum, '02d')
-        if self.MonthNum is not None and self.MonthText is not None:
-            m+=f"-{(self.MonthText+'   ')[:3]}"
         else:
             m+="-Zzz"
 
-        Log(f"{self._Year=}  {self.MonthNum=}   {y+"-"+m}")
-        return y+"-"+m
+        stuff=""
+        if self.MonthText is not None:
+            stuff=self.MonthText
+
+        ret=y+"-"+m+"-"+stuff
+        Log(f"{self._Year=}  {self.MonthNum=}   {self.MonthText=}    {ret=}")
+        return ret
 
     def FormatYearMonthDayForSorting(self) -> str:
         d="00"
