@@ -1050,7 +1050,7 @@ def MonthNameToInt(text: str) -> int|None:
         m1=MonthNameToInt(m.groups()[0])
         m2=MonthNameToInt(m.groups()[1])
         if m1 is not None and m2 is not None:
-            return math.ceil((m1+m2)/2)
+            return m1
 
     with suppress(Exception):
         return monthConversionTable[text]
@@ -1371,7 +1371,7 @@ def ToDatetime(text: str= "") -> datetime|None:
         time=datetime.strptime(timetext, "%I:%M:%S %p")
         td=timedelta(hours=time.hour, minutes=time.minute, seconds=time.second)
     Log(f"   {date=}")
-    Log(f"   {time=}")
+    #Log(f"   {time=}")
 
     date=date.Date
     if td is not None:
