@@ -450,7 +450,6 @@ class FanzineDate:
     # complete=True means that *all* the input string must be part of the date
     @classmethod
     def Match(cls, s: str, strict: bool=False, complete: bool=True):
-
         self=cls()
 
         # Whitespace is not a date...
@@ -468,7 +467,7 @@ class FanzineDate:
             return d
 
         # A 4-digit number all alone is a year
-        m=re.match(r"^(\d\d\d\d)$", dateText)  # Month + 2- or 4-digit year
+        m=re.match(r"^(\d\d\d\d)$", dateText)  # 4-digit year
         if m is not None and m.groups() is not None and len(m.groups()) == 1:
             y=ValidFannishYear(m.groups()[0])
             if y != "0":
@@ -534,7 +533,7 @@ class FanzineDate:
                         return self
 
         # Annoyingly, the standard date parser doesn't like "." designating an abbreviated month name.  Deal with mmm. dd, yyyy
-        m=re.match(r"^([\s\w\-',]+).?\s+(\d+),?\s+(\d\d|\d\d\d\d)$", dateText)  # Month +[,] + 2- or 4-digit year
+        m=re.match(r"^([\s\w\-',]+).?\s+(\d+)\s*,?\s+(\d\d|\d\d\d\d)$", dateText)  # Month +[,] + 2- or 4-digit year
         if m is not None and m.groups() is not None and len(m.groups()) == 3:
             mtext=m.groups()[0].replace(","," ").replace("  ", " ")     # Turn a comma-space combination into a single space
             dtext=m.groups()[1]
@@ -550,7 +549,7 @@ class FanzineDate:
 
         # Look for <dd> <month> [,] <yyyy> where month is a recognizable month name and the <y>s form a fannish year
         # Note that the mtext and ytext found here may be analyzed several different ways
-        m=re.match(r"^(\d{1,2})\s+([\s\w\-',]+).?\s+(\d\d|\d\d\d\d)$", dateText)  # Month +[,] + 2- or 4-digit year
+        m=re.match(r"^(\d{1,2})\s+([\s\w\-',]+)\s*.?\s+(\d\d|\d\d\d\d)$", dateText)  # Month +[,] + 2- or 4-digit year
         if m is not None and m.groups() is not None and len(m.groups()) == 3:
             dtext=m.groups()[0]
             mtext=m.groups()[1].replace(",", " ").replace("  ", " ")  # Turn a comma-space combination into a single space
@@ -612,7 +611,7 @@ class FanzineDate:
 
         # Another form is the fannish "April 31, 1967" -- didn't want to miss that April mailing date!
         # We look for <month><number>,<year> with possible spaces between. Comma is optional.
-        m=re.match(r"^(\w+)\s+(\d+),?\s+(\d\d|\d\d\d\d)$", dateText)  # Month + Day, + 2- or 4-digit year
+        m=re.match(r"^(\w+)\s+(\d+)\s*,?\s+(\d\d|\d\d\d\d)$", dateText)  # Month + Day, + 2- or 4-digit year
         if m is not None and m.groups() is not None and len(m.groups()) == 3:
             mtext=m.groups()[0]
             dtext=m.groups()[1]
