@@ -961,7 +961,7 @@ def ValidateData(val: str, valtype: str) -> int:
 
 
 # =================================================================================
-def MonthLength(m: int, year: int=None) -> int:
+def MonthLength(m: int, year: int|None=None) -> int:
     if m == 2:
         if year is None:    # Missing year is probably a non-leap year
             return 28
