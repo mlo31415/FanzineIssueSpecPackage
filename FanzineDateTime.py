@@ -5,7 +5,6 @@ from datetime import datetime, timedelta
 from dateutil import parser
 import re
 from contextlib import suppress
-import math
 
 from Log import Log, LogError
 from HelpersPackage import ToNumeric, IsNumeric, IsInt, Int, Int0
@@ -1356,15 +1355,16 @@ def ToDatetime(text: str= "") -> datetime|None:
     # ...15.35.17.04 CST
     # etc.
     timetext=""
-    datetext=""
-    m=re.match(r"^.*\w[0-9]{1,2}(:[0-9]{1,2})[1,2](.[0-9]+)?[a-zA-Z. ]*$", text)
+    datetext=text
+    m=re.match(r"(^.*?)\s+([0-9]{1,2}:[0-9]{1,2}:[0-9]{1,2}\s*[a-zA-Z]*)\s*$", text)
     if m is not None:
         # We split this into the time part and the date part.  We split at the last space before the 1st colon
-        loccol=text.find(":")
-        locsp=text[:loccol].rfind(" ")
-        timetext=text[locsp:].strip()
-        datetext=text[:locsp].strip()
+        datetext=m.groups()[0]
+        timetext=m.groups()[1]
     date=FanzineDate().Match(datetext)
+    if date.IsEmpty():
+        return None
+
     td=None
     if timetext != "":
         time=datetime.strptime(timetext, "%I:%M:%S %p")
