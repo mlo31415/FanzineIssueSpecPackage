@@ -426,7 +426,7 @@ class FanzineDate:
             stuff=self.MonthText
 
         ret=y+"-"+m+"-"+stuff
-        Log(f"{self._Year=}  {self.MonthNum=}   {self.MonthText=}    {ret=}")
+        #Log(f"{self._Year=}  {self.MonthNum=}   {self.MonthText=}    {ret=}")
         return ret
 
     def FormatYearMonthDayForSorting(self) -> str:
@@ -1343,7 +1343,7 @@ def StandardizeMonth(month: str) -> str:
 
 # Interpret text as a standard datetime string
 def ToDatetime(text: str= "") -> datetime|None:
-    Log(f"ToDatetime({text})")
+    Log(f"ToDatetime('{text}')")
     text=text.strip()
     if text == "":
         return None
