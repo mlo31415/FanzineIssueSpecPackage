@@ -29,6 +29,7 @@ from FanzineDateTime import FanzineDate, MonthNameToInt
 
 from Log import Log, LogError
 from HelpersPackage import ToNumeric, IsInt
+from HelpersPackage import MergeURLs
 from HelpersPackage import Pluralize
 from HelpersPackage import InterpretNumber, InterpretRoman, InterpretInteger
 from HelpersPackage import CaseInsensitiveCompare
@@ -253,6 +254,16 @@ class FanzineSeriesInfo:
             return False
         
         return True
+
+    # .....................
+    # Generate a proper URL for the item
+    @property
+    def URL(self) -> str:
+
+        if self.DirURL == "":
+            return "<no url>"
+
+        return MergeURLs(self.DirURL, self.DirURL)
 
     # .....................
     @property
@@ -1458,9 +1469,15 @@ class FanzineIssueInfo:
         self._PageFilename=val.strip()
 
     # .....................
+    # Generate a proper URL for the item
     @property
-    def URL(self) -> str:                       
-        return self.DirURL+"/"+self.PageFilename
+    def URL(self) -> str:
+
+        if self is None or self.PageFilename == "":
+            return "<no url>"
+
+        return MergeURLs(self.DirURL, self.PageFilename)
+
 
     # .....................
     @property
