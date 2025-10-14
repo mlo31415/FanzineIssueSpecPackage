@@ -1341,12 +1341,18 @@ def StandardizeMonth(month: str) -> str:
 
 
 # Interpret text as a standard datetime string
-def ToDatetime(text: str= "") -> datetime|None:
+def ToDatetime(text: str="") -> datetime|None:
     Log(f"ToDatetime('{text}')")
     text=text.strip()
     if text == "":
         return None
 
+    try:
+        val=parser.parse(text)  # , default=default)
+    except:
+        pass
+
+    # The parser failed.  Try with my own code.
     # Look for ..sometime.. nn:nn... [am|pm] [EST|...]
     # That is, an arbitrary string followed by whitespace at least one digit followed by (Once or twice (a colon followed by at least o digit) followed by perhaps a decimal point followed by digits followed by notning buy alpha changers or white space
     # The goal is to handle these:
