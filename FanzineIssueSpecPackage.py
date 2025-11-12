@@ -1368,7 +1368,7 @@ class FanzineIssueInfo:
         if self.Editor != "":
             out+="  ed:"+self.Editor
         if self.Pagecount is not None:
-            out+="  "+str(self.Pagecount)+" pp"
+            out+="  "+str(self.Pagecount)+"pp"
 
         return out.strip()
 
