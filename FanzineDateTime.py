@@ -242,7 +242,6 @@ class FanzineDate:
 
         if self._MonthNum is not None and self._MonthText is not None:
             Log(f"Month({val}) --> {self._MonthNum} and {self._MonthText}")
-            i=0
 
 
     # .....................
