@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-
+from typing import Self
 from datetime import datetime, timedelta
 from dateutil import parser
 import re
@@ -91,7 +91,7 @@ class FanzineDate:
 
 
     # -----------------------------
-    def __eq__(self, other) -> bool:
+    def __eq__(self, other: Self) -> bool:
         # Empty dates are equal
         if (self is None and other is None) or (self.IsEmpty() and other.IsEmpty()):
             return True
@@ -125,7 +125,7 @@ class FanzineDate:
 
     # -----------------------------
     # Define < operator for sorting
-    def __lt__(self, other) -> bool:
+    def __lt__(self, other: Self) -> bool:
         if self._Year is None:
             return True
         if other._Year is None:
@@ -146,7 +146,7 @@ class FanzineDate:
 
 
     # -----------------------------
-    def Copy(self, other) -> None:
+    def Copy(self, other: Self) -> None:
         self._Year=other._Year
         self._MonthNum=other._MonthNum
         self._MonthText=other._MonthText
@@ -163,10 +163,10 @@ class FanzineDate:
 
     #......................
     @property
-    def datetime(self):
+    def datetime(self) -> Self:
         return self.DateTime
     @datetime.setter
-    def datetime(self, val: datetime):
+    def datetime(self, val: Self):
         #assert type(val) is datetime
         self.Year=val.year
         self.Month=val.month
@@ -296,7 +296,7 @@ class FanzineDate:
         return f"{self.Year}_{str(self.MonthNum):02}"
     # .....................
     @property
-    def Date(self) -> datetime.date|None:
+    def Date(self) -> datetime|None:
         if self.IsEmpty():
             return None
         y=self._Year if self._Year is not None else 1
