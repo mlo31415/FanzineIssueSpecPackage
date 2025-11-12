@@ -20,6 +20,7 @@
 #     (It probably should be merged with the FanzineIssueData class of 1943FanzineList)
 from __future__ import annotations
 
+from typing import Self
 import re
 from contextlib import suppress
 from datetime import datetime
@@ -27,11 +28,11 @@ from datetime import datetime
 from Locale import Locale
 from FanzineDateTime import FanzineDate, MonthNameToInt
 
-from Log import Log, LogError
+from Log import Log
 from HelpersPackage import ToNumeric, IsInt
 from HelpersPackage import MergeURLs
 from HelpersPackage import Pluralize
-from HelpersPackage import InterpretNumber, InterpretRoman, InterpretInteger
+from HelpersPackage import InterpretRoman
 from HelpersPackage import CaseInsensitiveCompare
 from HelpersPackage import ParmDict
 
@@ -68,7 +69,7 @@ class FanzineCounts:
         return s
 
     # .....................
-    def __add__(self, b: [FanzineCounts | FanzineIssueInfo | int | str]) -> FanzineCounts:  # FanzineCounts
+    def __add__(self, b: FanzineCounts | FanzineIssueInfo | int | str) -> FanzineCounts:  # FanzineCounts
         # Note that titlecount, pdfcount and pdfpagecount need to be incremented (or not) independently
         if isinstance(b, FanzineCounts):
             return FanzineCounts(Issuecount=self.Issuecount+b.Issuecount, Pagecount=self.Pagecount+b.Pagecount, Titlecount=self.Titlecount, Pdfcount=self.Pdfcount, Pdfpagecount=self.Pdfpagecount, Titlelist=self.Titlelist)
@@ -84,7 +85,7 @@ class FanzineCounts:
 
     #......................
     # Needed for += for mutable objects
-    def __iadd__(self, b: [FanzineCounts | FanzineIssueInfo | int | str]) -> FanzineCounts:  # FanzineCounts
+    def __iadd__(self, b: FanzineCounts | FanzineIssueInfo | int | str) -> FanzineCounts:  # FanzineCounts
         # Note that titlecount, pdfcount and pdfpagecount need to be incremented (or not) independently
         if isinstance(b, FanzineCounts):
             self.Issuecount+=b.Issuecount
@@ -196,7 +197,7 @@ class FanzineSeriesInfo:
 
     # .....................
     # When we add, we add to the counts
-    def __add__(self, b: [FanzineSeriesInfo, FanzineIssueInfo, int]):
+    def __add__(self, b: Self|FanzineIssueInfo|int):
         ret=FanzineSeriesInfo(SeriesName=self.SeriesName, Editor=self.Editor, DisplayName=self.DisplayName, Country=self.Country, DirURL=self.DirURL)
         #Log("FanzineSeriesInfo.add:  self.URL="+self.URL+"     b.URL="+b.URL)
         if isinstance(b, FanzineSeriesInfo):
@@ -214,7 +215,7 @@ class FanzineSeriesInfo:
     # .....................
     # When we add, we add to the counts
     # Note that this is an in-paces add to aupport += for mutable objects
-    def __iadd__(self, b: [FanzineSeriesInfo, FanzineIssueInfo, int]):
+    def __iadd__(self, b: Self|FanzineIssueInfo|int):
         if isinstance(b, FanzineSeriesInfo):
             self.Issuecount+=b.Issuecount
             self.Pagecount+=b.Pagecount
@@ -1693,99 +1694,5 @@ class FanzineSeriesList:
                     out+=str(i)+", "
         return out
 
-
-######################################################################################################################
-######################################################################################################################
-# Stand-alone functions
-######################################################################################################################
-#####################################################################################################################
-
-
-
-#==============================================================================
-# Given the contents of various table columns, attempt to extract serial information
-# This uses InterpretSerial for detailed decoding
-def ExtractSerialNumber(volText: str, numText: str, wholeText: str, volNumText: str, titleText: str) -> FanzineSerial:
-    wholeInt=None
-    volInt=None
-    numInt=None
-    numsuffix=None
-    maybeWholeInt=None
-    wsuffix=None
-
-    if wholeText is not None:
-        wholeInt=InterpretNumber(wholeText)
-
-    if volNumText is not None:
-        ser=FanzineSerial().Match(volNumText)
-        if ser.Vol is not None and ser.Num is not None:  # Otherwise, we don't actually have a volume+number
-            volInt=ser.Vol
-            numInt=ser.Num
-            numsuffix=ser.NumSuffix
-
-    if volText is not None:
-        volInt=InterpretInteger(volText)
-
-    # If there's no vol, anything under "Num", etc., must actually be a whole number
-    if volText is None:
-        with suppress(Exception):
-            maybeWholeText=numText
-            maybeWholeInt=int(maybeWholeText)
-            numText=None
-
-    # But if there *is* a volume specified, than any number not labelled "whole" must be a number within the volume
-    if volText is not None and numText is not None:
-        numInt=InterpretInteger(numText)
-
-    # OK, now figure out the vol, num and whole.
-    # First, if a Vol is present, and an unambigious Num is absent, the an ambigious Num must be the Vol's num
-    if volInt is not None and numInt is None and maybeWholeInt is not None:
-        numInt=maybeWholeInt
-        maybeWholeInt=None
-
-    # If the wholeInt is missing and maybeWholeInt hasn't been used up, make it the wholeInt
-    if wholeInt is None and maybeWholeInt is not None:
-        wholeInt=maybeWholeInt
-
-    # Next, look at the title -- titles often have a serial designation at their end.
-
-    if titleText is not None:
-        # Possible formats:
-        #   n   -- a whole number
-        #   n.m -- a decimal number
-        #   Vn  -- a volume number, but where's the issue?
-        #   Vn[,] #m  -- a volume and number-within-volume
-        #   Vn.m -- ditto
-        ser=FanzineSerial().Match(titleText if not isinstance(titleText, list) else titleText[0])
-
-        # Some indexes have fanzine names ending in <month> <year>.  We'll detect these by looking for a trailing number between 1930 and 2050, and reject
-        # getting vol/ser, etc., from the title if we find it.
-        if ser.Num is None or ser.Num < 1930 or ser.Num > 2050:
-
-            if ser.Vol is not None and ser.Num is not None:
-                if volInt is None:
-                    volInt=ser.Vol
-                if numInt is None:
-                    numInt=ser.Num
-
-                if volInt != ser.Vol:
-                    LogError("***Inconsistent serial designations: Volume='"+str(volInt)+"' which is not Vol='"+str(ser.Vol)+"'")
-                if numInt != ser.Num:
-                    LogError("***Inconsistent serial designations: Number='"+str(numInt)+"' which is not Num='"+str(ser.Num)+"'")
-
-            elif ser.Num is not None:
-                if wholeInt is None:
-                    wholeInt=ser.Num
-
-                if wholeInt != ser.Num:
-                    LogError("***Inconsistent serial designations: Whole='"+str(wholeInt)+"'  which is not Num='"+str(ser.Num)+"'")
-
-            if ser.Whole is not None:
-                wholeInt=ser.Whole
-
-            numsuffix=ser.NumSuffix
-            wsuffix=ser.WSuffix
-
-    return FanzineSerial(Vol=volInt, Num=numInt, NumSuffix=numsuffix, Whole=wholeInt, WSuffix=wsuffix)
 
 
