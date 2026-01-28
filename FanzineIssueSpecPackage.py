@@ -1167,7 +1167,7 @@ class FanzineIssueSpecList:
             self._List=[val]
             return
         if isinstance(val, FanzineIssueSpecList):
-            self._List=val.List
+            self._List=val._List
             return
         if isinstance(val, list):
             if len(val) == 0:
@@ -1184,7 +1184,7 @@ class FanzineIssueSpecList:
         return self._List[key]
 
     def __setitem__(self, key: int, value: FanzineIssueSpec) -> FanzineIssueSpecList:      
-        self.List[key]=value
+        self._List[key]=value
         return self
 
 
