@@ -1295,7 +1295,7 @@ class FanzineIssueInfo:
 
     def __init__(self, Series: FanzineSeriesInfo|None=None, IssueName: str="", DisplayName: str="",
                  DirURL: str="", PageFilename: str="", FIS: FanzineIssueSpec|None=None, Position: int=-1,
-                 Pagecount: int|None=None, Editor: str="", Country: str="", Taglist: list[str]=None, Mailings: list[str]=None, Temp: any=None, AlphabetizeIndividually: bool=False,
+                 Pagecount: int|None=None, Editor: str="", Country: str="", Taglist: list[str]=None, Mailings: list[str]=None, Temp: Any=None, AlphabetizeIndividually: bool=False,
                  FanzineType: str="") -> None:
         _Series: FanzineSeriesInfo|None=None
         _IssueName: str=""      # Name of this issue (does not include issue #/date info)
@@ -1309,7 +1309,7 @@ class FanzineIssueInfo:
         _Locale: Locale
         _Taglist: list[str]|None=None  # A list of tags for this fanzine (e.g., "newszine")
         _Mailings: list[str]=[]  # A List of APA mailings this issue was a part of
-        _Temp: any=None     # Used outside the class to hold random information
+        _Temp: Any=None     # Used outside the class to hold random information
         _AlphabetizeIndividually: bool=False
         _FanzineType: str=""
 
