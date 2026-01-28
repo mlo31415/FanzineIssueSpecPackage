@@ -345,7 +345,7 @@ class FanzineSeriesInfo:
     @AlphabetizeIndividually.setter
     def AlphabetizeIndividually(self, val: bool) -> None:
         if val is None:
-            val=[]
+            val=True        # This was val=[] and was wrong!
         self._AlphabetizeIndividually=val
 
     # .....................
@@ -1569,7 +1569,7 @@ class FanzineIssueInfo:
     @AlphabetizeIndividually.setter
     def AlphabetizeIndividually(self, val: bool) -> None:  # FanzineIssueInfo
         if val is None:
-            val=[]
+            val=False
         self._AlphabetizeIndividually=val
 
 
