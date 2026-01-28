@@ -945,7 +945,7 @@ class FanzineIssueSpec:
 
     @Year.setter
     def Year(self, val: int|str|None)-> None:   
-        self._FS.Year=val
+        self._FD.Year=val       # Changed from _FS
 
     #.....................
     # This is a non-settable property -- it is always derived from the numeric Year
