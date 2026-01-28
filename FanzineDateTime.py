@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from typing import Self
-from datetime import datetime, timedelta
+from datetime import datetime as libdatetime, timedelta
 from dateutil import parser
 import re
 from contextlib import suppress
@@ -22,7 +22,7 @@ class FanzineDate:
                  DayText: str|None=None,
                  MonthDayText: str|None =None,
                  DateText: str|None=None,
-                 DateTime: datetime|None = None) -> None:
+                 DateTime: libdatetime|None = None) -> None:
 
         self._Year=None
         self._YearText=None
@@ -118,7 +118,7 @@ class FanzineDate:
         m2=other.MonthNum if other.MonthNum is not None else 1
         d2=other.Day if other.Day is not None else 1
         try:
-            return (datetime(y1, m1, d1) - datetime(y2, m2, d2)).days
+            return (libdatetime(y1, m1, d1) - libdatetime(y2, m2, d2)).days
         except:
             Log("*** We have a problem subtracting two dates: "+str(self)+ " - "+str(other))
             return 0
@@ -167,7 +167,7 @@ class FanzineDate:
         return self.DateTime
     @datetime.setter
     def datetime(self, val: Self):
-        #assert type(val) is datetime
+        #assert type(val) is libdatetime
         self.Year=val.year
         self.Month=val.month
         self.Day=val.day
@@ -295,13 +295,13 @@ class FanzineDate:
         return f"{self.Year}_{str(self.MonthNum):02}"
     # .....................
     @property
-    def Date(self) -> datetime|None:
+    def Date(self) -> libdatetime|None:
         if self.IsEmpty():
             return None
         y=self._Year if self._Year is not None else 1
         m=self.MonthNum if self.MonthNum is not None else 1
         d=self._Day if self._Day is not None else 1
-        return datetime(y, m, d)  #.date
+        return libdatetime(y, m, d)  #.date
     @Date.setter
     def Date(self, val):
         assert False
@@ -629,8 +629,8 @@ class FanzineDate:
         # It is pretty aggressive, so only use it when strict is not set
         if not strict and not complete:
             with suppress(Exception):
-                d=parser.parse(dateText, default=datetime(1, 1, 1))
-                if d != datetime(1, 1, 1):
+                d=parser.parse(dateText, default=libdatetime(1, 1, 1))
+                if d != libdatetime(1, 1, 1):
                     self.Year=d.year
                     self.Month=d.month
                     self.Day=d.day
@@ -1339,8 +1339,8 @@ def StandardizeMonth(month: str) -> str:
 
 
 
-# Interpret text as a standard datetime string
-def ToDatetime(text: str="") -> datetime|None:
+# Interpret text as a standard libdatetime string
+def ToDatetime(text: str="") -> libdatetime|None:
     Log(f"ToDatetime('{text}')")
     text=text.strip()
     if text == "":
@@ -1372,7 +1372,7 @@ def ToDatetime(text: str="") -> datetime|None:
 
     td=None
     if timetext != "":
-        time=datetime.strptime(timetext, "%I:%M:%S %p")
+        time=libdatetime.strptime(timetext, "%I:%M:%S %p")
         td=timedelta(hours=time.hour, minutes=time.minute, seconds=time.second)
     Log(f"   {date=}")
     #Log(f"   {time=}")
@@ -1383,8 +1383,8 @@ def ToDatetime(text: str="") -> datetime|None:
     return date
 
 
-# Turn a datetime into a standard datetime string
-def FromDatetime(dt: datetime|None=None) -> str:
+# Turn a libdatetime into a standard libdatetime string
+def FromDatetime(dt: libdatetime|None=None) -> str:
     if dt is None:
         return ""
     return dt.strftime("%B %d, %Y  %I:%M:%S %p")+"\n"
