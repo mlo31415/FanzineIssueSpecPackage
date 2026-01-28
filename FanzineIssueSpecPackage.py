@@ -1080,7 +1080,7 @@ class FanzineIssueSpecList:
     def __init__(self, List: list[FanzineIssueSpec]|None=None) -> None:
         self._List=None
         self.List=List  # Use setter
-        pass
+
 
     # ...............................
     def AppendIS(self, fanzineIssueSpec: None|FanzineIssueSpec|FanzineIssueSpecList) -> None:      
