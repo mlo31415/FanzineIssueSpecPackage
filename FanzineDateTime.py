@@ -107,10 +107,10 @@ class FanzineDate:
         return self._Year == other._Year and self._MonthNum == other._MonthNum and self._Day == other._Day
 
     # -----------------------------
-    def __ne__(self, other) -> bool:
+    def __ne__(self, other: Self) -> bool:
         return not self.__eq__(other)
 
-    def __sub__(self, other):
+    def __sub__(self, other: Self) -> int:
         y1=self.Year if self.Year is not None else 1
         m1=self.MonthNum if self.MonthNum is not None else 1
         d1=self.Day if self.Day is not None else 1
@@ -157,7 +157,7 @@ class FanzineDate:
 
     # .....................
     @property
-    def LongDates(self):
+    def LongDates(self) -> Self:
         self._LongDates=True        # Set _LongDates to True.  The next use of __str__() will set it back to False
         return self                 # This was str(FD) will yield short dates and str(FD.LongDates) will yield long dates
 

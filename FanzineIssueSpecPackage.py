@@ -20,7 +20,7 @@
 #     (It probably should be merged with the FanzineIssueData class of 1943FanzineList)
 from __future__ import annotations
 
-from typing import Self
+from typing import Self, Any
 import re
 from contextlib import suppress
 from datetime import datetime
@@ -229,7 +229,7 @@ class FanzineSeriesInfo:
         return self
 
     # .....................
-    def Deepcopy(self) -> FanzineSeriesInfo:
+    def Deepcopy(self) -> Self:
         new=FanzineSeriesInfo()
         new.SeriesName=self.SeriesName
         new.DisplayName=self.DisplayName
@@ -1002,7 +1002,7 @@ class FanzineIssueSpec:
 
     # .....................
     # Return a datetime.date object
-    def Date(self) -> datetime.date:                    
+    def Date(self) -> datetime|None:
         return self._FD.Date
 
     #.......................
@@ -1092,11 +1092,11 @@ class FanzineIssueSpecList:
 
     # ...............................
     # Basically, this is just a synonym for Extend
-    def Append(self, lst: FanzineIssueSpecList|list[FanzineIssueSpec]|FanzineIssueSpec|None) -> FanzineIssueSpecList:      # FanzineIssueSpecList
+    def Append(self, lst: FanzineIssueSpecList | list[FanzineIssueSpec] | FanzineIssueSpec | None) -> FanzineIssueSpecList:      # FanzineIssueSpecList
         return self.Extend(lst)
 
     # ...............................
-    def Extend(self, val: FanzineIssueSpecList|list[FanzineIssueSpec, FanzineIssueSpec, None]) -> FanzineIssueSpecList:      # FanzineIssueSpecList
+    def Extend(self, val: FanzineIssueSpecList | list[FanzineIssueSpec] | FanzineIssueSpec | None) -> FanzineIssueSpecList:      # FanzineIssueSpecList
         if self._List is None:
             self._List=[]
 
@@ -1105,7 +1105,7 @@ class FanzineIssueSpecList:
             if lst is None or len(lst) == 0:
                 pass      # Nothing to do
             else:
-                self._List.extend(lst)
+                self._List.extend(lst._List)        # Was buggy
         elif isinstance(val, list):
             if len(val) == 0:
                 pass        # Nothing to do
@@ -1161,7 +1161,7 @@ class FanzineIssueSpecList:
 
     # ...............................
     @property
-    def List(self) -> FanzineIssueSpecList:      
+    def List(self) -> FanzineIssueSpecList|None:
         return self._List
 
     @List.setter
@@ -1482,10 +1482,10 @@ class FanzineIssueInfo:
 
     # .....................
     @property
-    def Temp(self) -> any:                       
+    def Temp(self) -> Any:
         return self._Temp
     @Temp.setter
-    def Temp(self, val: any) -> None:                       
+    def Temp(self, val: Any) -> None:
         self._Temp=val
 
     # .....................
