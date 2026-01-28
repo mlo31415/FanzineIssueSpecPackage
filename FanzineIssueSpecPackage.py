@@ -81,7 +81,7 @@ class FanzineCounts:
         elif isinstance(b, str):
             return FanzineCounts(Issuecount=self.Issuecount, Pagecount=self.Pagecount, Titlecount=self.Titlecount, Pdfcount=self.Pdfcount, Pdfpagecount=self.Pdfpagecount, Titlelist=self.Titlelist)
 
-        assert False
+        raise Exception(f"FanzineCounts.__add__({b}): cannot add type {type(b)}.")
 
     #......................
     # Needed for += for mutable objects
@@ -104,7 +104,7 @@ class FanzineCounts:
             self.Titlelist.add(b)
             return self
 
-        assert False
+        raise Exception(f"FanzineCounts.__iadd__({b}): cannot add type {type(b)}.")
 
     # -------------------------------------------------------------------------
     # Compute a counts annotation from a 2-tuple element -- used in calls to WriteTable
@@ -960,7 +960,7 @@ class FanzineIssueSpec:
 
     @property
     def Month(self) -> int|None:
-        assert False
+        raise Exception(f"FanzineDate.Month: getter should never be called.")
     @Month.setter
     def Month(self, val: int|str|None)-> None:      
         self._FD.Month=val
@@ -1052,8 +1052,7 @@ class FanzineIssueSpec:
     # =====================================================================================
     # Look for a FIS in the input string.  Return a tuple of (success, <unmatched text>)
     def Scan(self, s: str, strict: bool=False) -> tuple[bool, str]:        
-        raise Exception
-
+        raise Exception("FanzineIssueSpec.Scan is not implemented.")
 
     #=============================================================================
     def FormatYearMonthForSorting(self) -> str:
@@ -1114,7 +1113,7 @@ class FanzineIssueSpecList:
         elif isinstance(val, FanzineIssueSpec):
             self._List.append(val)
         else:
-            Exception("FanzineIssueSpecList.Extend: Uninterpretable val type")
+            raise Exception("FanzineIssueSpecList.Extend: Uninterpretable val type")
         return self
 
     # ...............................
@@ -1288,7 +1287,7 @@ class FanzineIssueSpecList:
     #------------------------------------------------------------------------------------
     # Look for a FISL in the input string.  Return a tuple of (success, <unmatched text>)
     def Scan(self, s: str, strict: bool=False) -> tuple[bool, str]:      
-        raise Exception
+        raise Exception("FanzineIssueSpecList.Scan is not implemented.")
 
 
 ######################################################################################################################
@@ -1421,7 +1420,7 @@ class FanzineIssueInfo:
         return self._Series.SeriesName
     @SeriesName.setter
     def SeriesName(self, val: str) -> None:                       
-        assert False
+        raise Exception(f"FanzineIssueInfo.Seriesname={val}: Can't use setter.")
 
     # .....................
     @property
@@ -1626,7 +1625,7 @@ class FanzineSeriesList:
     def FIIL(self, val: FanzineIssueSpecList|None) -> None:
         # If there is no existing list of FIIs, we create one from the FISL
         if self._FIIL is not None and len(self._FIIL) > 0:
-            raise(Exception("FIIL setter: FIIL is non-empty"))
+            raise Exception("FIIL setter: FIIL is non-empty")
         self._FIIL=[]
         for el in val:
             self._FIIL.append(FanzineIssueInfo(FIS=el, Editor=self.Editor, DirURL=self.SeriesURL))

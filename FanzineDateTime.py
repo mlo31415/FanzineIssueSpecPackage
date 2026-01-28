@@ -197,7 +197,7 @@ class FanzineDate:
         return self._MonthNum
     @property
     def Month(self) -> int:
-        assert False
+        raise AttributeError("FanzineDate.Month getter should never be called.")
     @Month.setter
     def Month(self, val: int|str|tuple[int, str]) -> None:
         self._MonthNum=None
@@ -254,7 +254,7 @@ class FanzineDate:
         return ""
     @MonthText.setter
     def MonthText(self, mt: str):
-        assert False
+        raise Exception("FanzineDate.MonthText({mt}): setter should never be called.")
 
     # .....................
     @property
@@ -304,7 +304,7 @@ class FanzineDate:
         return libdatetime(y, m, d)  #.date
     @Date.setter
     def Date(self, val):
-        assert False
+        raise Exception(f"FanzineDate.Date({val}): setter should never be called.")
 
     # .......................
     # Convert the FanzineDate into a debugging form
@@ -974,7 +974,8 @@ def MonthLength(m: int, year: int|None=None) -> int:
         return 30
     if m in [1, 3, 5, 7, 8, 10, 12]:        # All the rest have 31...
         return 31
-    assert False    # Crash and burn
+    raise Exception(f"MonthLength({m}, {year}): Invalid month.")    # Crash and burn
+
 
 # =================================================================================
 # Make sure day is within month
