@@ -959,7 +959,7 @@ class FanzineIssueSpec:
         return self._FD.MonthNum
 
     @property
-    def Month(self) -> int|None:
+    def Month(self):
         raise Exception(f"FanzineDate.Month: getter should never be called.")
     @Month.setter
     def Month(self, val: int|str|None)-> None:      
@@ -1078,8 +1078,8 @@ class FanzineIssueSpec:
 
 class FanzineIssueSpecList:
     def __init__(self, List: list[FanzineIssueSpec]|None=None) -> None:
-        self._List=None
-        self.List=List  # Use setter
+        self._List: list[FanzineIssueSpec]|None=None
+        self.List=List  # Use setter to set self._List
 
 
     # ...............................
