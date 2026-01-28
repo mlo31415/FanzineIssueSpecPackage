@@ -142,7 +142,7 @@ class FanzineSeriesInfo:
         if Keywords is None:
             Keywords=ParmDict()
         self._Keywords=Keywords
-        pass
+
 
     # .....................
     def __str__(self) -> str:
