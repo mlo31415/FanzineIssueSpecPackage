@@ -1141,16 +1141,11 @@ class FanzineIssueSpecList:
             s="Empty ISlist"
         return s
 
-
     #...............................
-    def __str__(self) -> str:   # Format the ISL for pretty      
-        s=""
-        for i in self:
-            if i is not None:
-                if len(s) > 0:
-                    s=s+", "
-                s=s+str(i)
-        return "FISL("+str(len(self._List))+"): "+s
+    def __str__(self) -> str:   # Format the ISL for pretty
+        if self._List is None:
+            return "FISL(empty)"
+        return "FISL("+str(len(self._List))+"): "+", ".join(str(self._List))
 
     # ...............................
     def __len__(self) -> int:
