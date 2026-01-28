@@ -1468,7 +1468,7 @@ class FanzineIssueInfo:
     @property
     def URL(self) -> str:
 
-        if self is None or self.PageFilename == "":
+        if self.PageFilename == "":
             return "<no url>"
 
         return MergeURLs(self.DirURL, self.PageFilename)
