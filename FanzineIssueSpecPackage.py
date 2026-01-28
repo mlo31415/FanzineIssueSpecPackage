@@ -919,7 +919,7 @@ class FanzineIssueSpec:
 
     @Whole.setter
     def Whole(self, val: int|str|None)-> None:      
-        print("Setting _FS.Whole to "+str(val))
+        #print("Setting _FS.Whole to "+str(val))
         if val is not None and isinstance(val, str) and len(val) == 0:
             self._FS.Whole=None
         else:
@@ -1208,10 +1208,10 @@ class FanzineIssueSpecList:
         for index in range(len(tokens)-1, -1, -1):  # Ugly, but I need index to be the indexes of the tokens
             trailingText=" ".join(tokens[index:])
             leadingText=" ".join(tokens[:index])
-            print("     index="+str(index)+"   leading='"+leadingText+"'    trailing='"+trailingText+"'")
+            #print(f"     {index=}   leading={leadingText}    trailing={trailingText}")
             trialFISL=FanzineIssueSpecList().Match(trailingText, strict=True, complete=True)  # Failed.  We've gone one too far. Quit trying and use what we found on the previous iteration
             if trialFISL.IsEmpty():
-                print("     ...backtracking. Found FISL="+repr(trialFISL))
+                #print(f"     ...backtracking. Found FISL={repr(trialFISL)}")
                 leadingText=" ".join(tokens[0:index+1])
                 break
             longestFISL=trialFISL
