@@ -1508,7 +1508,7 @@ class FanzineIssueInfo:
 
     # .....................
     @property
-    def Pagecount(self) -> int:                       
+    def Pagecount(self) -> int:
         return self._Pagecount if self._Pagecount > 0 else 1
     @Pagecount.setter
     def Pagecount(self, val: int) -> None:                      
