@@ -214,7 +214,7 @@ class FanzineSeriesInfo:
 
     # .....................
     # When we add, we add to the counts
-    # Note that this is an in-paces add to aupport += for mutable objects
+    # Note that this is an inplace add to support += for mutable objects
     def __iadd__(self, b: Self|FanzineIssueInfo|int):
         if isinstance(b, FanzineSeriesInfo):
             self.Issuecount+=b.Issuecount
@@ -264,7 +264,7 @@ class FanzineSeriesInfo:
         if self.DirURL == "":
             return "<no url>"
 
-        return MergeURLs(self.DirURL, self.DirURL)
+        return MergeURLs(self.DirURL, self.DirURL)      #TODO: PLainly wrong!
 
     # .....................
     @property
@@ -439,7 +439,7 @@ class FanzineSerial:
 
             # Can the suffixes provide a tie breaker?
             if self._WSuffix is not None or other._WSuffix is not None:
-                # OK, the Wholes are equal.  Can the suffixs (e.g., #133 and #133A) be used to distinguish?  Suffixed Wholes are always larger.
+                # OK, the Wholes are equal.  Can the suffixes (e.g., #133 and #133A) be used to distinguish?  Suffixed Wholes are always larger.
                 if other._WSuffix is None:
                     return False            # If other is None it can't be less that self, even if self, also, is None
                 if self._WSuffix is None:
@@ -601,7 +601,7 @@ class FanzineSerial:
         # If we can't make sense of it, return (None, None), so if the 2nd member of the tuple is None, conversion failed.
     def DecodeIssueDesignation(self, s: str) -> tuple[ int|None, int|None ]:            
         with suppress(Exception):
-            return None, int(s)
+            return None, int(s)     # If int(s) generates an exception, this line is ignored and execution passes on
 
         # Ok, it's not a simple number.  Drop leading and trailing spaces and see if it of the form #nn
         s=s.strip().lower()
@@ -612,7 +612,7 @@ class FanzineSerial:
             if len(s) == 0:
                 return None, None
             with suppress(Exception):
-                return None, int(s)
+                return None, int(s)     # If int(s) generates an exception, this line is ignored and execution passes on
 
         # This exhausts the single number possibilities
         # Maybe it's of the form Vnn, #nn (or Vnn.nn or Vnn,#nn)
@@ -627,7 +627,7 @@ class FanzineSerial:
 
         # The first step is to see if there's at least one of the characters ' ', '.', and '#' in the middle
         # We split the string in two by a span of " .#"
-        # Walk through the string until we;ve passed the first span of digits.  Then look for a span of " .#". The look for at least one more digit.
+        # Walk through the string until we've passed the first span of digits.  Then look for a span of " .#". The look for at least one more digit.
         # Since we've dropped any leading 'v', we kno we must be of the form nn< .#>nnn
         # So if the first character is not a digit, we give up.
         if not s[0].isdigit():
@@ -638,7 +638,7 @@ class FanzineSerial:
         if len(spl) != 2:
             return None, None
         with suppress(Exception):
-            return int(spl[0]), int(spl[1])
+            return int(spl[0]), int(spl[1])    # If int(s) generates an exception, this line is ignored and execution passes on
 
         return None, None
 
@@ -1230,9 +1230,9 @@ class FanzineIssueSpecList:
 
         tokens=[t.strip() for t in s.split(",")]        # Split the input on commas
 
-        # The strategy will be to worth through the list of issue information, taking one at a time.
+        # The strategy will be to work through the list of issue information, taking one at a time.
         while len(tokens) > 0:
-            # Because some legitimate FISs have an internal comma, they may have been split into two tokens, so we first joing the leading two tokens and see if they make sense
+            # Because some legitimate FISs have an internal comma, they may have been split into two tokens, so we first join the leading two tokens and see if they make sense
             # If there are at least two tokens left, re-join them and see if the result is an FIS of the form <Month> [day], yyyy
             # We can't allow 2-digit years here because they are indistinguishable from issue numbers.
             if len(tokens) > 1:
