@@ -132,12 +132,12 @@ class FanzineDate:
             return False
         if self._Year != other._Year:
             return self._Year < other._Year
-        if self.MonthNum is None:
+        if self._MonthNum is None:
             return True
         if other._MonthNum is None:
             return False
-        if self.MonthNum != other.MonthNum:
-            return self.MonthNum < other.MonthNum
+        if self._MonthNum != other._MonthNum:
+            return self._MonthNum < other._MonthNum
         if self._Day is None:
             return True
         if other._Day is None:
